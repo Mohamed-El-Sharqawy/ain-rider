@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
 import { useLogin } from './services/mutations';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 interface LoginForm {
   email: string;
@@ -45,9 +46,14 @@ export function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex items-center justify-center p-4 relative"
       style={{ backgroundColor: 'var(--color-surface-2)' }}
     >
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md">
         {/* Logo / Brand */}
         <div className="text-center mb-8">
