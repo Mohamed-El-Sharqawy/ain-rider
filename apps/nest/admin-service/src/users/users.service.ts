@@ -4,14 +4,14 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AuthDbService } from '../prisma/auth-db.service';
-import { NatsService } from '../shared/nats/nats.service';
+import { AdminNatsClient } from '../nats/admin-nats.client';
 import { UserFiltersDto } from './dto/user-filters.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     private authDb: AuthDbService,
-    private nats: NatsService,
+    private adminNats: AdminNatsClient,
   ) {}
 
   async findAll(filters: UserFiltersDto) {
@@ -39,22 +39,29 @@ export class UsersService {
     return this.authDb.getUserStats();
   }
 
-  async updateStatus(userId: string, status: string, reason?: string, updatedBy?: string) {
+  async suspendUser(userId: string, reason: string, suspendedBy: string) {
     const user = await this.authDb.findUserById(userId);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Send status update via NATS to auth-service
-    await this.nats.requester.request('ain_rider.user.update_status', {
-      userId,
-      status,
-      reason,
-      updatedBy,
-      previousStatus: user.status,
-    });
+    // Send suspend request via NATS to auth-service
+    const result = await this.adminNats.suspendUser(userId, reason, suspendedBy);
 
-    return { success: true, message: 'Status update request sent' };
+    return { success: true, message: 'User suspended', ...result };
+  }
+
+  async activateUser(userId: string, activatedBy: string) {
+    const user = await this.authDb.findUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Send activate request via NATS to auth-service
+    const result = await this.adminNats.activateUser(userId, activatedBy);
+
+    return { success: true, message: 'User activated', ...result };
   }
 }

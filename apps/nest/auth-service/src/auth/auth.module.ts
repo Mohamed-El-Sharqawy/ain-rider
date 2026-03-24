@@ -6,10 +6,14 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { NatsModule } from '../shared/nats/nats.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { UserSuspendResponder } from '../nats/responders/user-suspend.responder';
+import { UserActivateResponder } from '../nats/responders/user-activate.responder';
 
 @Module({
   imports: [
     NatsModule,
+    PrismaModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -19,7 +23,7 @@ import { NatsModule } from '../shared/nats/nats.module';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, UserSuspendResponder, UserActivateResponder],
   controllers: [AuthController],
   exports: [AuthService],
 })

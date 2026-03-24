@@ -5,23 +5,27 @@ import type { NatsConnection } from 'nats';
 
 @Injectable()
 export class NatsService implements OnModuleInit, OnModuleDestroy {
-  private connection: NatsConnection;
+  private _connection: NatsConnection;
   private _publisher: NatsPublisher;
 
   async onModuleInit() {
-    this.connection = await createNatsConnection({
+    this._connection = await createNatsConnection({
       url: process.env.NATS_URL || 'nats://localhost:4222',
       name: 'auth-service',
     });
-    this._publisher = createPublisher(this.connection);
+    this._publisher = createPublisher(this._connection);
     console.log('[NATS] auth-service connected');
   }
 
   async onModuleDestroy() {
-    await this.connection?.close();
+    await this._connection?.close();
   }
 
   get publisher(): NatsPublisher {
     return this._publisher;
+  }
+
+  get nc(): NatsConnection {
+    return this._connection;
   }
 }

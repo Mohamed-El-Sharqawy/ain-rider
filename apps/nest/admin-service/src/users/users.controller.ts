@@ -10,7 +10,6 @@ import { Roles } from '../auth/roles.decorator';
 import { CurrentUser, type CurrentUserPayload } from '../auth/current-user.decorator';
 import { UsersService } from './users.service';
 import { UserFiltersDto } from './dto/user-filters.dto';
-import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 
 @ApiTags('Admin - Users')
 @ApiBearerAuth()
@@ -39,14 +38,25 @@ export class UsersController {
   }
 
   @Roles('ADMIN')
-  @Patch(':id/status')
-  @ApiOperation({ summary: 'Update user status' })
+  @Patch(':id/suspend')
+  @ApiOperation({ summary: 'Suspend a user' })
   @ApiParam({ name: 'id', type: String })
-  updateStatus(
+  suspendUser(
     @Param('id') id: string,
-    @Body() body: UpdateUserStatusDto,
+    @Body('reason') reason: string,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.usersService.updateStatus(id, body.status, body.reason, user.sub);
+    return this.usersService.suspendUser(id, reason, user.sub);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id/activate')
+  @ApiOperation({ summary: 'Activate a user' })
+  @ApiParam({ name: 'id', type: String })
+  activateUser(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.usersService.activateUser(id, user.sub);
   }
 }

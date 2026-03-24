@@ -112,4 +112,21 @@ export class TripsService {
 
     return trip;
   }
+
+  async assignDriver(tripId: string, driverId: string, assignedBy: string, _traceId?: string) {
+    const trip = await this.prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        driverId,
+        status: TripStatus.MATCHED,
+        matchedAt: new Date(),
+      },
+    });
+
+    console.log(
+      `[TripsService] Driver assigned | tripId=${tripId} | driverId=${driverId} | assignedBy=${assignedBy}`
+    );
+
+    return trip;
+  }
 }

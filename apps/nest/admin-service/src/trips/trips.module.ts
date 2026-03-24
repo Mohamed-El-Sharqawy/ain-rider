@@ -7,6 +7,7 @@ import { TripsController } from './trips.controller';
 import { TripsService } from './trips.service';
 import { TripDbService } from '../prisma/trip-db.service';
 import { NatsModule } from '../shared/nats/nats.module';
+import { AdminNatsClient } from '../nats/admin-nats.client';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { NatsModule } from '../shared/nats/nats.module';
     }),
   ],
   controllers: [TripsController],
-  providers: [TripsService, TripDbService],
+  providers: [TripsService, TripDbService, AdminNatsClient],
   exports: [TripsService],
 })
 export class TripsModule {}

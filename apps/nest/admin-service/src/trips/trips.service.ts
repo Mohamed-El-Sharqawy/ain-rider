@@ -5,8 +5,7 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { TripDbService } from '../prisma/trip-db.service';
-import { NatsService } from '../shared/nats/nats.service';
-import { NATS_REQUESTS } from '@ain-rider/shared-types';
+import { AdminNatsClient } from '../nats/admin-nats.client';
 import type { TripFiltersDto } from './dto/trip-filters.dto';
 import type { CancelTripDto } from './dto/cancel-trip.dto';
 
@@ -14,7 +13,7 @@ import type { CancelTripDto } from './dto/cancel-trip.dto';
 export class TripsService {
   constructor(
     private tripDb: TripDbService,
-    private nats: NatsService,
+    private adminNats: AdminNatsClient,
   ) {}
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -50,47 +49,19 @@ export class TripsService {
     }
 
     // Send cancel command to trip-service via NATS request-reply
-    const result = await this.nats.requester.request(
-      NATS_REQUESTS.TRIP_CANCEL,
-      {
-        tripId: id,
-        reason: data.reason,
-        cancelledBy: data.cancelledBy,
-      },
-    );
+    const result = await this.adminNats.cancelTrip(id, data.reason, data.cancelledBy);
 
     return result;
   }
 
-  async updateTripStatus(id: string, status: string, driverId?: string) {
-    await this.findById(id);
-
-    const result = await this.nats.requester.request(
-      NATS_REQUESTS.TRIP_UPDATE_STATUS,
-      {
-        tripId: id,
-        status,
-        driverId,
-      },
-    );
-
-    return result;
-  }
-
-  async assignDriver(tripId: string, driverId: string) {
+  async assignDriver(tripId: string, driverId: string, assignedBy: string) {
     const trip = await this.findById(tripId);
 
     if (trip.status !== 'REQUESTED') {
       throw new Error(`Cannot assign driver to trip with status ${trip.status}`);
     }
 
-    const result = await this.nats.requester.request(
-      NATS_REQUESTS.TRIP_ASSIGN_DRIVER,
-      {
-        tripId,
-        driverId,
-      },
-    );
+    const result = await this.adminNats.assignDriver(tripId, driverId, assignedBy);
 
     return result;
   }
