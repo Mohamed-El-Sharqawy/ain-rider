@@ -7,6 +7,7 @@ import type { NatsConnection } from 'nats';
 export class NatsService implements OnModuleInit, OnModuleDestroy {
   private _connection: NatsConnection;
   private _publisher: NatsPublisher;
+  private isShuttingDown = false;
 
   async onModuleInit() {
     this._connection = await createNatsConnection({
@@ -18,7 +19,24 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await this._connection?.close();
+    if (this.isShuttingDown) return;
+    this.isShuttingDown = true;
+    
+    console.log('[NATS] Graceful shutdown initiated...');
+    
+    // Wait briefly for in-flight messages
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (this._connection) {
+      try {
+        await this._connection.drain();
+        console.log('[NATS] Connection drained');
+      } catch (err) {
+        console.error('[NATS] Error draining connection:', err);
+      }
+    }
+    
+    console.log('[NATS] Graceful shutdown complete');
   }
 
   get publisher(): NatsPublisher {

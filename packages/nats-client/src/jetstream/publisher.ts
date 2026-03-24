@@ -6,6 +6,7 @@
  * - W3C trace-context headers
  * - Message ID for deduplication
  * - Structured logging
+ * - Prometheus metrics
  */
 
 import {
@@ -18,6 +19,7 @@ import {
 import { randomUUID } from 'crypto';
 import { EventEnvelope, createEventEnvelope } from '../types/event-envelope';
 import { generateTraceId, createTraceparent } from '../tracing';
+import { natsMessagesPublished } from '../metrics';
 
 export interface PublishOptions {
   /** Override auto-generated trace ID */
@@ -106,6 +108,9 @@ export class JetStreamPublisher {
         new TextEncoder().encode(payload),
         publishOptions
       );
+
+      // Record metrics
+      natsMessagesPublished.inc({ service: this.serviceName, subject });
 
       console.log(
         `[JetStreamPublisher] Published to ${subject} | eventId=${eventId} | traceId=${traceId} | seq=${ack.seq}`

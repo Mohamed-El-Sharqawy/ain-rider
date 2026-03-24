@@ -17,6 +17,7 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
   private _responder: NatsResponder;
   private _jsPublisher: JetStreamPublisher;
   private _idempotency: IdempotencyService;
+  private isShuttingDown = false;
 
   async onModuleInit() {
     this.connection = await createNatsConnection({
@@ -38,8 +39,35 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await this._responder?.close();
-    await this.connection?.close();
+    if (this.isShuttingDown) return;
+    this.isShuttingDown = true;
+    
+    console.log('[NATS] Graceful shutdown initiated...');
+    
+    // Close responder first (stops accepting new requests)
+    if (this._responder) {
+      try {
+        await this._responder.close();
+        console.log('[NATS] Responder closed');
+      } catch (err) {
+        console.error('[NATS] Error closing responder:', err);
+      }
+    }
+    
+    // Wait briefly for in-flight messages (max 5s)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Close NATS connection
+    if (this.connection) {
+      try {
+        await this.connection.drain();
+        console.log('[NATS] Connection drained');
+      } catch (err) {
+        console.error('[NATS] Error draining connection:', err);
+      }
+    }
+    
+    console.log('[NATS] Graceful shutdown complete');
   }
 
   get publisher(): NatsPublisher {

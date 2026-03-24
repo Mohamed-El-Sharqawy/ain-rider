@@ -26,6 +26,9 @@ export * from './request-reply';
 // Tracing
 export * from './tracing';
 
+// Metrics
+export * from './metrics';
+
 // Legacy exports (for backward compatibility)
 export { NatsPublisher, createPublisher } from './publisher';
 export { NatsConsumer, createConsumer } from './consumer';

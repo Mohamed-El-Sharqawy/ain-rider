@@ -6,6 +6,7 @@
  * - Automatic trace ID extraction
  * - Structured logging
  * - Graceful shutdown
+ * - Prometheus metrics
  */
 
 import {
@@ -18,6 +19,7 @@ import { EventEnvelope } from '../types/event-envelope';
 import { extractOrGenerateTraceId } from '../tracing';
 import { IdempotencyService } from '../idempotency';
 import { DLQService } from '../dlq';
+import { natsMessagesReceived, natsDlqMessages, natsMessageLatency } from '../metrics';
 
 export interface ConsumerConfig {
   /** Stream name (e.g., 'AIN_RIDER_OPS') */
@@ -179,11 +181,18 @@ export abstract class JetStreamConsumer {
    */
   private async processMessage(msg: JsMsg): Promise<void> {
     const traceId = extractOrGenerateTraceId(msg.headers);
+    const startTime = Date.now();
     
     try {
       // Parse envelope
       const payload = new TextDecoder().decode(msg.data);
       const envelope: EventEnvelope<unknown> = JSON.parse(payload);
+
+      // Record received message
+      natsMessagesReceived.inc({ 
+        service: this.config.consumerName, 
+        subject: this.config.filterSubject 
+      });
 
       // Check idempotency
       if (this.config.enableIdempotency && this.idempotencyService) {
@@ -212,6 +221,13 @@ export abstract class JetStreamConsumer {
         );
       }
 
+      // Record latency
+      const latency = (Date.now() - startTime) / 1000;
+      natsMessageLatency.observe(
+        { service: this.config.consumerName, subject: this.config.filterSubject },
+        latency
+      );
+
       // Acknowledge
       msg.ack();
       
@@ -232,6 +248,13 @@ export abstract class JetStreamConsumer {
         // Send to DLQ
         if (this.config.enableDLQ && this.dlqService) {
           await this.sendToDLQ(msg, error, deliverCount, traceId);
+          
+          // Record DLQ metric
+          natsDlqMessages.inc({
+            service: this.config.consumerName,
+            original_subject: this.config.filterSubject,
+            error_type: error instanceof Error ? error.name : 'UnknownError',
+          });
         }
         msg.ack(); // Ack to stop redelivery
       } else {

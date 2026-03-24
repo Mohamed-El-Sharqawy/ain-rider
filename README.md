@@ -61,6 +61,56 @@ Production-ready microservices monorepo for the 911 Ain Rider platform.
 - **NATS JetStream** - Event streaming and pub/sub
 - **MinIO** - S3-compatible object storage
 
+## NATS JetStream
+
+NATS JetStream is the central event bus for inter-service communication.
+
+### Event Subjects
+
+| Subject | Publisher | Consumers |
+|---------|-----------|-----------|
+| `ain_rider.user_created` | auth-service | admin-service |
+| `ain_rider.user_updated` | auth-service | admin-service |
+| `ain_rider.user_status_changed` | auth-service | admin-service |
+| `ain_rider.location_update` | location-service | websocket-server |
+| `ain_rider.trip_requested` | trip-service | match-service |
+| `ain_rider.trip_matched` | match-service | trip-service, websocket-server |
+| `ain_rider.trip_started` | trip-service | websocket-server, payment-service |
+| `ain_rider.trip_completed` | trip-service | websocket-server, payment-service |
+| `ain_rider.trip_cancelled` | trip-service | websocket-server, payment-service |
+| `ain_rider.payment_processed` | payment-service | websocket-server |
+| `ain_rider.sos_created` | trip-service | websocket-server |
+| `ain_rider.sos_resolved` | trip-service | websocket-server |
+| `ain_rider.notification_sent` | notification-service | websocket-server |
+
+### Request-Reply Subjects
+
+| Subject | Requester | Responder |
+|---------|-----------|-----------|
+| `trip.cancel.request` | admin-service | trip-service |
+| `trip.assign_driver.request` | admin-service | trip-service |
+| `payment.refund.request` | admin-service | payment-service |
+| `user.suspend.request` | admin-service | auth-service |
+| `user.activate.request` | admin-service | auth-service |
+
+### Configuration
+
+Set `NATS_URL` environment variable (default: `nats://localhost:4222`):
+
+```env
+NATS_URL=nats://localhost:4222
+```
+
+### Monitoring
+
+- **JetStream Manager**: http://localhost:8222 (NATS monitoring)
+- **Prometheus Metrics**: Each service exposes NATS metrics at `/metrics`
+
+### DLQ (Dead Letter Queue)
+
+Failed messages are sent to `ain_rider.dlq.<original_subject>` after max retries.
+Monitor DLQ messages via the `DLQAlertingService` in `@ain-rider/nats-client`.
+
 ## Documentation
 
 See `EXECUTION_PLAN.md` for detailed setup instructions.
