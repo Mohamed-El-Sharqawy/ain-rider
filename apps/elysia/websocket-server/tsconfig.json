@@ -9,7 +9,7 @@
     "declarationMap": false,
     "paths": {
       "@ain-rider/shared-types": ["../../../packages/shared-types/dist"],
-      "@ain-rider/nats-client": ["../../../packages/nats-client/dist"],
+      "@ain-rider/nats-client": ["../../../packages/nats-client/dist/src"],
       "@ain-rider/redis-client": ["../../../packages/redis-client/dist"]
     }
   },
