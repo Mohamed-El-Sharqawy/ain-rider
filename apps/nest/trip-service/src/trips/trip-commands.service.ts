@@ -32,6 +32,18 @@ export class TripCommandsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    // Wait for NatsService to be ready
+    let retries = 0;
+    while (!this.nats.responder && retries < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      retries++;
+    }
+    
+    if (!this.nats.responder) {
+      console.error('[TripCommands] NATS responder not available after 5s');
+      return;
+    }
+    
     await this.registerHandlers();
   }
 
