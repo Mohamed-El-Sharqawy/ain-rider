@@ -2,8 +2,9 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { NatsService } from '../shared/nats/nats.service';
-import { UserRole, NATS_SUBJECTS } from '@ain-rider/shared-types';
+import { UserEventPublisher } from '../events/user-event.publisher';
+import { UserRole } from '@ain-rider/shared-types';
+import { generateTraceId } from '@ain-rider/nats-client';
 import type { RegisterDto } from './dto/register.dto';
 import { Prisma } from '../generated/prisma/client';
 
@@ -12,7 +13,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private nats: NatsService,
+    private userEventPublisher: UserEventPublisher,
   ) {}
 
   async register(data: RegisterDto) {
@@ -38,21 +39,9 @@ export class AuthService {
         await this.prisma.rider.create({ data: { userId: user.id } });
       }
 
-      // Publish user.created so all services can sync their shadow tables
-      await this.nats.publisher.publish({
-        subject: NATS_SUBJECTS.USER_CREATED,
-        data: {
-          id: user.id,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          status: user.status,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
-        },
-      });
+      // Publish user_created event for downstream services
+      const traceId = generateTraceId();
+      await this.userEventPublisher.publishUserCreated(user, traceId);
 
       return {
         user: this.sanitize(user),
@@ -99,21 +88,26 @@ export class AuthService {
     return { accessToken: this.signAccessToken(user) };
   }
 
-  async updateUserStatus(userId: string, status: string, changedBy?: string) {
+  async updateUserStatus(userId: string, status: string, changedBy?: string, reason?: string) {
+    const previousUser = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!previousUser) throw new UnauthorizedException('User not found');
+    
+    const previousStatus = previousUser.status;
+    
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: { status, updatedAt: new Date() },
     });
 
-    await this.nats.publisher.publish({
-      subject: NATS_SUBJECTS.USER_STATUS_CHANGED,
-      data: {
-        id: user.id,
-        status: user.status,
-        changedBy,
-        updatedAt: user.updatedAt.toISOString(),
-      },
-    });
+    // Publish user_status_changed event
+    const traceId = generateTraceId();
+    await this.userEventPublisher.publishUserStatusChanged(
+      user,
+      previousStatus,
+      changedBy || 'SYSTEM',
+      reason,
+      traceId,
+    );
 
     return this.sanitize(user);
   }
@@ -133,21 +127,9 @@ export class AuthService {
         },
       });
 
-      // Publish user.created so all services can sync their shadow tables
-      await this.nats.publisher.publish({
-        subject: NATS_SUBJECTS.USER_CREATED,
-        data: {
-          id: user.id,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          status: user.status,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
-        },
-      });
+      // Publish user_created event for downstream services
+      const traceId = generateTraceId();
+      await this.userEventPublisher.publishUserCreated(user, traceId);
 
       return {
         user: this.sanitize(user),

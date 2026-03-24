@@ -9,6 +9,7 @@ import { NatsModule } from '../shared/nats/nats.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserSuspendResponder } from '../nats/responders/user-suspend.responder';
 import { UserActivateResponder } from '../nats/responders/user-activate.responder';
+import { UserEventPublisher } from '../events/user-event.publisher';
 
 @Module({
   imports: [
@@ -23,7 +24,13 @@ import { UserActivateResponder } from '../nats/responders/user-activate.responde
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, UserSuspendResponder, UserActivateResponder],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    UserSuspendResponder,
+    UserActivateResponder,
+    UserEventPublisher,
+  ],
   controllers: [AuthController],
   exports: [AuthService],
 })
