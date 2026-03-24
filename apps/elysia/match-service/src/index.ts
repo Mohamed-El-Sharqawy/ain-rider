@@ -29,7 +29,7 @@ async function bootstrap() {
   tripRequestedConsumer = new (class extends JetStreamConsumer {
     constructor() {
       super(nc, {
-        streamName: 'AIN_RIDER_OPS',
+        streamName: 'AIN_RIDER',
         consumerName: 'trip-requested-consumer',
         filterSubject: 'ain_rider.trip_requested',
         maxDeliver: 3,

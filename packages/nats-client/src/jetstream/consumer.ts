@@ -70,6 +70,12 @@ export abstract class JetStreamConsumer {
     }
 
     try {
+      // Ensure stream exists
+      await this.ensureStream();
+      
+      // Ensure consumer exists
+      await this.ensureConsumer();
+
       this.consumer = await this.js.consumers.get(
         this.config.streamName,
         this.config.consumerName
@@ -91,6 +97,57 @@ export abstract class JetStreamConsumer {
         error
       );
       throw error;
+    }
+  }
+
+  /**
+   * Ensure stream exists, create if not
+   */
+  private async ensureStream(): Promise<void> {
+    const jsm = await this.nc.jetstreamManager();
+    try {
+      await jsm.streams.info(this.config.streamName);
+      console.log(`[${this.config.consumerName}] Stream ${this.config.streamName} exists`);
+    } catch {
+      try {
+        console.log(`[${this.config.consumerName}] Creating stream ${this.config.streamName}`);
+        await jsm.streams.add({
+          name: this.config.streamName,
+          subjects: [this.config.filterSubject],
+          retention: 'limits' as any,
+          max_msgs: 100000,
+          max_bytes: 100 * 1024 * 1024, // 100MB
+          storage: 'file' as any,
+        });
+      } catch (createError: any) {
+        // Stream might exist with overlapping subjects - that's fine
+        if (createError.message?.includes('overlap')) {
+          console.log(`[${this.config.consumerName}] Stream exists with overlapping subjects, using existing`);
+        } else {
+          throw createError;
+        }
+      }
+    }
+  }
+
+  /**
+   * Ensure consumer exists, create if not
+   */
+  private async ensureConsumer(): Promise<void> {
+    const jsm = await this.nc.jetstreamManager();
+    try {
+      await jsm.consumers.info(this.config.streamName, this.config.consumerName);
+      console.log(`[${this.config.consumerName}] Consumer exists`);
+    } catch {
+      console.log(`[${this.config.consumerName}] Creating consumer`);
+      await jsm.consumers.add(this.config.streamName, {
+        name: this.config.consumerName,
+        durable_name: this.config.consumerName,
+        filter_subject: this.config.filterSubject,
+        max_deliver: this.config.maxDeliver ?? 3,
+        ack_policy: 'explicit' as any,
+        deliver_policy: 'all' as any,
+      });
     }
   }
 
