@@ -26,6 +26,7 @@ for (const app of nestApps) {
 const elysiaApps = [
   'location-service',
   'match-service',
+  'websocket-server',
 ];
 
 for (const app of elysiaApps) {
