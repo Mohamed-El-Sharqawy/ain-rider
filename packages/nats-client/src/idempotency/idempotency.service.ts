@@ -6,7 +6,8 @@
  * TTL: 7 days
  */
 
-import { createClient, RedisClientType } from 'redis';
+import { createClient } from 'redis';
+import type { RedisClientType as RedisClient } from 'redis';
 
 export interface IdempotencyConfig {
   /** Redis URL (default: from REDIS_URL env var) */
@@ -22,12 +23,12 @@ export interface IdempotencyConfig {
 const DEFAULT_TTL = 7 * 24 * 60 * 60; // 7 days
 
 export class IdempotencyService {
-  private redis: RedisClientType;
+  private redis: RedisClient | any; // Use any to avoid type incompatibility
   private keyPrefix: string;
   private ttlSeconds: number;
 
   constructor(
-    redisClient?: RedisClientType,
+    redisClient?: RedisClient | any,
     config?: IdempotencyConfig
   ) {
     this.redis = redisClient || createClient({
@@ -91,7 +92,7 @@ export class IdempotencyService {
   /**
    * Get the underlying Redis client for advanced operations
    */
-  getRedisClient(): RedisClientType {
+  getRedisClient(): RedisClient | any {
     return this.redis;
   }
 }
@@ -100,7 +101,7 @@ export class IdempotencyService {
  * Factory function to create an IdempotencyService
  */
 export function createIdempotencyService(
-  redisClient?: RedisClientType,
+  redisClient?: RedisClient | any,
   config?: IdempotencyConfig
 ): IdempotencyService {
   return new IdempotencyService(redisClient, config);

@@ -18,7 +18,9 @@
     "prom-client": "^15.1.3",
     "@ain-rider/shared-types": "workspace:*",
     "@ain-rider/nats-client": "workspace:*",
-    "@ain-rider/redis-client": "workspace:*"
+    "@ain-rider/redis-client": "workspace:*",
+    "nats": "^2.29.3",
+    "redis": "^4.6.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

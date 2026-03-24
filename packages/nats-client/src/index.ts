@@ -26,7 +26,7 @@ export * from './request-reply';
 export * from './tracing';
 
 // Legacy exports (for backward compatibility)
-export { NatsPublisher } from './publisher';
-export { NatsConsumer } from './consumer';
-export { NatsRequester } from './requester';
-export { NatsResponder } from './responder';
+export { NatsPublisher, createPublisher } from './publisher';
+export { NatsConsumer, createConsumer } from './consumer';
+export { NatsRequester, createRequester } from './requester';
+export { NatsResponder, createResponder } from './responder';

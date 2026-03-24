@@ -1,8 +1,10 @@
 import { latLngToCell, gridDisk } from 'h3-js';
 import { cache } from '../../shared/redis';
-import { getPublisher } from '../../shared/nats';
-import { NATS_SUBJECTS } from '@ain-rider/shared-types';
-import type { TripRequestedEvent } from '@ain-rider/shared-types';
+import { getPublisher, getIdempotency, generateTrace } from '../../shared/nats';
+import type { 
+  TripMatchedPayload, 
+  TripNoMatchPayload,
+} from '@ain-rider/nats-client';
 import {
   matchAttemptsTotal,
   matchDuration,
@@ -62,11 +64,30 @@ export abstract class MatchService {
     log('info', 'Driver unregistered', { driverId });
   }
 
-  static async matchDriver(tripRequest: TripRequestedEvent['data']): Promise<void> {
+  /**
+   * Match a trip request with an available driver
+   * Uses JetStream events with proper envelopes
+   */
+  static async matchDriver(tripRequest: {
+    tripId: string;
+    riderId: string;
+    pickupLocation: { latitude: number; longitude: number };
+    traceId?: string;
+  }): Promise<void> {
     const end = matchDuration.startTimer();
     const { tripId, riderId, pickupLocation } = tripRequest;
+    const traceId = tripRequest.traceId ?? generateTrace();
 
     try {
+      // Check idempotency
+      const idempotency = getIdempotency();
+      const alreadyProcessed = await idempotency.isProcessed('trip-requested-consumer', tripId);
+      if (alreadyProcessed) {
+        log('info', 'Trip request already processed, skipping', { tripId, traceId });
+        end();
+        return;
+      }
+
       const centerH3 = latLngToCell(pickupLocation.latitude, pickupLocation.longitude, H3_RESOLUTION);
 
       // kRing k=1 → 7 cells (center + 6 neighbors)
@@ -81,9 +102,30 @@ export abstract class MatchService {
         log('info', 'Ring expanded to k=2', { tripId, candidatesFound: candidates.length });
       }
 
+      const publisher = getPublisher();
+
       if (candidates.length === 0) {
+        // Publish trip_no_match event
+        const noMatchPayload: TripNoMatchPayload = {
+          tripId,
+          riderId,
+          reason: 'NO_DRIVERS_AVAILABLE',
+          searchedAt: new Date().toISOString(),
+        };
+
+        await publisher.publish(
+          'ain_rider.trip_no_match',
+          'trip_no_match',
+          noMatchPayload,
+          { traceId }
+        );
+
         matchAttemptsTotal.inc({ result: 'no_drivers' });
-        log('warn', 'No available drivers for trip', { tripId, riderId, ringK });
+        log('warn', 'No available drivers for trip', { tripId, riderId, ringK, traceId });
+        
+        // Mark as processed
+        await idempotency.markProcessed('trip-requested-consumer', tripId);
+        end();
         return;
       }
 
@@ -91,24 +133,40 @@ export abstract class MatchService {
       // Simple: pick first available; production: sort by ETA, rating, acceptance rate
       const selected = candidates[0];
 
-      // Publish match event
-      await getPublisher().publish({
-        subject: NATS_SUBJECTS.TRIP_MATCHED,
-        data: {
-          tripId,
-          driverId: selected.driverId,
-          estimatedArrival: 300,
-        },
-      });
+      // Publish trip_matched event with proper envelope
+      const matchedPayload: TripMatchedPayload = {
+        tripId,
+        driverId: selected.driverId,
+        driverName: 'Driver', // TODO: Get from driver service
+        driverPhone: '+1234567890', // TODO: Get from driver service
+        driverRating: 4.5, // TODO: Get from driver service
+        vehicleMake: 'Toyota', // TODO: Get from driver service
+        vehicleModel: 'Camry', // TODO: Get from driver service
+        vehiclePlate: 'ABC123', // TODO: Get from driver service
+        estimatedArrival: 300, // 5 minutes
+        distance: 1000, // 1km
+        matchedAt: new Date().toISOString(),
+      };
+
+      await publisher.publish(
+        'ain_rider.trip_matched',
+        'trip_matched',
+        matchedPayload,
+        { traceId }
+      );
 
       // Remove driver from available pool
       await MatchService.unregisterDriver(selected.driverId);
 
+      // Mark as processed
+      await idempotency.markProcessed('trip-requested-consumer', tripId);
+
       matchAttemptsTotal.inc({ result: 'success' });
-      log('info', 'Trip matched', { tripId, driverId: selected.driverId, ringK });
+      log('info', 'Trip matched', { tripId, driverId: selected.driverId, ringK, traceId });
     } catch (error) {
       matchAttemptsTotal.inc({ result: 'error' });
-      log('error', 'Match failed', { tripId, error: String(error) });
+      log('error', 'Match failed', { tripId, error: String(error), traceId });
+      throw error;
     } finally {
       end();
     }
