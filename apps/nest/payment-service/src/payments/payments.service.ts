@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { NatsService } from '../shared/nats/nats.service';
-import { NATS_SUBJECTS, PaymentStatus } from '@ain-rider/shared-types';
+import { PaymentEventPublisher } from '../events/payment-event.publisher';
+import { PaymentStatus } from '@ain-rider/shared-types';
+import { generateTraceId } from '@ain-rider/nats-client';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     private prisma: PrismaService,
-    private nats: NatsService,
+    private paymentEventPublisher: PaymentEventPublisher,
   ) {}
 
   async createPayment(data: {
@@ -41,16 +42,9 @@ export class PaymentsService {
       },
     });
 
-    await this.nats.publisher.publish({
-      subject: NATS_SUBJECTS.PAYMENT_PROCESSED,
-      data: {
-        tripId: payment.tripId,
-        paymentId: payment.id,
-        amount: payment.amount,
-        status: payment.status,
-        paymentMethod: 'CASH',
-      },
-    });
+    // Publish payment_processed event
+    const traceId = generateTraceId();
+    await this.paymentEventPublisher.publishPaymentProcessed(payment, traceId);
 
     return payment;
   }

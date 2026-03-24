@@ -5,6 +5,7 @@ import { NatsService } from '../shared/nats/nats.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TripCompletedConsumer } from '../consumers/trip-completed.consumer';
 import { PaymentRefundResponder } from '../nats/responders/payment-refund.responder';
+import { PaymentEventPublisher } from '../events/payment-event.publisher';
 
 @Module({
   controllers: [PaymentsController],
@@ -14,6 +15,7 @@ import { PaymentRefundResponder } from '../nats/responders/payment-refund.respon
     PrismaService,
     TripCompletedConsumer,
     PaymentRefundResponder,
+    PaymentEventPublisher,
   ],
   exports: [PaymentsService],
 })

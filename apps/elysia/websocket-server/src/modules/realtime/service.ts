@@ -112,6 +112,24 @@ export abstract class RealtimeService {
       { stream: 'AIN_RIDER', consumer: 'websocket-server-sos' }
     );
 
+    await consumer.subscribe<{ paymentId: string; tripId: string; riderId: string; driverId: string; amount: number; status: string }>(
+      NATS_SUBJECTS.PAYMENT_PROCESSED,
+      async (data) => {
+        natsEventsTotal.inc({ subject: NATS_SUBJECTS.PAYMENT_PROCESSED });
+        // Notify rider
+        ConnectionStore.send(`trip:${data.tripId}:rider`, { 
+          type: 'payment_processed', 
+          data: { paymentId: data.paymentId, amount: data.amount, status: data.status } 
+        });
+        // Notify driver
+        ConnectionStore.send(`driver:${data.driverId}`, { 
+          type: 'payment_processed', 
+          data: { paymentId: data.paymentId, amount: data.amount, status: data.status } 
+        });
+      },
+      { stream: 'AIN_RIDER', consumer: 'websocket-server-payment' }
+    );
+
     log('info', 'JetStream subscriptions initialized');
     wsConnectionsTotal.set(ConnectionStore.size());
   }
