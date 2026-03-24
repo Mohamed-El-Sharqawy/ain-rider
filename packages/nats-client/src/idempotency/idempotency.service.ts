@@ -1,0 +1,107 @@
+/**
+ * Idempotency Service
+ * 
+ * Prevents duplicate event processing using Redis
+ * Key format: idempotency:{consumerName}:{eventId}
+ * TTL: 7 days
+ */
+
+import { createClient, RedisClientType } from 'redis';
+
+export interface IdempotencyConfig {
+  /** Redis URL (default: from REDIS_URL env var) */
+  redisUrl?: string;
+  
+  /** Key prefix (default: 'idempotency') */
+  keyPrefix?: string;
+  
+  /** TTL in seconds (default: 7 days) */
+  ttlSeconds?: number;
+}
+
+const DEFAULT_TTL = 7 * 24 * 60 * 60; // 7 days
+
+export class IdempotencyService {
+  private redis: RedisClientType;
+  private keyPrefix: string;
+  private ttlSeconds: number;
+
+  constructor(
+    redisClient?: RedisClientType,
+    config?: IdempotencyConfig
+  ) {
+    this.redis = redisClient || createClient({
+      url: config?.redisUrl || process.env.REDIS_URL || 'redis://localhost:6379',
+    });
+    this.keyPrefix = config?.keyPrefix || 'idempotency';
+    this.ttlSeconds = config?.ttlSeconds || DEFAULT_TTL;
+  }
+
+  /**
+   * Connect to Redis if not already connected
+   */
+  async connect(): Promise<void> {
+    if (!this.redis.isOpen) {
+      await this.redis.connect();
+      console.log('[IdempotencyService] Connected to Redis');
+    }
+  }
+
+  /**
+   * Disconnect from Redis
+   */
+  async disconnect(): Promise<void> {
+    if (this.redis.isOpen) {
+      await this.redis.disconnect();
+      console.log('[IdempotencyService] Disconnected from Redis');
+    }
+  }
+
+  /**
+   * Check if an event has already been processed
+   * 
+   * @param consumerName - Name of the consumer
+   * @param eventId - Unique event ID
+   * @returns true if already processed, false otherwise
+   */
+  async isProcessed(consumerName: string, eventId: string): Promise<boolean> {
+    const key = this.buildKey(consumerName, eventId);
+    const exists = await this.redis.exists(key);
+    return exists === 1;
+  }
+
+  /**
+   * Mark an event as processed
+   * 
+   * @param consumerName - Name of the consumer
+   * @param eventId - Unique event ID
+   */
+  async markProcessed(consumerName: string, eventId: string): Promise<void> {
+    const key = this.buildKey(consumerName, eventId);
+    await this.redis.setEx(key, this.ttlSeconds, '1');
+  }
+
+  /**
+   * Build Redis key for idempotency check
+   */
+  private buildKey(consumerName: string, eventId: string): string {
+    return `${this.keyPrefix}:${consumerName}:${eventId}`;
+  }
+
+  /**
+   * Get the underlying Redis client for advanced operations
+   */
+  getRedisClient(): RedisClientType {
+    return this.redis;
+  }
+}
+
+/**
+ * Factory function to create an IdempotencyService
+ */
+export function createIdempotencyService(
+  redisClient?: RedisClientType,
+  config?: IdempotencyConfig
+): IdempotencyService {
+  return new IdempotencyService(redisClient, config);
+}
