@@ -1,5 +1,6 @@
-import { Elysia, status } from 'elysia';
+import { Elysia } from 'elysia';
 import { cookie } from '@elysiajs/cookie';
+import { UnauthorizedError } from '@ain-rider/error-handling';
 
 export const authGuard = new Elysia({ name: 'Auth.Guard' })
   .use(cookie())
@@ -15,7 +16,7 @@ export const authGuard = new Elysia({ name: 'Auth.Guard' })
     });
 
     if (!token) {
-      throw status(401, 'Not authenticated - no access token');
+      throw new UnauthorizedError('Not authenticated - no access token');
     }
 
     return {

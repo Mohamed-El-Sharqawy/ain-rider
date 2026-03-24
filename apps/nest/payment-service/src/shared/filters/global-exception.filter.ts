@@ -6,7 +6,7 @@
 
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { AppError, normalizeError, logError, createLogger, ErrorCodes, ErrorCodeToHttpStatus } from '@ain-rider/error-handling';
+import { AppError, normalizeError, logError, createLogger, mapHttpExceptionToAppError } from '@ain-rider/error-handling';
 
 const logger = createLogger({ serviceName: 'payment-service' });
 
@@ -18,24 +18,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let appError: AppError;
 
     if (exception instanceof HttpException) {
-      const status = exception.getStatus();
-      const exceptionResponse = exception.getResponse();
-      
-      // Map HTTP status to appropriate error
-      let code = ErrorCodes.INTERNAL_ERROR;
-      for (const [errorCode, httpStatus] of Object.entries(ErrorCodeToHttpStatus)) {
-        if (httpStatus === status) {
-          code = errorCode as any;
-          break;
-        }
-      }
-      
-      appError = normalizeError(exception);
-      (appError as any).code = code;
-      (appError as any).httpStatus = status;
-      if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-        (appError as any).details = exceptionResponse;
-      }
+      appError = mapHttpExceptionToAppError({
+        getStatus: () => exception.getStatus(),
+        message: exception.message,
+        getResponse: () => exception.getResponse(),
+      });
     } else {
       appError = normalizeError(exception);
     }

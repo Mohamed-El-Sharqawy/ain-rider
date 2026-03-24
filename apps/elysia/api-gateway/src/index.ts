@@ -9,7 +9,7 @@ import { auth } from './modules/auth';
 import { trips } from './modules/trips';
 import { admin } from './modules/admin';
 import { log } from './shared/logger';
-import { AppError, normalizeError, logError, createLogger, ValidationError, NotFoundError, generateTraceId, extractTraceId } from '@ain-rider/error-handling';
+import { AppError, normalizeError, logError, createLogger, ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, generateTraceId, extractTraceId } from '@ain-rider/error-handling';
 
 const PORT = parseInt(process.env.API_GATEWAY_PORT || '3000');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'];
@@ -27,7 +27,7 @@ new Elysia()
     const traceId = (store as any).traceId || 'unknown';
     
     let appError: AppError;
-    const errorCode = code as string;
+    const errorCode = code as string | number;
     
     // Handle 404 NOT_FOUND
     if (errorCode === 'NOT_FOUND') {
@@ -43,6 +43,24 @@ new Elysia()
           type: validationError.type 
         }
       );
+    }
+    // Handle numeric HTTP status codes (from status() throws)
+    else if (typeof errorCode === 'number') {
+      const message = typeof error === 'string' ? error : (error as any)?.message || 'Request failed';
+      switch (errorCode) {
+        case 401:
+          appError = new UnauthorizedError(message);
+          break;
+        case 403:
+          appError = new ForbiddenError(message);
+          break;
+        case 404:
+          appError = new NotFoundError(message);
+          break;
+        case 400:
+        default:
+          appError = new ValidationError(message, { status: errorCode });
+      }
     }
     else {
       appError = normalizeError(error);
