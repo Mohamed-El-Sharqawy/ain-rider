@@ -1,5 +1,8 @@
 import { connect, NatsConnection, ConnectionOptions } from 'nats';
 
+// Re-export NatsConnection type for consumers
+export type { NatsConnection } from 'nats';
+
 export interface NatsConfig {
   url: string;
   name?: string;
