@@ -1,10 +1,10 @@
-import { Elysia, status } from 'elysia';
+import { Elysia } from 'elysia';
 import { authGuard } from '../auth/guard';
 import { AdminProxyService } from './service';
 
 export const admin = new Elysia({ prefix: '/admin' })
   .use(authGuard)
-  .all('/*', async ({ request, accessToken }) => {
+  .all('/*', async ({ request, accessToken, set }) => {
     const url = new URL(request.url);
     const path = url.pathname.replace('/admin', '');
     const queryString = url.search;
@@ -26,18 +26,10 @@ export const admin = new Elysia({ prefix: '/admin' })
     const res = await AdminProxyService.proxy(request.method, fullPath, body, headers);
 
     if (!res.ok) {
-      let errorMessage = 'Admin service request failed';
-      try {
-        const err = await res.json() as { message?: string | string[] };
-        if (Array.isArray(err.message)) {
-          errorMessage = err.message.join(', ');
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-      } catch {
-        errorMessage = `Request failed with status ${res.status}`;
-      }
-      throw status(res.status as any, errorMessage);
+      // Pass through the error response from backend service
+      const errorBody = await res.text();
+      set.status = res.status;
+      return errorBody;
     }
 
     return res.json();

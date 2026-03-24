@@ -16,21 +16,12 @@ console.log('[Auth Module] Configuration:', {
 export const auth = new Elysia({ prefix: '/auth' })
   .post(
     '/login',
-    async ({ body, cookie: { accessToken, refreshToken } }) => {
+    async ({ body, cookie: { accessToken, refreshToken }, set }) => {
       const res = await AuthProxyService.login(body);
       if (!res.ok) {
-        let errorMessage = 'Login failed';
-        try {
-          const err = await res.json() as { message?: string | string[] };
-          if (Array.isArray(err.message)) {
-            errorMessage = err.message.join(', ');
-          } else if (err.message) {
-            errorMessage = err.message;
-          }
-        } catch {
-          errorMessage = `Login failed with status ${res.status}`;
-        }
-        throw status(res.status as 400 | 401, errorMessage);
+        const errorBody = await res.text();
+        set.status = res.status;
+        return errorBody;
       }
 
       const data = await res.json() as { user: unknown; accessToken: string; refreshToken: string };
@@ -55,21 +46,12 @@ export const auth = new Elysia({ prefix: '/auth' })
   )
   .post(
     '/register',
-    async ({ body, cookie: { accessToken, refreshToken } }) => {
+    async ({ body, cookie: { accessToken, refreshToken }, set }) => {
       const res = await AuthProxyService.register(body);
       if (!res.ok) {
-        let errorMessage = 'Registration failed';
-        try {
-          const err = await res.json() as { message?: string | string[] };
-          if (Array.isArray(err.message)) {
-            errorMessage = err.message.join(', ');
-          } else if (err.message) {
-            errorMessage = err.message;
-          }
-        } catch {
-          errorMessage = `Registration failed with status ${res.status}`;
-        }
-        throw status(res.status as 400 | 409, errorMessage);
+        const errorBody = await res.text();
+        set.status = res.status;
+        return errorBody;
       }
 
       const data = await res.json() as { user: unknown; accessToken: string; refreshToken: string };
@@ -92,7 +74,7 @@ export const auth = new Elysia({ prefix: '/auth' })
     },
     { body: AuthModel.registerBody }
   )
-  .post('/refresh', async ({ cookie: { accessToken, refreshToken } }) => {
+  .post('/refresh', async ({ cookie: { accessToken, refreshToken }, set }) => {
     if (!refreshToken.value) {
       throw status(401, 'No refresh token');
     }
@@ -101,7 +83,9 @@ export const auth = new Elysia({ prefix: '/auth' })
     if (!res.ok) {
       refreshToken.remove();
       accessToken.remove();
-      throw status(401, 'Invalid refresh token');
+      const errorBody = await res.text();
+      set.status = res.status;
+      return errorBody;
     }
 
     const data = await res.json() as { accessToken: string };
@@ -120,7 +104,7 @@ export const auth = new Elysia({ prefix: '/auth' })
     refreshToken.remove();
     return { success: true };
   })
-  .get('/me', async ({ cookie: { accessToken }, request }) => {
+  .get('/me', async ({ cookie: { accessToken }, request, set }) => {
     console.log('[/auth/me] Request:', {
       hasCookie: !!accessToken,
       hasValue: !!accessToken?.value,
@@ -133,18 +117,9 @@ export const auth = new Elysia({ prefix: '/auth' })
 
     const res = await AuthProxyService.getMe(accessToken.value as string);
     if (!res.ok) {
-      let errorMessage = 'Invalid session';
-      try {
-        const err = await res.json() as { message?: string | string[] };
-        if (Array.isArray(err.message)) {
-          errorMessage = err.message.join(', ');
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-      } catch {
-        errorMessage = `Authentication failed with status ${res.status}`;
-      }
-      throw status(401, errorMessage);
+      const errorBody = await res.text();
+      set.status = res.status;
+      return errorBody;
     }
 
     return res.json();
