@@ -19,9 +19,14 @@ export const auth = new Elysia({ prefix: '/auth' })
     async ({ body, cookie: { accessToken, refreshToken }, set }) => {
       const res = await AuthProxyService.login(body);
       if (!res.ok) {
-        const errorBody = await res.text();
-        set.status = res.status;
-        return errorBody;
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
       }
 
       const data = await res.json() as { user: unknown; accessToken: string; refreshToken: string };
@@ -49,9 +54,14 @@ export const auth = new Elysia({ prefix: '/auth' })
     async ({ body, cookie: { accessToken, refreshToken }, set }) => {
       const res = await AuthProxyService.register(body);
       if (!res.ok) {
-        const errorBody = await res.text();
-        set.status = res.status;
-        return errorBody;
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
       }
 
       const data = await res.json() as { user: unknown; accessToken: string; refreshToken: string };
@@ -117,10 +127,38 @@ export const auth = new Elysia({ prefix: '/auth' })
 
     const res = await AuthProxyService.getMe(accessToken.value as string);
     if (!res.ok) {
-      const errorBody = await res.text();
-      set.status = res.status;
-      return errorBody;
+      try {
+        const errorBody = await res.json();
+        set.status = res.status;
+        return errorBody;
+      } catch {
+        set.status = res.status;
+        return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+      }
     }
 
     return res.json();
-  });
+  })
+  .post(
+    '/admin/create-user',
+    async ({ body, cookie: { accessToken }, set }) => {
+      if (!accessToken.value) {
+        throw status(401, 'Not authenticated');
+      }
+
+      const res = await AuthProxyService.adminCreateUser(accessToken.value as string, body);
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
+      }
+
+      return res.json();
+    },
+    { body: AuthModel.adminCreateUserBody }
+  );

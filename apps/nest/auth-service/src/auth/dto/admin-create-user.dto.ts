@@ -1,7 +1,7 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum, IsPhoneNumber } from 'class-validator';
 import { UserRole } from '@ain-rider/shared-types';
 
-export class RegisterDto {
+export class AdminCreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -23,8 +23,8 @@ export class RegisterDto {
   @IsNotEmpty()
   lastName: string;
 
-  // Public registration only allows RIDER or DRIVER
-  @IsEnum([UserRole.RIDER, UserRole.DRIVER])
+  // Admin can create any role
+  @IsEnum(UserRole)
   @IsNotEmpty()
-  role: UserRole.RIDER | UserRole.DRIVER;
+  role: UserRole;
 }

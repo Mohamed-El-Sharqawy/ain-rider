@@ -8,6 +8,7 @@ export class BatchSettingItem {
   key: string;
 
   @ApiProperty()
+  @IsOptional()
   value: unknown;
 
   @ApiProperty({ required: false })

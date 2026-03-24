@@ -7,10 +7,12 @@ import { AppError } from './app-error.js';
 import { ErrorCodes } from '../schemas/index.js';
 
 export class NotFoundError extends AppError {
-  constructor(resourceName: string, identifier?: string | number) {
+  constructor(resourceNameOrMessage: string, identifier?: string | number) {
+    // If identifier provided, treat first arg as resource name and add suffix
+    // Otherwise, treat as full message (e.g., from HttpException)
     const message = identifier
-      ? `${resourceName} with ID '${identifier}' not found`
-      : `${resourceName} not found`;
+      ? `${resourceNameOrMessage} with ID '${identifier}' not found`
+      : resourceNameOrMessage;
     super(ErrorCodes.NOT_FOUND, message);
     Object.setPrototypeOf(this, NotFoundError.prototype);
   }

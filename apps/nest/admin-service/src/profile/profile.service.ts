@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { AuthDbService } from '../prisma/auth-db.service';
 import { StorageService } from '../shared/storage/storage.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { randomUUID } from 'crypto';
@@ -7,12 +7,12 @@ import { randomUUID } from 'crypto';
 @Injectable()
 export class ProfileService {
   constructor(
-    private prisma: PrismaService,
+    private authDb: AuthDbService,
     private storage: StorageService,
   ) {}
 
   async getProfile(userId: string) {
-    const user = await this.prisma.userShadow.findUnique({
+    const user = await this.authDb.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -36,7 +36,7 @@ export class ProfileService {
   }
 
   async updateProfile(userId: string, data: UpdateProfileDto) {
-    const user = await this.prisma.userShadow.findUnique({
+    const user = await this.authDb.user.findUnique({
       where: { id: userId },
     });
 
@@ -44,7 +44,9 @@ export class ProfileService {
       throw new NotFoundException('User not found');
     }
 
-    return this.prisma.userShadow.update({
+    // Note: Profile updates should go through auth-service via NATS
+    // For now, we directly update the auth database (read-write for profile updates)
+    return this.authDb.user.update({
       where: { id: userId },
       data: {
         ...(data.firstName && { firstName: data.firstName }),
@@ -84,7 +86,7 @@ export class ProfileService {
   }
 
   async deleteProfileImage(userId: string) {
-    const user = await this.prisma.userShadow.findUnique({
+    const user = await this.authDb.user.findUnique({
       where: { id: userId },
       select: { profileImage: true },
     });
@@ -98,7 +100,7 @@ export class ProfileService {
       await this.storage.delete(objectName);
     }
 
-    await this.prisma.userShadow.update({
+    await this.authDb.user.update({
       where: { id: userId },
       data: { profileImage: null, updatedAt: new Date() },
     });

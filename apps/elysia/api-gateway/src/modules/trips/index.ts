@@ -10,9 +10,14 @@ export const trips = new Elysia({ prefix: '/trips' })
     async ({ body, user, set }) => {
       const res = await TripProxyService.requestTrip(body, user.id);
       if (!res.ok) {
-        const errorBody = await res.text();
-        set.status = res.status;
-        return errorBody;
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
       }
       return res.json();
     },
@@ -23,9 +28,14 @@ export const trips = new Elysia({ prefix: '/trips' })
     async ({ params, user, set }) => {
       const res = await TripProxyService.getTrip(params.id, user.id);
       if (!res.ok) {
-        const errorBody = await res.text();
-        set.status = res.status;
-        return errorBody;
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
       }
       return res.json();
     },
@@ -36,9 +46,14 @@ export const trips = new Elysia({ prefix: '/trips' })
     async ({ params, body, user, set }) => {
       const res = await TripProxyService.cancelTrip(params.id, user.id, body.reason);
       if (!res.ok) {
-        const errorBody = await res.text();
-        set.status = res.status;
-        return errorBody;
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
       }
       return res.json();
     },

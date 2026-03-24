@@ -3,6 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpsertSettingDto {
   @ApiProperty()
+  @IsOptional()
   value: unknown;
 
   @ApiPropertyOptional({ enum: ['STRING', 'NUMBER', 'BOOLEAN', 'JSON'] })

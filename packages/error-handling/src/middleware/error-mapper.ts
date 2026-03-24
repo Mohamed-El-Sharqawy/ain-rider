@@ -35,6 +35,7 @@ export function mapHttpExceptionToAppError(exception: { getStatus: () => number;
     case 403:
       return new ForbiddenError(message);
     case 404:
+      // Use message directly to avoid doubling "not found" suffix
       return new NotFoundError(message);
     case 409:
       return new ConflictError(message, response);

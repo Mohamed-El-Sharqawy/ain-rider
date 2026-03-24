@@ -11,7 +11,15 @@ export const AuthModel = {
     firstName: t.String(),
     lastName: t.String(),
     phoneNumber: t.String(),
-    role: t.Union([t.Literal('RIDER'), t.Literal('DRIVER'), t.Literal('ADMIN'), t.Literal('SUPPORT')]),
+    role: t.Union([t.Literal('RIDER'), t.Literal('DRIVER')]),
+  }),
+  adminCreateUserBody: t.Object({
+    email: t.String({ format: 'email' }),
+    password: t.String({ minLength: 6 }),
+    firstName: t.String(),
+    lastName: t.String(),
+    phoneNumber: t.String(),
+    role: t.Union([t.Literal('RIDER'), t.Literal('DRIVER'), t.Literal('SUPPORT'), t.Literal('ADMIN')]),
   }),
   refreshBody: t.Object({
     refreshToken: t.String(),

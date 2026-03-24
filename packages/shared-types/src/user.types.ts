@@ -3,6 +3,7 @@ import { Location } from "./location.types";
 export enum UserRole {
   RIDER = 'RIDER',
   DRIVER = 'DRIVER',
+  SUPPORT = 'SUPPORT',
   ADMIN = 'ADMIN',
 }
 

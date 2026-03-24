@@ -12,6 +12,7 @@ export const ErrorDetailSchema = Type.Object({
   code: Type.String({ pattern: '^[A-Z_]+$' }),
   message: Type.String({ minLength: 1 }),
   traceId: Type.String({ format: 'uuid' }),
+  details: Type.Optional(Type.Unknown()),
 });
 
 /**

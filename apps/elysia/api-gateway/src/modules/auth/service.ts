@@ -75,4 +75,24 @@ export abstract class AuthProxyService {
       throw error;
     }
   }
+
+  static async adminCreateUser(token: string, body: unknown): Promise<Response> {
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/admin/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service adminCreateUser proxy failed', { error: String(error) });
+      throw error;
+    }
+  }
 }

@@ -20,7 +20,14 @@ export class SettingsService {
     
     return this.prisma.setting.upsert({
       where: { key },
-      update: { value: valueStr, updatedBy },
+      update: { 
+        value: valueStr, 
+        type: type || undefined,
+        category: category || undefined,
+        description: description || undefined,
+        isPublic: isPublic ?? undefined,
+        updatedBy 
+      },
       create: { 
         key, 
         value: valueStr, 

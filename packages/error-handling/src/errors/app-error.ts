@@ -31,7 +31,7 @@ export class AppError extends Error {
    * Converts the error to a unified error response format.
    */
   toResponse(traceId: string): ErrorResponse {
-    return {
+    const response: ErrorResponse = {
       success: false,
       error: {
         code: this.code,
@@ -39,6 +39,14 @@ export class AppError extends Error {
         traceId,
       },
     };
+
+    // Include details in development or for validation errors
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (this.details && (!isProduction || this.code === 'VALIDATION_ERROR')) {
+      response.error.details = this.details;
+    }
+
+    return response;
   }
 
   /**

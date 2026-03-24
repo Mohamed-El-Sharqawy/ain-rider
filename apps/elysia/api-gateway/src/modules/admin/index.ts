@@ -27,9 +27,14 @@ export const admin = new Elysia({ prefix: '/admin' })
 
     if (!res.ok) {
       // Pass through the error response from backend service
-      const errorBody = await res.text();
-      set.status = res.status;
-      return errorBody;
+      try {
+        const errorBody = await res.json();
+        set.status = res.status;
+        return errorBody;
+      } catch {
+        set.status = res.status;
+        return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+      }
     }
 
     return res.json();

@@ -1,10 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { NatsService } from '../shared/nats/nats.service';
 import { UserRole, NATS_SUBJECTS } from '@ain-rider/shared-types';
 import type { RegisterDto } from './dto/register.dto';
+import { Prisma } from '../generated/prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -17,46 +18,53 @@ export class AuthService {
   async register(data: RegisterDto) {
     const passwordHash = await bcrypt.hash(data.password, 10);
 
-    const user = await this.prisma.user.create({
-      data: {
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        passwordHash,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        role: data.role,
-      },
-    });
-
-    if (data.role === UserRole.DRIVER) {
-      await this.prisma.driver.create({
-        data: { userId: user.id, licenseNumber: '' },
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          email: data.email,
+          phoneNumber: data.phoneNumber,
+          passwordHash,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          role: data.role,
+        },
       });
-    } else if (data.role === UserRole.RIDER) {
-      await this.prisma.rider.create({ data: { userId: user.id } });
+
+      if (data.role === UserRole.DRIVER) {
+        await this.prisma.driver.create({
+          data: { userId: user.id, licenseNumber: '' },
+        });
+      } else if (data.role === UserRole.RIDER) {
+        await this.prisma.rider.create({ data: { userId: user.id } });
+      }
+
+      // Publish user.created so all services can sync their shadow tables
+      await this.nats.publisher.publish({
+        subject: NATS_SUBJECTS.USER_CREATED,
+        data: {
+          id: user.id,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
+        },
+      });
+
+      return {
+        user: this.sanitize(user),
+        accessToken: this.signAccessToken(user),
+        refreshToken: this.signRefreshToken(user),
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && (error as Prisma.PrismaClientKnownRequestError).code === 'P2002') {
+        throw new ConflictException('Email already registered');
+      }
+      throw error;
     }
-
-    // Publish user.created so all services can sync their shadow tables
-    await this.nats.publisher.publish({
-      subject: NATS_SUBJECTS.USER_CREATED,
-      data: {
-        id: user.id,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        status: user.status,
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
-      },
-    });
-
-    return {
-      user: this.sanitize(user),
-      accessToken: this.signAccessToken(user),
-      refreshToken: this.signRefreshToken(user),
-    };
   }
 
   async login(email: string, password: string) {
@@ -108,6 +116,49 @@ export class AuthService {
     });
 
     return this.sanitize(user);
+  }
+
+  async adminCreateUser(data: { email: string; phoneNumber: string; password: string; firstName: string; lastName: string; role: string }, createdBy: string) {
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          email: data.email,
+          phoneNumber: data.phoneNumber,
+          passwordHash,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          role: data.role,
+        },
+      });
+
+      // Publish user.created so all services can sync their shadow tables
+      await this.nats.publisher.publish({
+        subject: NATS_SUBJECTS.USER_CREATED,
+        data: {
+          id: user.id,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
+        },
+      });
+
+      return {
+        user: this.sanitize(user),
+        createdBy,
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && (error as Prisma.PrismaClientKnownRequestError).code === 'P2002') {
+        throw new ConflictException('Email already registered');
+      }
+      throw error;
+    }
   }
 
   private signAccessToken(user: { id: string; email: string; role: string }) {

@@ -1,9 +1,11 @@
-import { Controller, Post, Get, Body, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { AdminCreateUserDto } from './dto/admin-create-user.dto';
+import { UserRole } from '@ain-rider/shared-types';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -11,9 +13,20 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  @ApiOperation({ summary: 'Register a new user' })
+  @ApiOperation({ summary: 'Register a new user (RIDER or DRIVER only)' })
   register(@Body() body: RegisterDto) {
     return this.authService.register(body);
+  }
+
+  @Post('admin/create-user')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin only: Create users with any role' })
+  async adminCreateUser(@Body() body: AdminCreateUserDto, @Request() req: any) {
+    if (req.user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only admins can create users');
+    }
+    return this.authService.adminCreateUser(body, req.user.sub);
   }
 
   @Post('login')
