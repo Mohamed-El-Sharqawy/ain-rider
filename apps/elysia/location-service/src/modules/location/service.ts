@@ -2,34 +2,39 @@ import { latLngToCell } from 'h3-js';
 import { pgPool } from '../../shared/db';
 import { cache, redisCluster } from '../../shared/redis';
 import { getPublisher } from '../../shared/nats';
-import { NATS_SUBJECTS } from '@ain-rider/shared-types';
-import type { LocationUpdate } from '@ain-rider/shared-types';
+import { LocationEventPublisher } from '../../events/location-event.publisher';
 import {
   locationUpdatesTotal,
   locationUpdateDuration,
   activeDriversGauge,
 } from '../../shared/metrics';
 import { log } from '../../shared/logger';
+import { generateTraceId } from '@ain-rider/nats-client';
 import type { LocationUpdateBody, NearbyQuery } from './model';
 
 const H3_RESOLUTION_DISPATCH = 9;
+
+// Location event publisher for JetStream
+let _locationPublisher: LocationEventPublisher | null = null;
+
+function getLocationPublisher(): LocationEventPublisher {
+  if (!_locationPublisher) {
+    _locationPublisher = new LocationEventPublisher(getPublisher());
+  }
+  return _locationPublisher;
+}
 
 export abstract class LocationService {
   static async updateDriverLocation(body: LocationUpdateBody): Promise<{ success: boolean; h3Index: string }> {
     const end = locationUpdateDuration.startTimer();
     const { driverId, latitude, longitude, heading, speed } = body;
+    const traceId = generateTraceId();
 
     try {
       const h3Index = latLngToCell(latitude, longitude, H3_RESOLUTION_DISPATCH);
 
-      const locationUpdate: LocationUpdate = {
-        driverId,
-        location: { latitude, longitude, timestamp: new Date(), heading, speed },
-        h3Index,
-      };
-
       // Atomically update: remove old H3 cell, add to new, update position
-      const prevLocation = await cache.get<LocationUpdate>(`driver:location:${driverId}`);
+      const prevLocation = await cache.get<{ h3Index?: string }>(`driver:location:${driverId}`);
       const pipeline = redisCluster.pipeline();
 
       if (prevLocation?.h3Index && prevLocation.h3Index !== h3Index) {
@@ -37,7 +42,7 @@ export abstract class LocationService {
       }
 
       pipeline.sadd(`h3:drivers:${h3Index}`, driverId);
-      pipeline.setex(`driver:location:${driverId}`, 300, JSON.stringify(locationUpdate));
+      pipeline.setex(`driver:location:${driverId}`, 300, JSON.stringify({ driverId, latitude, longitude, h3Index, heading, speed }));
       await pipeline.exec();
 
       // Write to TimescaleDB (GPS history)
@@ -47,11 +52,15 @@ export abstract class LocationService {
         [driverId, latitude, longitude, h3Index, heading ?? null, speed ?? null]
       );
 
-      // Publish NATS event for WebSocket fanout
-      await getPublisher().publish({
-        subject: NATS_SUBJECTS.LOCATION_UPDATE,
-        data: locationUpdate,
-      });
+      // Publish location update event via JetStream
+      await getLocationPublisher().publishLocationUpdate({
+        driverId,
+        location: { latitude, longitude },
+        heading,
+        speed,
+        isOnline: true,
+        h3Index,
+      }, traceId);
 
       locationUpdatesTotal.inc({ status: 'success' });
       return { success: true, h3Index };

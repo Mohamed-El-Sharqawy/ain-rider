@@ -1,16 +1,23 @@
-import { createNatsConnection, createPublisher } from '@ain-rider/nats-client';
-import type { NatsPublisher } from '@ain-rider/nats-client';
+import { createNatsConnection, JetStreamPublisher } from '@ain-rider/nats-client';
+import type { NatsConnection } from '@ain-rider/nats-client';
 
 const NATS_URL = process.env.NATS_URL || 'nats://localhost:4222';
 
-let _publisher: NatsPublisher | null = null;
+let _nc: NatsConnection | null = null;
+let _publisher: JetStreamPublisher | null = null;
 
 export async function initNats(): Promise<void> {
-  const nc = await createNatsConnection({ url: NATS_URL, name: 'location-service' });
-  _publisher = createPublisher(nc);
+  _nc = await createNatsConnection({ url: NATS_URL, name: 'location-service' });
+  _publisher = new JetStreamPublisher(_nc);
+  console.log('[NATS] location-service connected');
 }
 
-export function getPublisher(): NatsPublisher {
+export function getPublisher(): JetStreamPublisher {
   if (!_publisher) throw new Error('NATS publisher not initialized');
   return _publisher;
+}
+
+export function getConnection(): NatsConnection {
+  if (!_nc) throw new Error('NATS connection not initialized');
+  return _nc;
 }
