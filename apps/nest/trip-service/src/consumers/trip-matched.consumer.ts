@@ -13,7 +13,7 @@ import { NatsService } from '../shared/nats/nats.service';
 
 @Injectable()
 export class TripMatchedConsumer implements OnModuleInit, OnModuleDestroy {
-  private consumer: JetStreamConsumer;
+  private consumer: JetStreamConsumer | null = null;
 
   constructor(
     private tripsService: TripsService,
@@ -21,6 +21,18 @@ export class TripMatchedConsumer implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit() {
+    // Wait for NatsService to be ready
+    let retries = 0;
+    while (!this.natsService.nc && retries < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      retries++;
+    }
+    
+    if (!this.natsService.nc) {
+      console.error('[TripMatchedConsumer] NATS connection not available after 5s');
+      return;
+    }
+
     // Create consumer instance
     this.consumer = new (class extends JetStreamConsumer {
       private tripsService: TripsService;

@@ -29,6 +29,18 @@ export class UserActivateResponder implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit() {
+    // Wait for NatsService to be ready
+    let retries = 0;
+    while (!this.natsService.nc && retries < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      retries++;
+    }
+    
+    if (!this.natsService.nc) {
+      console.error('[UserActivateResponder] NATS connection not available after 5s');
+      return;
+    }
+
     this.responder = new NatsResponder(this.natsService.nc);
 
     await this.responder.respond<ActivateUserRequest, ActivateUserResponse>(

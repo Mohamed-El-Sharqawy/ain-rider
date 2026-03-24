@@ -56,10 +56,18 @@ export interface RefundResponse {
 
 @Injectable()
 export class AdminNatsClient {
-  private requestClient: NatsRequestClient;
+  private _requestClient: NatsRequestClient | null = null;
 
-  constructor(private natsService: NatsService) {
-    this.requestClient = new NatsRequestClient(this.natsService.nc);
+  constructor(private natsService: NatsService) {}
+
+  private get requestClient(): NatsRequestClient {
+    if (!this._requestClient) {
+      if (!this.natsService.nc) {
+        throw new Error('NATS connection not ready');
+      }
+      this._requestClient = new NatsRequestClient(this.natsService.nc);
+    }
+    return this._requestClient;
   }
 
   /**
