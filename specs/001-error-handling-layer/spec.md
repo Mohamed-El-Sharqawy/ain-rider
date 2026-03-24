@@ -106,7 +106,7 @@ As a backend developer, when I write business logic in a NestJS service, the sam
 
 **Unified Response Schema**
 
-- **FR-010**: All error responses MUST conform to: `{ "success": false, "error": { "code": string, "message": string } }`.
+- **FR-010**: All error responses MUST conform to: `{ "success": false, "error": { "code": string, "message": string, "traceId": string } }`.
 - **FR-011**: Error `code` MUST be a machine-readable uppercase identifier (e.g., `VALIDATION_ERROR`, `NOT_FOUND`).
 - **FR-012**: Error `message` MUST be a human-readable string safe for display to end users.
 - **FR-013**: HTTP status codes MUST align with error semantics (400 validation, 401 auth, 403 forbidden, 404 not found, 409 conflict, 422 business rule, 500 internal, 503 unavailable).
@@ -125,17 +125,24 @@ As a backend developer, when I write business logic in a NestJS service, the sam
 - **FR-020**: Gateway MUST propagate `traceId` to downstream services via NATS message headers.
 - **FR-021**: All services MUST include `traceId` in their log entries for request correlation.
 
+**Sensitive Data Sanitization**
+
+- **FR-022**: Error messages MUST be automatically sanitized for sensitive patterns before logging and responding.
+- **FR-023**: Predefined sanitization patterns MUST include: password, token, secret, key, authorization, credential, apikey.
+- **FR-024**: Sanitized values MUST be replaced with `[REDACTED]` in logs and error messages.
+
 ### Key Entities
 
-- **ErrorResponse**: The unified error response structure containing success flag, error code, and message.
+- **ErrorResponse**: The unified error response structure containing success flag, error code, message, and traceId.
 - **TraceContext**: Request correlation context containing traceId, serviceName, and timestamp.
 - **LogEntry**: Structured log record with all required fields for error visibility.
+- **SanitizationConfig**: Configuration for automatic sensitive data redaction patterns.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: 100% of error responses from all services conform to the unified schema `{ success, error: { code, message } }`.
+- **SC-001**: 100% of error responses from all services conform to the unified schema `{ success, error: { code, message, traceId } }`.
 - **SC-002**: 100% of errors are logged with serviceName, errorType, message, and traceId (when available).
 - **SC-003**: NATS timeouts return HTTP 503 within 3.5 seconds (3s timeout + 500ms overhead) instead of hanging.
 - **SC-004**: Zero stack traces are exposed in production error responses.
@@ -144,8 +151,18 @@ As a backend developer, when I write business logic in a NestJS service, the sam
 
 ## Assumptions
 
-- Pino or Winston will be used as the logging library (both support structured JSON output).
+- Pino will be used as the logging library (fastest, native JSON, works in Bun + Node).
 - NATS JetStream is already configured and operational.
 - The existing Elysia `.onError()` handler will be extended, not replaced.
-- NestJS services already have a basic exception filter that will be enhanced.
+- NestJS services currently use class-validator/class-transformer which will be replaced with TypeBox.
 - TraceId will be passed via `X-Trace-Id` HTTP header and NATS message headers.
+
+## Clarifications
+
+### Session 2026-03-24
+
+- Q: Which schema validation library for shared Error Schema? → A: TypeBox (replacing class-validator/class-transformer in NestJS)
+- Q: Which structured logging library? → A: Pino (fastest, native JSON, works in Bun + Node)
+- Q: Include traceId in error responses? → A: Yes, include traceId in all error responses for frontend debugging
+- Q: Where to locate shared Error Schema? → A: New `packages/error-handling` package (contains types AND utilities/logic)
+- Q: Sensitive data sanitization approach? → A: Automatic with predefined patterns (password, token, secret, key, authorization)
