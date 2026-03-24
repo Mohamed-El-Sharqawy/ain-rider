@@ -6,6 +6,7 @@
 
 // Connection
 export * from './connection';
+export type { NatsConnection } from './connection';
 
 // Types
 export * from './types';

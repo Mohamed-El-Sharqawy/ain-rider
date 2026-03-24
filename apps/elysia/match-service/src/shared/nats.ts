@@ -4,7 +4,7 @@ import {
   IdempotencyService,
   generateTraceId,
 } from '@ain-rider/nats-client';
-import type { NatsConnection } from 'nats';
+import type { NatsConnection } from '@ain-rider/nats-client';
 import { createClient } from 'redis';
 
 const NATS_URL = process.env.NATS_URL || 'nats://localhost:4222';
