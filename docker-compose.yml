@@ -1,0 +1,316 @@
+networks:
+  ain-rider-net:
+    driver: bridge
+
+volumes:
+  # One Postgres instance hosts all per-service databases (dev convenience).
+  # In production each database gets its own PVC on Kubernetes.
+  postgres_data:
+
+  redis_data_1:
+  redis_data_2:
+  redis_data_3:
+  redis_data_4:
+  redis_data_5:
+  redis_data_6:
+
+  nats_data:
+  minio_data:
+
+services:
+
+  # ── PostgreSQL (TimescaleDB) ─────────────────────────────────────────────────
+  # Single instance, multiple databases:
+  #   ainrider_auth     → auth-service
+  #   ainrider_admin    → admin-service
+  #   ainrider_trip     → trip-service
+  #   ainrider_payment  → payment-service
+  #   ainrider_location → location-service (TimescaleDB hypertable)
+  postgres:
+    image: timescale/timescaledb-ha:pg17-all-amd64
+    container_name: ain-rider-postgres
+    environment:
+      POSTGRES_USER: ainrider
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ainrider_auth        # default DB; init.sql creates the rest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"                     # direct access for prisma db push / migrations
+    networks:
+      - ain-rider-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ainrider -d ainrider_auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── PgBouncer — auth-service ─────────────────────────────────────────────────
+  pgbouncer-auth:
+    image: edoburu/pgbouncer:latest
+    container_name: ain-rider-pgbouncer-auth
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ainrider
+      DB_PASSWORD: password
+      DB_NAME: ainrider_auth
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 500
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    ports:
+      - "5434:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ain-rider-net
+
+  # ── PgBouncer — admin-service ────────────────────────────────────────────────
+  pgbouncer-admin:
+    image: edoburu/pgbouncer:latest
+    container_name: ain-rider-pgbouncer-admin
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ainrider
+      DB_PASSWORD: password
+      DB_NAME: ainrider_admin
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 500
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    ports:
+      - "5435:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ain-rider-net
+
+  # ── PgBouncer — trip-service ─────────────────────────────────────────────────
+  pgbouncer-trip:
+    image: edoburu/pgbouncer:latest
+    container_name: ain-rider-pgbouncer-trip
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ainrider
+      DB_PASSWORD: password
+      DB_NAME: ainrider_trip
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 500
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    ports:
+      - "5436:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ain-rider-net
+
+  # ── PgBouncer — payment-service ──────────────────────────────────────────────
+  pgbouncer-payment:
+    image: edoburu/pgbouncer:latest
+    container_name: ain-rider-pgbouncer-payment
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ainrider
+      DB_PASSWORD: password
+      DB_NAME: ainrider_payment
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 500
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    ports:
+      - "5437:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ain-rider-net
+
+  # ── PgBouncer — location-service ─────────────────────────────────────────────
+  pgbouncer-location:
+    image: edoburu/pgbouncer:latest
+    container_name: ain-rider-pgbouncer-location
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ainrider
+      DB_PASSWORD: password
+      DB_NAME: ainrider_location
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 500
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    ports:
+      - "5438:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ain-rider-net
+
+  # ── Redis Cluster (6 nodes: 3 masters + 3 replicas) ──────────────────────────
+  redis-1:
+    image: redis:7.4-alpine
+    container_name: ain-rider-redis-1
+    command: >
+      redis-server
+      --cluster-enabled yes --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000 --appendonly yes
+      --port 6379
+      --cluster-announce-hostname ain-rider-redis-1
+      --cluster-announce-port 6379
+      --cluster-announce-bus-port 16379
+      --cluster-preferred-endpoint-type hostname
+    ports: ["6379:6379", "16379:16379"]
+    volumes: [redis_data_1:/data]
+    networks: [ain-rider-net]
+
+  redis-2:
+    image: redis:7.4-alpine
+    container_name: ain-rider-redis-2
+    command: >
+      redis-server
+      --cluster-enabled yes --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000 --appendonly yes
+      --port 6379
+      --cluster-announce-hostname ain-rider-redis-2
+      --cluster-announce-port 6379
+      --cluster-announce-bus-port 16379
+      --cluster-preferred-endpoint-type hostname
+    ports: ["6380:6379", "16380:16379"]
+    volumes: [redis_data_2:/data]
+    networks: [ain-rider-net]
+
+  redis-3:
+    image: redis:7.4-alpine
+    container_name: ain-rider-redis-3
+    command: >
+      redis-server
+      --cluster-enabled yes --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000 --appendonly yes
+      --port 6379
+      --cluster-announce-hostname ain-rider-redis-3
+      --cluster-announce-port 6379
+      --cluster-announce-bus-port 16379
+      --cluster-preferred-endpoint-type hostname
+    ports: ["6381:6379", "16381:16379"]
+    volumes: [redis_data_3:/data]
+    networks: [ain-rider-net]
+
+  redis-4:
+    image: redis:7.4-alpine
+    container_name: ain-rider-redis-4
+    command: >
+      redis-server
+      --cluster-enabled yes --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000 --appendonly yes
+      --port 6379
+      --cluster-announce-hostname ain-rider-redis-4
+      --cluster-announce-port 6379
+      --cluster-announce-bus-port 16379
+      --cluster-preferred-endpoint-type hostname
+    ports: ["6382:6379", "16382:16379"]
+    volumes: [redis_data_4:/data]
+    networks: [ain-rider-net]
+
+  redis-5:
+    image: redis:7.4-alpine
+    container_name: ain-rider-redis-5
+    command: >
+      redis-server
+      --cluster-enabled yes --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000 --appendonly yes
+      --port 6379
+      --cluster-announce-hostname ain-rider-redis-5
+      --cluster-announce-port 6379
+      --cluster-announce-bus-port 16379
+      --cluster-preferred-endpoint-type hostname
+    ports: ["6383:6379", "16383:16379"]
+    volumes: [redis_data_5:/data]
+    networks: [ain-rider-net]
+
+  redis-6:
+    image: redis:7.4-alpine
+    container_name: ain-rider-redis-6
+    command: >
+      redis-server
+      --cluster-enabled yes --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000 --appendonly yes
+      --port 6379
+      --cluster-announce-hostname ain-rider-redis-6
+      --cluster-announce-port 6379
+      --cluster-announce-bus-port 16379
+      --cluster-preferred-endpoint-type hostname
+    ports: ["6384:6379", "16384:16379"]
+    volumes: [redis_data_6:/data]
+    networks: [ain-rider-net]
+
+  redis-cluster-init:
+    image: redis:7.4-alpine
+    container_name: ain-rider-redis-cluster-init
+    command: >
+      sh -c "sleep 5 &&
+      redis-cli --cluster create
+      ain-rider-redis-1:6379 ain-rider-redis-2:6379 ain-rider-redis-3:6379
+      ain-rider-redis-4:6379 ain-rider-redis-5:6379 ain-rider-redis-6:6379
+      --cluster-replicas 1 --cluster-yes"
+    depends_on: [redis-1, redis-2, redis-3, redis-4, redis-5, redis-6]
+    networks: [ain-rider-net]
+    restart: "no"
+
+  # ── NATS JetStream ────────────────────────────────────────────────────────────
+  nats:
+    image: nats:2.10-alpine
+    container_name: ain-rider-nats
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes: [nats_data:/data]
+    networks: [ain-rider-net]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── MinIO (S3-compatible object storage) ─────────────────────────────────────
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    container_name: ain-rider-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes: [minio_data:/data]
+    networks: [ain-rider-net]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: ain-rider-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+      mc alias set myminio http://minio:9000 minioadmin minioadmin &&
+      mc mb myminio/ain-rider --ignore-existing &&
+      mc anonymous set download myminio/ain-rider"
+    networks: [ain-rider-net]
+    restart: "no"

@@ -1,0 +1,54 @@
+// ─── Auth Service Read-Only Schema ─────────────────────────────────────────
+// This schema is used by admin-service for read-only access to auth-service's database.
+// Auto-synced from auth-service. DO NOT EDIT MANUALLY.
+// Last sync: 2026-03-23
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/auth-prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  phoneNumber  String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         String
+  status       String   @default("ACTIVE")
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Driver {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  vehicleId     String?
+  licenseNumber String   @unique
+  rating        Float    @default(5.0)
+  totalTrips    Int      @default(0)
+  isOnline      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("drivers")
+}
+
+model Rider {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  rating     Float    @default(5.0)
+  totalTrips Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("riders")
+}

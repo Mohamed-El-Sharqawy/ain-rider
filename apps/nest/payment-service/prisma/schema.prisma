@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Payment {
+  id              String    @id @default(uuid())
+  tripId          String    @unique
+  riderId         String
+  driverId        String
+  amount          Float
+  currency        String    @default("IQD")
+  status          String    @default("PENDING")
+  paymentMethod   String
+  transactionId   String?
+  gatewayResponse Json?
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  @@index([tripId])
+  @@index([riderId])
+  @@index([driverId])
+  @@index([status])
+  @@map("payments")
+}
+
+model Refund {
+  id          String    @id @default(uuid())
+  paymentId   String
+  amount      Float
+  reason      String
+  status      String    @default("PENDING")
+  processedBy String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([paymentId])
+  @@map("refunds")
+}

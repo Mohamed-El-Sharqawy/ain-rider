@@ -1,0 +1,43 @@
+{
+  "name": "ain-rider-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "911 Ain Rider Backend Monorepo",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @ain-rider/* dev",
+    "build": "node scripts/build.mjs",
+    "build:packages": "node scripts/build-packages.mjs",
+    "build:apps": "node scripts/build.mjs",
+    "test": "pnpm --recursive test",
+    "lint": "pnpm --recursive lint",
+    "clean": "node scripts/clean.mjs",
+    "clean:all": "node scripts/clean.mjs",
+    "docker:infra:up": "docker-compose up -d",
+    "docker:infra:down": "docker-compose down",
+    "docker:infra:clean": "docker-compose down -v",
+    "docker:infra:logs": "docker-compose logs -f",
+    "docker:build:nest": "node scripts/docker-build-nest.mjs",
+    "docker:build:elysia": "node scripts/docker-build-elysia.mjs",
+    "docker:build:all": "node scripts/docker-build-all.mjs",
+    "prisma:generate": "node scripts/prisma-generate.mjs",
+    "prisma:push": "node scripts/prisma-push.mjs",
+    "prisma:sync-trip-schema": "node scripts/sync-trip-schema.mjs",
+    "db:seed": "tsx scripts/seed.ts"
+  },
+  "devDependencies": {
+    "@prisma/adapter-pg": "^7.5.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.10.5",
+    "bcrypt": "^5.1.1",
+    "eslint": "^9.18.0",
+    "pg": "^8.20.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  }
+}

@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  phoneNumber  String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         String   // RIDER, DRIVER, ADMIN, SUPPORT
+  status       String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, BANNED
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Driver {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  vehicleId     String?
+  licenseNumber String   @unique
+  rating        Float    @default(5.0)
+  totalTrips    Int      @default(0)
+  isOnline      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("drivers")
+}
+
+model Rider {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  rating     Float    @default(5.0)
+  totalTrips Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("riders")
+}

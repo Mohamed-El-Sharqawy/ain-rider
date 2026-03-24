@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Trip {
+  id                 String    @id @default(uuid())
+  riderId            String
+  driverId           String?
+  status             String    @default("REQUESTED")
+  pickupLat          Float
+  pickupLng          Float
+  pickupAddress      String
+  dropoffLat         Float
+  dropoffLng         Float
+  dropoffAddress     String
+  estimatedFare      Float
+  actualFare         Float?
+  paymentMethod      String    @default("CASH")
+  paymentStatus      String    @default("PENDING") // PENDING, COLLECTED, FAILED
+  promoCode          String?
+  promoDiscount      Float     @default(0)
+  distance           Float?
+  duration           Int?
+  requestedAt        DateTime  @default(now())
+  matchedAt          DateTime?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  cancelledBy        String?
+  driverRating       Float?
+  riderRating        Float?
+  updatedAt          DateTime  @updatedAt
+
+  @@index([riderId])
+  @@index([driverId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([requestedAt])
+  @@map("trips")
+}

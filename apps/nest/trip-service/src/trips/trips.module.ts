@@ -1,0 +1,11 @@
+import { Module } from '@nestjs/common';
+import { TripsController } from './trips.controller';
+import { TripsService } from './trips.service';
+import { TripCommandsService } from './trip-commands.service';
+
+@Module({
+  controllers: [TripsController],
+  providers: [TripsService, TripCommandsService],
+  exports: [TripsService],
+})
+export class TripsModule {}

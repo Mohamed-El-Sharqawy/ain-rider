@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Shadow copy of users from auth-service, kept in sync via NATS USER_* events.
+// admin-service NEVER queries auth-service over HTTP — all user data comes from here.
+model UserShadow {
+  id           String   @id
+  email        String   @unique
+  phoneNumber  String
+  firstName    String
+  lastName     String
+  role         String
+  status       String   @default("ACTIVE")
+  profileImage String?
+  syncedAt     DateTime @default(now())
+  createdAt    DateTime
+  updatedAt    DateTime
+
+  @@map("shadow_users")
+}
+
+model VehicleType {
+  id            String    @id @default(uuid())
+  name          String
+  type          String
+  baseFare      Float
+  perKmRate     Float
+  perMinuteRate Float
+  minFare       Float
+  maxPassengers Int
+  imageUrl      String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  vehicles      Vehicle[]
+
+  @@map("vehicle_types")
+}
+
+model Vehicle {
+  id                 String      @id @default(uuid())
+  driverId           String
+  vehicleTypeId      String
+  make               String
+  model              String
+  year               Int
+  color              String
+  licensePlate       String      @unique
+  registrationNumber String      @unique
+  insuranceNumber    String
+  insuranceExpiry    DateTime
+  status             String      @default("ACTIVE")
+  imageUrl           String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  vehicleType        VehicleType @relation(fields: [vehicleTypeId], references: [id])
+
+  @@map("vehicles")
+}
+
+model Wallet {
+  id           String              @id @default(uuid())
+  userId       String              @unique
+  balance      Float               @default(0)
+  currency     String              @default("IQD")
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  transactions WalletTransaction[]
+  withdrawals  Withdrawal[]
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id            String   @id @default(uuid())
+  walletId      String
+  userId        String
+  type          String
+  amount        Float
+  balanceBefore Float
+  balanceAfter  Float
+  status        String   @default("COMPLETED")
+  description   String
+  referenceId   String?
+  createdAt     DateTime @default(now())
+  wallet        Wallet   @relation(fields: [walletId], references: [id])
+
+  @@index([userId])
+  @@index([walletId])
+  @@map("wallet_transactions")
+}
+
+model Withdrawal {
+  id                String    @id @default(uuid())
+  userId            String
+  walletId          String
+  amount            Float
+  status            String    @default("PENDING")
+  bankAccountNumber String
+  bankName          String
+  accountHolderName String
+  requestedAt       DateTime  @default(now())
+  processedAt       DateTime?
+  processedBy       String?
+  rejectionReason   String?
+  transactionId     String?
+  wallet            Wallet    @relation(fields: [walletId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("withdrawals")
+}
+
+model Promo {
+  id                String       @id @default(uuid())
+  code              String       @unique
+  type              String
+  value             Float
+  maxDiscount       Float?
+  minTripAmount     Float?
+  maxUsagePerUser   Int          @default(1)
+  totalUsageLimit   Int
+  currentUsageCount Int          @default(0)
+  status            String       @default("ACTIVE")
+  validFrom         DateTime
+  validUntil        DateTime
+  description       String
+  createdBy         String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  usages            PromoUsage[]
+
+  @@index([code])
+  @@index([status])
+  @@map("promos")
+}
+
+model PromoUsage {
+  id             String   @id @default(uuid())
+  promoId        String
+  userId         String
+  tripId         String
+  discountAmount Float
+  usedAt         DateTime @default(now())
+  promo          Promo    @relation(fields: [promoId], references: [id])
+
+  @@index([userId])
+  @@map("promo_usages")
+}
+
+model Notification {
+  id          String             @id @default(uuid())
+  userId      String?
+  type        String
+  priority    String             @default("MEDIUM")
+  status      String             @default("PENDING")
+  title       String
+  body        String
+  data        Json?
+  imageUrl    String?
+  actionUrl   String?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+  createdBy   String
+  createdAt   DateTime           @default(now())
+  reads       NotificationRead[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("notifications")
+}
+
+// Tracks who has read a notification — supports admin reads without affecting the target user's read status
+model NotificationRead {
+  id             String       @id @default(uuid())
+  notificationId String
+  readerId       String
+  readAt         DateTime     @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, readerId])
+  @@index([readerId])
+  @@map("notification_reads")
+}
+
+model SOS {
+  id                String    @id @default(uuid())
+  userId            String
+  tripId            String?
+  status            String    @default("ACTIVE")
+  priority          String    @default("CRITICAL")
+  latitude          Float
+  longitude         Float
+  address           String
+  reason            String?
+  notes             String?
+  emergencyContacts Json
+  respondedBy       String?
+  responseNotes     String?
+  createdAt         DateTime  @default(now())
+  resolvedAt        DateTime?
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("sos_alerts")
+}
+
+model Complaint {
+  id              String             @id @default(uuid())
+  complainantId   String
+  complainantRole String
+  againstUserId   String?
+  tripId          String?
+  type            String
+  status          String             @default("PENDING")
+  priority        String             @default("MEDIUM")
+  subject         String
+  description     String
+  evidence        Json?
+  assignedTo      String?
+  resolution      String?
+  resolutionNotes String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  resolvedAt      DateTime?
+  comments        ComplaintComment[]
+
+  @@index([complainantId])
+  @@index([status])
+  @@map("complaints")
+}
+
+model ComplaintComment {
+  id          String    @id @default(uuid())
+  complaintId String
+  userId      String
+  userRole    String
+  comment     String
+  isInternal  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+
+  @@map("complaint_comments")
+}
+
+model Setting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  type        String
+  category    String
+  description String
+  isPublic    Boolean  @default(false)
+  updatedBy   String
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@map("settings")
+}
+
+model Booking {
+  id             String    @id @default(uuid())
+  riderId        String
+  driverId       String?
+  pickupAddress  String
+  pickupLat      Float
+  pickupLng      Float
+  dropoffAddress String
+  dropoffLat     Float
+  dropoffLng     Float
+  scheduledAt    DateTime?
+  status         String    @default("PENDING")
+  fare           Float?
+  paymentMethod  String
+  notes          String?
+  createdBy      String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([riderId])
+  @@index([status])
+  @@map("bookings")
+}

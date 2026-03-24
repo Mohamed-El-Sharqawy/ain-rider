@@ -1,0 +1,20 @@
+export const NATS_SUBJECTS = {
+    LOCATION_UPDATE: 'ain_rider.location_update',
+    TRIP_REQUESTED: 'ain_rider.trip_requested',
+    TRIP_MATCHED: 'ain_rider.trip_matched',
+    TRIP_STARTED: 'ain_rider.trip_started',
+    TRIP_COMPLETED: 'ain_rider.trip_completed',
+    TRIP_CANCELLED: 'ain_rider.trip_cancelled',
+    DRIVER_STATUS_CHANGED: 'ain_rider.driver_status_changed',
+    PAYMENT_PROCESSED: 'ain_rider.payment_processed',
+    WALLET_UPDATED: 'ain_rider.wallet_updated',
+    WITHDRAWAL_REQUESTED: 'ain_rider.withdrawal_requested',
+    WITHDRAWAL_PROCESSED: 'ain_rider.withdrawal_processed',
+    SOS_CREATED: 'ain_rider.sos_created',
+    SOS_RESOLVED: 'ain_rider.sos_resolved',
+    COMPLAINT_CREATED: 'ain_rider.complaint_created',
+    COMPLAINT_UPDATED: 'ain_rider.complaint_updated',
+    NOTIFICATION_SENT: 'ain_rider.notification_sent',
+    PROMO_USED: 'ain_rider.promo_used',
+};
+//# sourceMappingURL=events.types.js.map

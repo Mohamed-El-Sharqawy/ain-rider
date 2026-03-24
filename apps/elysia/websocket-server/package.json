@@ -1,0 +1,24 @@
+{
+  "name": "@ain-rider/websocket-server",
+  "version": "1.0.0",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "elysia": "^1.4.28",
+    "@elysiajs/cors": "^1.4.1",
+    "prom-client": "^15.1.3",
+    "@ain-rider/shared-types": "workspace:*",
+    "@ain-rider/nats-client": "workspace:*",
+    "@ain-rider/redis-client": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "rimraf": "^6.0.1"
+  }
+}

@@ -1,0 +1,95 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { NatsService } from '../shared/nats/nats.service';
+import { NATS_SUBJECTS } from '@ain-rider/shared-types';
+
+@Injectable()
+export class NotificationsService {
+  constructor(
+    private prisma: PrismaService,
+    private nats: NatsService,
+  ) {}
+
+  create(data: any) {
+    return this.prisma.notification.create({ data });
+  }
+
+  findAll(limit = 100) {
+    return this.prisma.notification.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: { reads: true },
+    });
+  }
+
+  findByUser(userId: string) {
+    return this.prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      include: { reads: { where: { readerId: userId } } },
+    });
+  }
+
+  async markRead(id: string, readerId: string) {
+    return this.prisma.notificationRead.upsert({
+      where: { notificationId_readerId: { notificationId: id, readerId } },
+      create: { notificationId: id, readerId },
+      update: { readAt: new Date() },
+    });
+  }
+
+  async markAllAsRead(readerId: string) {
+    // Find all notifications this reader hasn't read yet
+    const unread = await this.prisma.notification.findMany({
+      where: {
+        reads: { none: { readerId } },
+      },
+      select: { id: true },
+    });
+
+    if (unread.length === 0) return { count: 0 };
+
+    await this.prisma.notificationRead.createMany({
+      data: unread.map((n) => ({ notificationId: n.id, readerId })),
+      skipDuplicates: true,
+    });
+
+    return { count: unread.length };
+  }
+
+  async sendPushNotification(userId: string, title: string, body: string, data?: any) {
+    console.log(`[Push] To ${userId}: ${title} - ${body}`);
+    
+    const notification = await this.create({
+      userId,
+      title,
+      body,
+      type: 'PUSH',
+      data: data || {},
+      createdBy: 'system',
+    });
+
+    // Publish to NATS for real-time WebSocket delivery
+    await this.nats.publisher.publish({
+      subject: NATS_SUBJECTS.NOTIFICATION_SENT,
+      data: {
+        userId,
+        title,
+        body,
+        notificationId: notification.id,
+        data,
+      },
+    });
+
+    return notification;
+  }
+
+  async sendSms(phoneNumber: string, message: string) {
+    // In a real implementation, this would integrate with Twilio/SNS or an SMS microservice
+    console.log(`[SMS] To ${phoneNumber}: ${message}`);
+    // Might not map directly to a user in the notification table if just a phone number, 
+    // but throwing not implemented or returning success for now.
+    return { success: true, message: 'SMS sent successfully (mock)' };
+  }
+}
