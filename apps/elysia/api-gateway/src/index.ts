@@ -9,16 +9,50 @@ import { auth } from './modules/auth';
 import { trips } from './modules/trips';
 import { admin } from './modules/admin';
 import { log } from './shared/logger';
-import { traceMiddleware } from './shared/trace';
-import { errorHandler } from './shared/error-handler';
+import { AppError, normalizeError, logError, createLogger, ValidationError, NotFoundError, generateTraceId, extractTraceId } from '@ain-rider/error-handling';
 
 const PORT = parseInt(process.env.API_GATEWAY_PORT || '3000');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'];
+const logger = createLogger({ serviceName: 'api-gateway' });
 
 new Elysia()
   .use(cookie())
-  .use(traceMiddleware)
-  .use(errorHandler)
+  .state('traceId', 'unknown')
+  .onRequest(({ request, store }) => {
+    const headers = request.headers as unknown as Record<string, string>;
+    const traceId = extractTraceId(headers) || generateTraceId();
+    store.traceId = traceId;
+  })
+  .onError(({ code, error, set, store }) => {
+    const traceId = (store as any).traceId || 'unknown';
+    
+    let appError: AppError;
+    const errorCode = code as string;
+    
+    // Handle 404 NOT_FOUND
+    if (errorCode === 'NOT_FOUND') {
+      appError = new NotFoundError('Resource');
+    }
+    // Handle Elysia validation errors (code is 'VALIDATION')
+    else if (errorCode === 'VALIDATION') {
+      const validationError = error as any;
+      appError = new ValidationError(
+        validationError.summary || 'Validation failed',
+        { 
+          errors: validationError.errors,
+          type: validationError.type 
+        }
+      );
+    }
+    else {
+      appError = normalizeError(error);
+    }
+    
+    logError(logger, appError, { traceId });
+    
+    set.status = appError.httpStatus;
+    return appError.toResponse(traceId);
+  })
   .use(
     cors({
       origin: (request) => {

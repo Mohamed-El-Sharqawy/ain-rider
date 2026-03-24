@@ -4,7 +4,7 @@
  */
 
 import { Elysia } from 'elysia';
-import { AppError, normalizeError, logError, createLogger, ValidationError } from '@ain-rider/error-handling';
+import { AppError, normalizeError, logError, createLogger, ValidationError, NotFoundError } from '@ain-rider/error-handling';
 
 const logger = createLogger({ serviceName: 'api-gateway' });
 
@@ -13,18 +13,27 @@ const logger = createLogger({ serviceName: 'api-gateway' });
  * Catches all errors and returns unified error response format.
  */
 export const errorHandler = new Elysia({ name: 'error-handler' })
-  .onError(({ error, set, store }) => {
+  .onError(({ code, error, set, store }) => {
     const traceId = (store as any).traceId || 'unknown';
     
     let appError: AppError;
     
-    // Handle Elysia validation errors
-    if (error && typeof error === 'object' && 'type' in error && (error as any).type === 'validation') {
+    // Handle 404 NOT_FOUND
+    if (code === 'NOT_FOUND') {
+      appError = new NotFoundError('Resource not found');
+    }
+    // Handle Elysia validation errors (code is 'VALIDATION')
+    else if (code === 'VALIDATION') {
+      const validationError = error as any;
       appError = new ValidationError(
-        'Validation failed',
-        { validation: (error as any).summary || error.message }
+        validationError.summary || 'Validation failed',
+        { 
+          errors: validationError.errors,
+          type: validationError.type 
+        }
       );
-    } else {
+    }
+    else {
       appError = normalizeError(error);
     }
     
