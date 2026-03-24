@@ -1,0 +1,22 @@
+{
+  "name": "@ain-rider/error-handling",
+  "version": "1.0.0",
+  "description": "Shared error handling utilities for Ain Rider backend services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.32.0",
+    "pino": "^8.19.0"
+  },
+  "peerDependencies": {
+    "nats": "^2.19.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.10.0"
+  }
+}

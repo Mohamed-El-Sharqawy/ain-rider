@@ -5,6 +5,8 @@ import { metrics } from './modules/metrics';
 import { realtime } from './modules/realtime';
 import { RealtimeService } from './modules/realtime/service';
 import { log } from './shared/logger';
+import { traceMiddleware } from './shared/trace';
+import { errorHandler } from './shared/error-handler';
 
 const PORT = parseInt(process.env.WEBSOCKET_PORT || '3001');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'];
@@ -15,6 +17,8 @@ RealtimeService.initNatsSubscriptions().catch((err) => {
 });
 
 new Elysia()
+  .use(traceMiddleware)
+  .use(errorHandler)
   .use(
     cors({
       origin: (request) => {
@@ -27,15 +31,6 @@ new Elysia()
       credentials: true,
     })
   )
-  .onError(({ code, error }) => {
-    const message = error instanceof Error ? error.message : String(error);
-    log('error', 'Unhandled error', { code, message });
-    return {
-      success: false,
-      error: { code, message },
-      timestamp: new Date().toISOString(),
-    };
-  })
   .use(health)
   .use(metrics)
   .use(realtime)

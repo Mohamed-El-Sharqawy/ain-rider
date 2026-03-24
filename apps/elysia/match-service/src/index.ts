@@ -9,6 +9,8 @@ import { MatchService } from './modules/match/service';
 import { NATS_SUBJECTS } from '@ain-rider/shared-types';
 import type { TripRequestedEvent } from '@ain-rider/shared-types';
 import { log } from './shared/logger';
+import { traceMiddleware } from './shared/trace';
+import { errorHandler } from './shared/error-handler';
 
 const PORT = parseInt(process.env.MATCH_SERVICE_PORT || '3003');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'];
@@ -35,6 +37,8 @@ bootstrap().catch((err) => {
 });
 
 new Elysia()
+  .use(traceMiddleware)
+  .use(errorHandler)
   .use(
     cors({
       origin: (request) => {
@@ -54,15 +58,6 @@ new Elysia()
       },
     })
   )
-  .onError(({ code, error }) => {
-    const message = error instanceof Error ? error.message : String(error);
-    log('error', 'Unhandled error', { code, message });
-    return {
-      success: false,
-      error: { code, message },
-      timestamp: new Date().toISOString(),
-    };
-  })
   .use(health)
   .use(metrics)
   .use(match)

@@ -4,6 +4,8 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
+import { TraceInterceptor } from './shared/interceptors/trace.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,6 +18,10 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }),
   );
+
+  // Global error handling
+  app.useGlobalInterceptors(new TraceInterceptor());
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Swagger UI requires @fastify/static — only register in development.
   // In production the /api/docs-json endpoint is still available for external

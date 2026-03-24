@@ -6,6 +6,8 @@ import { metrics } from './modules/metrics';
 import { location } from './modules/location';
 import { initNats } from './shared/nats';
 import { log } from './shared/logger';
+import { traceMiddleware } from './shared/trace';
+import { errorHandler } from './shared/error-handler';
 
 const PORT = parseInt(process.env.LOCATION_SERVICE_PORT || '3002');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'];
@@ -16,6 +18,8 @@ initNats().catch((err) => {
 });
 
 new Elysia()
+  .use(traceMiddleware)
+  .use(errorHandler)
   .use(
     cors({
       origin: (request) => {
@@ -35,15 +39,6 @@ new Elysia()
       },
     })
   )
-  .onError(({ code, error }) => {
-    const message = error instanceof Error ? error.message : String(error);
-    log('error', 'Unhandled error', { code, message });
-    return {
-      success: false,
-      error: { code, message },
-      timestamp: new Date().toISOString(),
-    };
-  })
   .use(health)
   .use(metrics)
   .use(location)

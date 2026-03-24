@@ -10,6 +10,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@ain-rider/error-handling": "workspace:*",
     "elysia": "^1.4.28",
     "@elysiajs/cors": "^1.4.1",
     "prom-client": "^15.1.3",

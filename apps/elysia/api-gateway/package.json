@@ -10,6 +10,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@ain-rider/error-handling": "workspace:*",
     "@ain-rider/nats-client": "workspace:*",
     "@ain-rider/redis-client": "workspace:*",
     "@ain-rider/shared-types": "workspace:*",

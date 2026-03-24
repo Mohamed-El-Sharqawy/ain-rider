@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "nats": "^2.29.3",
-    "@ain-rider/shared-types": "workspace:*"
+    "@ain-rider/shared-types": "workspace:*",
+    "@ain-rider/error-handling": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

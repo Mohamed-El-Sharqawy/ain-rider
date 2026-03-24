@@ -9,12 +9,16 @@ import { auth } from './modules/auth';
 import { trips } from './modules/trips';
 import { admin } from './modules/admin';
 import { log } from './shared/logger';
+import { traceMiddleware } from './shared/trace';
+import { errorHandler } from './shared/error-handler';
 
 const PORT = parseInt(process.env.API_GATEWAY_PORT || '3000');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'];
 
 new Elysia()
   .use(cookie())
+  .use(traceMiddleware)
+  .use(errorHandler)
   .use(
     cors({
       origin: (request) => {
@@ -49,48 +53,6 @@ new Elysia()
         req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'anonymous',
     })
   )
-  .onError(({ code, error, set }) => {
-    let message = 'Internal server error';
-    let statusCode = 500;
-
-    if (error instanceof Error) {
-      message = error.message;
-    } else if (typeof error === 'string') {
-      message = error;
-    } else if (error && typeof error === 'object' && 'message' in error) {
-      message = String((error as Record<string, unknown>).message);
-    }
-
-    if (typeof code === 'number') {
-      statusCode = code;
-    } else {
-      switch (code) {
-        case 'VALIDATION':
-          statusCode = 400;
-          message = message === 'Internal server error' ? 'Validation failed' : message;
-          break;
-        case 'INTERNAL_SERVER_ERROR':
-          statusCode = 500;
-          break;
-        case 'INVALID_FILE_TYPE':
-          statusCode = 400;
-          message = 'Invalid file type';
-          break;
-        case 'UNKNOWN':
-          statusCode = 500;
-          break;
-      }
-    }
-
-    set.status = statusCode as any;
-    log('error', 'Request error', { code, message, statusCode });
-
-    return {
-      success: false,
-      error: { code: statusCode, message },
-      timestamp: new Date().toISOString(),
-    };
-  })
   .use(health)
   .use(metrics)
   .use(auth)
