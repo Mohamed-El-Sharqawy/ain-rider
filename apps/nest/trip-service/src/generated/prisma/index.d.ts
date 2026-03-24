@@ -18,6 +18,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  * 
  */
 export type Trip = $Result.DefaultSelection<Prisma.$TripPayload>
+/**
+ * Model SOS
+ * 
+ */
+export type SOS = $Result.DefaultSelection<Prisma.$SOSPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -149,6 +154,16 @@ export class PrismaClient<
     * ```
     */
   get trip(): Prisma.TripDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.sOS`: Exposes CRUD operations for the **SOS** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SOS
+    * const sOS = await prisma.sOS.findMany()
+    * ```
+    */
+  get sOS(): Prisma.SOSDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -583,7 +598,8 @@ export namespace Prisma {
 
 
   export const ModelName: {
-    Trip: 'Trip'
+    Trip: 'Trip',
+    SOS: 'SOS'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -599,7 +615,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "trip"
+      modelProps: "trip" | "sOS"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -674,6 +690,80 @@ export namespace Prisma {
           count: {
             args: Prisma.TripCountArgs<ExtArgs>
             result: $Utils.Optional<TripCountAggregateOutputType> | number
+          }
+        }
+      }
+      SOS: {
+        payload: Prisma.$SOSPayload<ExtArgs>
+        fields: Prisma.SOSFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SOSFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SOSFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>
+          }
+          findFirst: {
+            args: Prisma.SOSFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SOSFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>
+          }
+          findMany: {
+            args: Prisma.SOSFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>[]
+          }
+          create: {
+            args: Prisma.SOSCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>
+          }
+          createMany: {
+            args: Prisma.SOSCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SOSCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>[]
+          }
+          delete: {
+            args: Prisma.SOSDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>
+          }
+          update: {
+            args: Prisma.SOSUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>
+          }
+          deleteMany: {
+            args: Prisma.SOSDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SOSUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SOSUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>[]
+          }
+          upsert: {
+            args: Prisma.SOSUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SOSPayload>
+          }
+          aggregate: {
+            args: Prisma.SOSAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSOS>
+          }
+          groupBy: {
+            args: Prisma.SOSGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SOSGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SOSCountArgs<ExtArgs>
+            result: $Utils.Optional<SOSCountAggregateOutputType> | number
           }
         }
       }
@@ -786,6 +876,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     trip?: TripOmit
+    sOS?: SOSOmit
   }
 
   /* Types for Logging */
@@ -2240,6 +2331,1148 @@ export namespace Prisma {
 
 
   /**
+   * Model SOS
+   */
+
+  export type AggregateSOS = {
+    _count: SOSCountAggregateOutputType | null
+    _avg: SOSAvgAggregateOutputType | null
+    _sum: SOSSumAggregateOutputType | null
+    _min: SOSMinAggregateOutputType | null
+    _max: SOSMaxAggregateOutputType | null
+  }
+
+  export type SOSAvgAggregateOutputType = {
+    lat: number | null
+    lng: number | null
+  }
+
+  export type SOSSumAggregateOutputType = {
+    lat: number | null
+    lng: number | null
+  }
+
+  export type SOSMinAggregateOutputType = {
+    id: string | null
+    tripId: string | null
+    userId: string | null
+    userType: string | null
+    lat: number | null
+    lng: number | null
+    reason: string | null
+    status: string | null
+    resolution: string | null
+    resolvedBy: string | null
+    resolvedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SOSMaxAggregateOutputType = {
+    id: string | null
+    tripId: string | null
+    userId: string | null
+    userType: string | null
+    lat: number | null
+    lng: number | null
+    reason: string | null
+    status: string | null
+    resolution: string | null
+    resolvedBy: string | null
+    resolvedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SOSCountAggregateOutputType = {
+    id: number
+    tripId: number
+    userId: number
+    userType: number
+    lat: number
+    lng: number
+    reason: number
+    status: number
+    resolution: number
+    resolvedBy: number
+    resolvedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SOSAvgAggregateInputType = {
+    lat?: true
+    lng?: true
+  }
+
+  export type SOSSumAggregateInputType = {
+    lat?: true
+    lng?: true
+  }
+
+  export type SOSMinAggregateInputType = {
+    id?: true
+    tripId?: true
+    userId?: true
+    userType?: true
+    lat?: true
+    lng?: true
+    reason?: true
+    status?: true
+    resolution?: true
+    resolvedBy?: true
+    resolvedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SOSMaxAggregateInputType = {
+    id?: true
+    tripId?: true
+    userId?: true
+    userType?: true
+    lat?: true
+    lng?: true
+    reason?: true
+    status?: true
+    resolution?: true
+    resolvedBy?: true
+    resolvedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SOSCountAggregateInputType = {
+    id?: true
+    tripId?: true
+    userId?: true
+    userType?: true
+    lat?: true
+    lng?: true
+    reason?: true
+    status?: true
+    resolution?: true
+    resolvedBy?: true
+    resolvedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SOSAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SOS to aggregate.
+     */
+    where?: SOSWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SOS to fetch.
+     */
+    orderBy?: SOSOrderByWithRelationInput | SOSOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SOSWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SOS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SOS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SOS
+    **/
+    _count?: true | SOSCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SOSAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SOSSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SOSMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SOSMaxAggregateInputType
+  }
+
+  export type GetSOSAggregateType<T extends SOSAggregateArgs> = {
+        [P in keyof T & keyof AggregateSOS]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSOS[P]>
+      : GetScalarType<T[P], AggregateSOS[P]>
+  }
+
+
+
+
+  export type SOSGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SOSWhereInput
+    orderBy?: SOSOrderByWithAggregationInput | SOSOrderByWithAggregationInput[]
+    by: SOSScalarFieldEnum[] | SOSScalarFieldEnum
+    having?: SOSScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SOSCountAggregateInputType | true
+    _avg?: SOSAvgAggregateInputType
+    _sum?: SOSSumAggregateInputType
+    _min?: SOSMinAggregateInputType
+    _max?: SOSMaxAggregateInputType
+  }
+
+  export type SOSGroupByOutputType = {
+    id: string
+    tripId: string | null
+    userId: string
+    userType: string
+    lat: number
+    lng: number
+    reason: string | null
+    status: string
+    resolution: string | null
+    resolvedBy: string | null
+    resolvedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: SOSCountAggregateOutputType | null
+    _avg: SOSAvgAggregateOutputType | null
+    _sum: SOSSumAggregateOutputType | null
+    _min: SOSMinAggregateOutputType | null
+    _max: SOSMaxAggregateOutputType | null
+  }
+
+  type GetSOSGroupByPayload<T extends SOSGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SOSGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SOSGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SOSGroupByOutputType[P]>
+            : GetScalarType<T[P], SOSGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SOSSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tripId?: boolean
+    userId?: boolean
+    userType?: boolean
+    lat?: boolean
+    lng?: boolean
+    reason?: boolean
+    status?: boolean
+    resolution?: boolean
+    resolvedBy?: boolean
+    resolvedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sOS"]>
+
+  export type SOSSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tripId?: boolean
+    userId?: boolean
+    userType?: boolean
+    lat?: boolean
+    lng?: boolean
+    reason?: boolean
+    status?: boolean
+    resolution?: boolean
+    resolvedBy?: boolean
+    resolvedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sOS"]>
+
+  export type SOSSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tripId?: boolean
+    userId?: boolean
+    userType?: boolean
+    lat?: boolean
+    lng?: boolean
+    reason?: boolean
+    status?: boolean
+    resolution?: boolean
+    resolvedBy?: boolean
+    resolvedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sOS"]>
+
+  export type SOSSelectScalar = {
+    id?: boolean
+    tripId?: boolean
+    userId?: boolean
+    userType?: boolean
+    lat?: boolean
+    lng?: boolean
+    reason?: boolean
+    status?: boolean
+    resolution?: boolean
+    resolvedBy?: boolean
+    resolvedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SOSOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tripId" | "userId" | "userType" | "lat" | "lng" | "reason" | "status" | "resolution" | "resolvedBy" | "resolvedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["sOS"]>
+
+  export type $SOSPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SOS"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tripId: string | null
+      userId: string
+      userType: string
+      lat: number
+      lng: number
+      reason: string | null
+      status: string
+      resolution: string | null
+      resolvedBy: string | null
+      resolvedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["sOS"]>
+    composites: {}
+  }
+
+  type SOSGetPayload<S extends boolean | null | undefined | SOSDefaultArgs> = $Result.GetResult<Prisma.$SOSPayload, S>
+
+  type SOSCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SOSFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SOSCountAggregateInputType | true
+    }
+
+  export interface SOSDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SOS'], meta: { name: 'SOS' } }
+    /**
+     * Find zero or one SOS that matches the filter.
+     * @param {SOSFindUniqueArgs} args - Arguments to find a SOS
+     * @example
+     * // Get one SOS
+     * const sOS = await prisma.sOS.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SOSFindUniqueArgs>(args: SelectSubset<T, SOSFindUniqueArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SOS that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SOSFindUniqueOrThrowArgs} args - Arguments to find a SOS
+     * @example
+     * // Get one SOS
+     * const sOS = await prisma.sOS.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SOSFindUniqueOrThrowArgs>(args: SelectSubset<T, SOSFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SOS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SOSFindFirstArgs} args - Arguments to find a SOS
+     * @example
+     * // Get one SOS
+     * const sOS = await prisma.sOS.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SOSFindFirstArgs>(args?: SelectSubset<T, SOSFindFirstArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SOS that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SOSFindFirstOrThrowArgs} args - Arguments to find a SOS
+     * @example
+     * // Get one SOS
+     * const sOS = await prisma.sOS.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SOSFindFirstOrThrowArgs>(args?: SelectSubset<T, SOSFindFirstOrThrowArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SOS that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SOSFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SOS
+     * const sOS = await prisma.sOS.findMany()
+     * 
+     * // Get first 10 SOS
+     * const sOS = await prisma.sOS.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const sOSWithIdOnly = await prisma.sOS.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SOSFindManyArgs>(args?: SelectSubset<T, SOSFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SOS.
+     * @param {SOSCreateArgs} args - Arguments to create a SOS.
+     * @example
+     * // Create one SOS
+     * const SOS = await prisma.sOS.create({
+     *   data: {
+     *     // ... data to create a SOS
+     *   }
+     * })
+     * 
+     */
+    create<T extends SOSCreateArgs>(args: SelectSubset<T, SOSCreateArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SOS.
+     * @param {SOSCreateManyArgs} args - Arguments to create many SOS.
+     * @example
+     * // Create many SOS
+     * const sOS = await prisma.sOS.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SOSCreateManyArgs>(args?: SelectSubset<T, SOSCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SOS and returns the data saved in the database.
+     * @param {SOSCreateManyAndReturnArgs} args - Arguments to create many SOS.
+     * @example
+     * // Create many SOS
+     * const sOS = await prisma.sOS.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SOS and only return the `id`
+     * const sOSWithIdOnly = await prisma.sOS.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SOSCreateManyAndReturnArgs>(args?: SelectSubset<T, SOSCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SOS.
+     * @param {SOSDeleteArgs} args - Arguments to delete one SOS.
+     * @example
+     * // Delete one SOS
+     * const SOS = await prisma.sOS.delete({
+     *   where: {
+     *     // ... filter to delete one SOS
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SOSDeleteArgs>(args: SelectSubset<T, SOSDeleteArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SOS.
+     * @param {SOSUpdateArgs} args - Arguments to update one SOS.
+     * @example
+     * // Update one SOS
+     * const sOS = await prisma.sOS.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SOSUpdateArgs>(args: SelectSubset<T, SOSUpdateArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SOS.
+     * @param {SOSDeleteManyArgs} args - Arguments to filter SOS to delete.
+     * @example
+     * // Delete a few SOS
+     * const { count } = await prisma.sOS.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SOSDeleteManyArgs>(args?: SelectSubset<T, SOSDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SOS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SOSUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SOS
+     * const sOS = await prisma.sOS.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SOSUpdateManyArgs>(args: SelectSubset<T, SOSUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SOS and returns the data updated in the database.
+     * @param {SOSUpdateManyAndReturnArgs} args - Arguments to update many SOS.
+     * @example
+     * // Update many SOS
+     * const sOS = await prisma.sOS.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SOS and only return the `id`
+     * const sOSWithIdOnly = await prisma.sOS.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SOSUpdateManyAndReturnArgs>(args: SelectSubset<T, SOSUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SOS.
+     * @param {SOSUpsertArgs} args - Arguments to update or create a SOS.
+     * @example
+     * // Update or create a SOS
+     * const sOS = await prisma.sOS.upsert({
+     *   create: {
+     *     // ... data to create a SOS
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SOS we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SOSUpsertArgs>(args: SelectSubset<T, SOSUpsertArgs<ExtArgs>>): Prisma__SOSClient<$Result.GetResult<Prisma.$SOSPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SOS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SOSCountArgs} args - Arguments to filter SOS to count.
+     * @example
+     * // Count the number of SOS
+     * const count = await prisma.sOS.count({
+     *   where: {
+     *     // ... the filter for the SOS we want to count
+     *   }
+     * })
+    **/
+    count<T extends SOSCountArgs>(
+      args?: Subset<T, SOSCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SOSCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SOS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SOSAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SOSAggregateArgs>(args: Subset<T, SOSAggregateArgs>): Prisma.PrismaPromise<GetSOSAggregateType<T>>
+
+    /**
+     * Group by SOS.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SOSGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SOSGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SOSGroupByArgs['orderBy'] }
+        : { orderBy?: SOSGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SOSGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSOSGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SOS model
+   */
+  readonly fields: SOSFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SOS.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SOSClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SOS model
+   */
+  interface SOSFieldRefs {
+    readonly id: FieldRef<"SOS", 'String'>
+    readonly tripId: FieldRef<"SOS", 'String'>
+    readonly userId: FieldRef<"SOS", 'String'>
+    readonly userType: FieldRef<"SOS", 'String'>
+    readonly lat: FieldRef<"SOS", 'Float'>
+    readonly lng: FieldRef<"SOS", 'Float'>
+    readonly reason: FieldRef<"SOS", 'String'>
+    readonly status: FieldRef<"SOS", 'String'>
+    readonly resolution: FieldRef<"SOS", 'String'>
+    readonly resolvedBy: FieldRef<"SOS", 'String'>
+    readonly resolvedAt: FieldRef<"SOS", 'DateTime'>
+    readonly createdAt: FieldRef<"SOS", 'DateTime'>
+    readonly updatedAt: FieldRef<"SOS", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SOS findUnique
+   */
+  export type SOSFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * Filter, which SOS to fetch.
+     */
+    where: SOSWhereUniqueInput
+  }
+
+  /**
+   * SOS findUniqueOrThrow
+   */
+  export type SOSFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * Filter, which SOS to fetch.
+     */
+    where: SOSWhereUniqueInput
+  }
+
+  /**
+   * SOS findFirst
+   */
+  export type SOSFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * Filter, which SOS to fetch.
+     */
+    where?: SOSWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SOS to fetch.
+     */
+    orderBy?: SOSOrderByWithRelationInput | SOSOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SOS.
+     */
+    cursor?: SOSWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SOS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SOS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SOS.
+     */
+    distinct?: SOSScalarFieldEnum | SOSScalarFieldEnum[]
+  }
+
+  /**
+   * SOS findFirstOrThrow
+   */
+  export type SOSFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * Filter, which SOS to fetch.
+     */
+    where?: SOSWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SOS to fetch.
+     */
+    orderBy?: SOSOrderByWithRelationInput | SOSOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SOS.
+     */
+    cursor?: SOSWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SOS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SOS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SOS.
+     */
+    distinct?: SOSScalarFieldEnum | SOSScalarFieldEnum[]
+  }
+
+  /**
+   * SOS findMany
+   */
+  export type SOSFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * Filter, which SOS to fetch.
+     */
+    where?: SOSWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SOS to fetch.
+     */
+    orderBy?: SOSOrderByWithRelationInput | SOSOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SOS.
+     */
+    cursor?: SOSWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SOS from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SOS.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SOS.
+     */
+    distinct?: SOSScalarFieldEnum | SOSScalarFieldEnum[]
+  }
+
+  /**
+   * SOS create
+   */
+  export type SOSCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SOS.
+     */
+    data: XOR<SOSCreateInput, SOSUncheckedCreateInput>
+  }
+
+  /**
+   * SOS createMany
+   */
+  export type SOSCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SOS.
+     */
+    data: SOSCreateManyInput | SOSCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SOS createManyAndReturn
+   */
+  export type SOSCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * The data used to create many SOS.
+     */
+    data: SOSCreateManyInput | SOSCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SOS update
+   */
+  export type SOSUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SOS.
+     */
+    data: XOR<SOSUpdateInput, SOSUncheckedUpdateInput>
+    /**
+     * Choose, which SOS to update.
+     */
+    where: SOSWhereUniqueInput
+  }
+
+  /**
+   * SOS updateMany
+   */
+  export type SOSUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SOS.
+     */
+    data: XOR<SOSUpdateManyMutationInput, SOSUncheckedUpdateManyInput>
+    /**
+     * Filter which SOS to update
+     */
+    where?: SOSWhereInput
+    /**
+     * Limit how many SOS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SOS updateManyAndReturn
+   */
+  export type SOSUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * The data used to update SOS.
+     */
+    data: XOR<SOSUpdateManyMutationInput, SOSUncheckedUpdateManyInput>
+    /**
+     * Filter which SOS to update
+     */
+    where?: SOSWhereInput
+    /**
+     * Limit how many SOS to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SOS upsert
+   */
+  export type SOSUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SOS to update in case it exists.
+     */
+    where: SOSWhereUniqueInput
+    /**
+     * In case the SOS found by the `where` argument doesn't exist, create a new SOS with this data.
+     */
+    create: XOR<SOSCreateInput, SOSUncheckedCreateInput>
+    /**
+     * In case the SOS was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SOSUpdateInput, SOSUncheckedUpdateInput>
+  }
+
+  /**
+   * SOS delete
+   */
+  export type SOSDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+    /**
+     * Filter which SOS to delete.
+     */
+    where: SOSWhereUniqueInput
+  }
+
+  /**
+   * SOS deleteMany
+   */
+  export type SOSDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SOS to delete
+     */
+    where?: SOSWhereInput
+    /**
+     * Limit how many SOS to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SOS without action
+   */
+  export type SOSDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SOS
+     */
+    select?: SOSSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SOS
+     */
+    omit?: SOSOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -2285,6 +3518,25 @@ export namespace Prisma {
   };
 
   export type TripScalarFieldEnum = (typeof TripScalarFieldEnum)[keyof typeof TripScalarFieldEnum]
+
+
+  export const SOSScalarFieldEnum: {
+    id: 'id',
+    tripId: 'tripId',
+    userId: 'userId',
+    userType: 'userType',
+    lat: 'lat',
+    lng: 'lng',
+    reason: 'reason',
+    status: 'status',
+    resolution: 'resolution',
+    resolvedBy: 'resolvedBy',
+    resolvedAt: 'resolvedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SOSScalarFieldEnum = (typeof SOSScalarFieldEnum)[keyof typeof SOSScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -2544,6 +3796,100 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Trip"> | Date | string
   }
 
+  export type SOSWhereInput = {
+    AND?: SOSWhereInput | SOSWhereInput[]
+    OR?: SOSWhereInput[]
+    NOT?: SOSWhereInput | SOSWhereInput[]
+    id?: StringFilter<"SOS"> | string
+    tripId?: StringNullableFilter<"SOS"> | string | null
+    userId?: StringFilter<"SOS"> | string
+    userType?: StringFilter<"SOS"> | string
+    lat?: FloatFilter<"SOS"> | number
+    lng?: FloatFilter<"SOS"> | number
+    reason?: StringNullableFilter<"SOS"> | string | null
+    status?: StringFilter<"SOS"> | string
+    resolution?: StringNullableFilter<"SOS"> | string | null
+    resolvedBy?: StringNullableFilter<"SOS"> | string | null
+    resolvedAt?: DateTimeNullableFilter<"SOS"> | Date | string | null
+    createdAt?: DateTimeFilter<"SOS"> | Date | string
+    updatedAt?: DateTimeFilter<"SOS"> | Date | string
+  }
+
+  export type SOSOrderByWithRelationInput = {
+    id?: SortOrder
+    tripId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    userType?: SortOrder
+    lat?: SortOrder
+    lng?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    status?: SortOrder
+    resolution?: SortOrderInput | SortOrder
+    resolvedBy?: SortOrderInput | SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SOSWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SOSWhereInput | SOSWhereInput[]
+    OR?: SOSWhereInput[]
+    NOT?: SOSWhereInput | SOSWhereInput[]
+    tripId?: StringNullableFilter<"SOS"> | string | null
+    userId?: StringFilter<"SOS"> | string
+    userType?: StringFilter<"SOS"> | string
+    lat?: FloatFilter<"SOS"> | number
+    lng?: FloatFilter<"SOS"> | number
+    reason?: StringNullableFilter<"SOS"> | string | null
+    status?: StringFilter<"SOS"> | string
+    resolution?: StringNullableFilter<"SOS"> | string | null
+    resolvedBy?: StringNullableFilter<"SOS"> | string | null
+    resolvedAt?: DateTimeNullableFilter<"SOS"> | Date | string | null
+    createdAt?: DateTimeFilter<"SOS"> | Date | string
+    updatedAt?: DateTimeFilter<"SOS"> | Date | string
+  }, "id">
+
+  export type SOSOrderByWithAggregationInput = {
+    id?: SortOrder
+    tripId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    userType?: SortOrder
+    lat?: SortOrder
+    lng?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    status?: SortOrder
+    resolution?: SortOrderInput | SortOrder
+    resolvedBy?: SortOrderInput | SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SOSCountOrderByAggregateInput
+    _avg?: SOSAvgOrderByAggregateInput
+    _max?: SOSMaxOrderByAggregateInput
+    _min?: SOSMinOrderByAggregateInput
+    _sum?: SOSSumOrderByAggregateInput
+  }
+
+  export type SOSScalarWhereWithAggregatesInput = {
+    AND?: SOSScalarWhereWithAggregatesInput | SOSScalarWhereWithAggregatesInput[]
+    OR?: SOSScalarWhereWithAggregatesInput[]
+    NOT?: SOSScalarWhereWithAggregatesInput | SOSScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SOS"> | string
+    tripId?: StringNullableWithAggregatesFilter<"SOS"> | string | null
+    userId?: StringWithAggregatesFilter<"SOS"> | string
+    userType?: StringWithAggregatesFilter<"SOS"> | string
+    lat?: FloatWithAggregatesFilter<"SOS"> | number
+    lng?: FloatWithAggregatesFilter<"SOS"> | number
+    reason?: StringNullableWithAggregatesFilter<"SOS"> | string | null
+    status?: StringWithAggregatesFilter<"SOS"> | string
+    resolution?: StringNullableWithAggregatesFilter<"SOS"> | string | null
+    resolvedBy?: StringNullableWithAggregatesFilter<"SOS"> | string | null
+    resolvedAt?: DateTimeNullableWithAggregatesFilter<"SOS"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"SOS"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SOS"> | Date | string
+  }
+
   export type TripCreateInput = {
     id?: string
     riderId: string
@@ -2758,6 +4104,118 @@ export namespace Prisma {
     cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
     driverRating?: NullableFloatFieldUpdateOperationsInput | number | null
     riderRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SOSCreateInput = {
+    id?: string
+    tripId?: string | null
+    userId: string
+    userType: string
+    lat: number
+    lng: number
+    reason?: string | null
+    status?: string
+    resolution?: string | null
+    resolvedBy?: string | null
+    resolvedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SOSUncheckedCreateInput = {
+    id?: string
+    tripId?: string | null
+    userId: string
+    userType: string
+    lat: number
+    lng: number
+    reason?: string | null
+    status?: string
+    resolution?: string | null
+    resolvedBy?: string | null
+    resolvedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SOSUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tripId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    userType?: StringFieldUpdateOperationsInput | string
+    lat?: FloatFieldUpdateOperationsInput | number
+    lng?: FloatFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    resolution?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SOSUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tripId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    userType?: StringFieldUpdateOperationsInput | string
+    lat?: FloatFieldUpdateOperationsInput | number
+    lng?: FloatFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    resolution?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SOSCreateManyInput = {
+    id?: string
+    tripId?: string | null
+    userId: string
+    userType: string
+    lat: number
+    lng: number
+    reason?: string | null
+    status?: string
+    resolution?: string | null
+    resolvedBy?: string | null
+    resolvedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SOSUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tripId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    userType?: StringFieldUpdateOperationsInput | string
+    lat?: FloatFieldUpdateOperationsInput | number
+    lng?: FloatFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    resolution?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SOSUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tripId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    userType?: StringFieldUpdateOperationsInput | string
+    lat?: FloatFieldUpdateOperationsInput | number
+    lng?: FloatFieldUpdateOperationsInput | number
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    resolution?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -3082,6 +4540,64 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type SOSCountOrderByAggregateInput = {
+    id?: SortOrder
+    tripId?: SortOrder
+    userId?: SortOrder
+    userType?: SortOrder
+    lat?: SortOrder
+    lng?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    resolution?: SortOrder
+    resolvedBy?: SortOrder
+    resolvedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SOSAvgOrderByAggregateInput = {
+    lat?: SortOrder
+    lng?: SortOrder
+  }
+
+  export type SOSMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tripId?: SortOrder
+    userId?: SortOrder
+    userType?: SortOrder
+    lat?: SortOrder
+    lng?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    resolution?: SortOrder
+    resolvedBy?: SortOrder
+    resolvedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SOSMinOrderByAggregateInput = {
+    id?: SortOrder
+    tripId?: SortOrder
+    userId?: SortOrder
+    userType?: SortOrder
+    lat?: SortOrder
+    lng?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    resolution?: SortOrder
+    resolvedBy?: SortOrder
+    resolvedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SOSSumOrderByAggregateInput = {
+    lat?: SortOrder
+    lng?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {

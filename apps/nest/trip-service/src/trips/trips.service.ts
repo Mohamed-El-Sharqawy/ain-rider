@@ -5,6 +5,7 @@ import { TripEventPublisher } from '../events/trip-event.publisher';
 import { TripStatus } from '@ain-rider/shared-types';
 import type { CreateTripDto } from './dto/create-trip.dto';
 import type { Prisma } from '../generated/prisma/client';
+import type { SOS } from '../generated/prisma/client';
 
 @Injectable()
 export class TripsService {
@@ -128,5 +129,89 @@ export class TripsService {
     );
 
     return trip;
+  }
+
+  /**
+   * Trigger SOS emergency alert
+   */
+  async triggerSOS(
+    data: {
+      tripId?: string;
+      userId: string;
+      userType: 'RIDER' | 'DRIVER';
+      lat: number;
+      lng: number;
+      reason?: string;
+    },
+    traceId?: string
+  ): Promise<SOS> {
+    const sos = await this.prisma.sOS.create({
+      data: {
+        tripId: data.tripId,
+        userId: data.userId,
+        userType: data.userType,
+        lat: data.lat,
+        lng: data.lng,
+        reason: data.reason,
+        status: 'ACTIVE',
+      },
+    });
+
+    // Publish sos_created event
+    await this.eventPublisher.publishSOSCreated(
+      {
+        sosId: sos.id,
+        tripId: sos.tripId,
+        userId: sos.userId,
+        userType: sos.userType as 'RIDER' | 'DRIVER',
+        location: { lat: sos.lat, lng: sos.lng },
+        reason: sos.reason,
+      },
+      traceId
+    );
+
+    console.log(
+      `[TripsService] SOS triggered | sosId=${sos.id} | userId=${data.userId} | traceId=${traceId}`
+    );
+
+    return sos;
+  }
+
+  /**
+   * Resolve SOS emergency
+   */
+  async resolveSOS(
+    sosId: string,
+    resolvedBy: string,
+    resolution: 'FALSE_ALARM' | 'RESOLVED' | 'ESCALATED_TO_AUTHORITIES',
+    notes?: string,
+    traceId?: string
+  ): Promise<SOS> {
+    const sos = await this.prisma.sOS.update({
+      where: { id: sosId },
+      data: {
+        status: 'RESOLVED',
+        resolvedBy,
+        resolution,
+        resolvedAt: new Date(),
+      },
+    });
+
+    // Publish sos_resolved event
+    await this.eventPublisher.publishSOSResolved(
+      {
+        sosId: sos.id,
+        resolvedBy: sos.resolvedBy!,
+        resolution: sos.resolution as 'FALSE_ALARM' | 'RESOLVED' | 'ESCALATED_TO_AUTHORITIES',
+        notes,
+      },
+      traceId
+    );
+
+    console.log(
+      `[TripsService] SOS resolved | sosId=${sosId} | resolvedBy=${resolvedBy} | traceId=${traceId}`
+    );
+
+    return sos;
   }
 }

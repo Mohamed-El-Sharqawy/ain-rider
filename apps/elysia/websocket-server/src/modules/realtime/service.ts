@@ -103,13 +103,42 @@ export abstract class RealtimeService {
       { stream: 'AIN_RIDER', consumer: 'websocket-server-notification' }
     );
 
-    await consumer.subscribe<{ userId: string; tripId?: string }>(
+    await consumer.subscribe<{ sosId: string; userId: string; tripId?: string; location: { lat: number; lng: number } }>(
       NATS_SUBJECTS.SOS_CREATED,
       async (data) => {
         natsEventsTotal.inc({ subject: NATS_SUBJECTS.SOS_CREATED });
-        ConnectionStore.send(`support:all`, { type: 'sos_alert', data });
+        // Send SOS alert to all connected admin/support users
+        const sent = ConnectionStore.sendToAdmins({ 
+          type: 'sos_alert', 
+          data: { 
+            sosId: data.sosId, 
+            userId: data.userId, 
+            tripId: data.tripId, 
+            location: data.location, 
+            status: 'ACTIVE' 
+          } 
+        });
+        log('info', 'SOS alert sent to admins', { sosId: data.sosId, adminsNotified: sent });
       },
       { stream: 'AIN_RIDER', consumer: 'websocket-server-sos' }
+    );
+
+    await consumer.subscribe<{ sosId: string; resolvedBy: string; resolution: string }>(
+      NATS_SUBJECTS.SOS_RESOLVED,
+      async (data) => {
+        natsEventsTotal.inc({ subject: NATS_SUBJECTS.SOS_RESOLVED });
+        // Notify admins that SOS was resolved
+        ConnectionStore.sendToAdmins({ 
+          type: 'sos_resolved', 
+          data: { 
+            sosId: data.sosId, 
+            resolvedBy: data.resolvedBy, 
+            resolution: data.resolution 
+          } 
+        });
+        log('info', 'SOS resolved notification sent', { sosId: data.sosId });
+      },
+      { stream: 'AIN_RIDER', consumer: 'websocket-server-sos-resolved' }
     );
 
     await consumer.subscribe<{ paymentId: string; tripId: string; riderId: string; driverId: string; amount: number; status: string }>(

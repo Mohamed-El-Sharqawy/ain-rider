@@ -151,6 +151,22 @@ exports.Prisma.TripScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SOSScalarFieldEnum = {
+  id: 'id',
+  tripId: 'tripId',
+  userId: 'userId',
+  userType: 'userType',
+  lat: 'lat',
+  lng: 'lng',
+  reason: 'reason',
+  status: 'status',
+  resolution: 'resolution',
+  resolvedBy: 'resolvedBy',
+  resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -168,7 +184,8 @@ exports.Prisma.NullsOrder = {
 
 
 exports.Prisma.ModelName = {
-  Trip: 'Trip'
+  Trip: 'Trip',
+  SOS: 'SOS'
 };
 
 /**

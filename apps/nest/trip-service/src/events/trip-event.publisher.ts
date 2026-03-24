@@ -12,7 +12,10 @@ import {
   TripStartedPayload,
   TripCompletedPayload,
   TripCancelledPayload,
+  SOSCreatedPayload,
+  SOSResolvedPayload,
 } from '@ain-rider/nats-client';
+import type { Location } from '@ain-rider/nats-client';
 
 export const TRIP_SUBJECTS = {
   TRIP_REQUESTED: 'ain_rider.trip_requested',
@@ -21,6 +24,8 @@ export const TRIP_SUBJECTS = {
   TRIP_COMPLETED: 'ain_rider.trip_completed',
   TRIP_CANCELLED: 'ain_rider.trip_cancelled',
   TRIP_NO_MATCH: 'ain_rider.trip_no_match',
+  SOS_CREATED: 'ain_rider.sos_created',
+  SOS_RESOLVED: 'ain_rider.sos_resolved',
 } as const;
 
 @Injectable()
@@ -207,6 +212,66 @@ export class TripEventPublisher {
         ...data,
         matchedAt: new Date().toISOString(),
       },
+      { traceId }
+    );
+  }
+
+  /**
+   * Publish sos_created event when SOS is triggered
+   */
+  async publishSOSCreated(
+    data: {
+      sosId: string;
+      tripId?: string | null;
+      userId: string;
+      userType: 'RIDER' | 'DRIVER';
+      location: Location;
+      reason?: string | null;
+    },
+    traceId?: string
+  ): Promise<void> {
+    const payload: SOSCreatedPayload = {
+      sosId: data.sosId,
+      tripId: data.tripId,
+      userId: data.userId,
+      userType: data.userType,
+      location: data.location,
+      reason: data.reason,
+      createdAt: new Date().toISOString(),
+    };
+
+    await this.publisher.publish(
+      TRIP_SUBJECTS.SOS_CREATED,
+      'sos_created',
+      payload,
+      { traceId }
+    );
+  }
+
+  /**
+   * Publish sos_resolved event when SOS is resolved
+   */
+  async publishSOSResolved(
+    data: {
+      sosId: string;
+      resolvedBy: string;
+      resolution: 'FALSE_ALARM' | 'RESOLVED' | 'ESCALATED_TO_AUTHORITIES';
+      notes?: string | null;
+    },
+    traceId?: string
+  ): Promise<void> {
+    const payload: SOSResolvedPayload = {
+      sosId: data.sosId,
+      resolvedBy: data.resolvedBy,
+      resolution: data.resolution,
+      notes: data.notes,
+      resolvedAt: new Date().toISOString(),
+    };
+
+    await this.publisher.publish(
+      TRIP_SUBJECTS.SOS_RESOLVED,
+      'sos_resolved',
+      payload,
       { traceId }
     );
   }
