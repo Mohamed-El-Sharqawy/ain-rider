@@ -614,6 +614,9 @@ importers:
       nats:
         specifier: ^2.29.3
         version: 2.29.3
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       redis:
         specifier: ^4.6.0
         version: 4.7.1

@@ -7,6 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TripMatchedConsumer } from '../consumers/trip-matched.consumer';
 import { TripCancelResponder } from '../nats/responders/trip-cancel.responder';
 import { TripAssignDriverResponder } from '../nats/responders/trip-assign-driver.responder';
+import { TripCreateResponder } from '../nats/responders/trip-create.responder';
+import { TripUpdateStatusResponder } from '../nats/responders/trip-update-status.responder';
 
 @Module({
   controllers: [TripsController],
@@ -18,6 +20,8 @@ import { TripAssignDriverResponder } from '../nats/responders/trip-assign-driver
     TripMatchedConsumer,
     TripCancelResponder,
     TripAssignDriverResponder,
+    TripCreateResponder,
+    TripUpdateStatusResponder,
   ],
   exports: [TripsService],
 })

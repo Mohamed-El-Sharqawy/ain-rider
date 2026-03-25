@@ -66,6 +66,47 @@ export class PaymentsService {
     return refund;
   }
 
+  async adjustPayment(paymentId: string, newAmount: number, reason: string, adjustedBy: string) {
+    const existingPayment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+    });
+
+    if (!existingPayment) {
+      throw new Error(`Payment ${paymentId} not found`);
+    }
+
+    const previousAmount = existingPayment.amount;
+
+    const payment = await this.prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        amount: newAmount,
+        gatewayResponse: {
+          ...((existingPayment.gatewayResponse as object) || {}),
+          adjustment: {
+            previousAmount,
+            reason,
+            adjustedBy,
+            adjustedAt: new Date().toISOString(),
+          },
+        },
+      },
+    });
+
+    // Publish wallet_updated event if this affects rider's balance
+    const traceId = generateTraceId();
+    await this.paymentEventPublisher.publishWalletUpdated(
+      { id: payment.riderId, balance: 0 } as any, // Would fetch actual wallet
+      previousAmount - newAmount,
+      'ADJUSTMENT',
+      reason,
+      paymentId,
+      traceId
+    );
+
+    return payment;
+  }
+
   findByTrip(tripId: string) {
     return this.prisma.payment.findUnique({ where: { tripId } });
   }

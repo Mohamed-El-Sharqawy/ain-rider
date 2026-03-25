@@ -73,8 +73,9 @@ export class TripMatchedConsumer implements OnModuleInit, OnModuleDestroy {
     })(
       this.natsService.nc,
       {
-        streamName: 'AIN_RIDER',
+        streamName: 'AIN_RIDER_OPS',
         consumerName: 'trip-matched-consumer',
+        serviceName: 'trip-service',
         filterSubject: 'ain_rider.trip_matched',
         maxDeliver: 3,
         enableIdempotency: true,

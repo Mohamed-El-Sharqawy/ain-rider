@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NatsService } from '../shared/nats/nats.service';
 import { NATS_SUBJECTS } from '@ain-rider/shared-types';
+import { generateTraceId } from '@ain-rider/nats-client';
 
 @Injectable()
 export class NotificationsService {
@@ -70,17 +71,20 @@ export class NotificationsService {
       createdBy: 'system',
     });
 
-    // Publish to NATS for real-time WebSocket delivery
-    await this.nats.publisher.publish({
-      subject: NATS_SUBJECTS.NOTIFICATION_SENT,
-      data: {
+    // Publish to NATS JetStream for real-time WebSocket delivery
+    const traceId = generateTraceId();
+    await this.nats.jsPublisher.publish(
+      NATS_SUBJECTS.NOTIFICATION_SENT,
+      'notification_sent',
+      {
         userId,
         title,
         body,
         notificationId: notification.id,
         data,
       },
-    });
+      { traceId }
+    );
 
     return notification;
   }

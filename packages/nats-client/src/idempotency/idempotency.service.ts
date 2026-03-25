@@ -9,6 +9,10 @@
 import { createClient } from 'redis';
 import type { RedisClientType as RedisClient } from 'redis';
 
+// Re-export for convenience so consumers don't need direct redis import
+export { createClient } from 'redis';
+export type { RedisClientType } from 'redis';
+
 export interface IdempotencyConfig {
   /** Redis URL (default: from REDIS_URL env var) */
   redisUrl?: string;

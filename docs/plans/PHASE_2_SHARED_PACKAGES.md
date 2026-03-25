@@ -60,16 +60,16 @@ Create `packages/shared-types/src/user.types.ts`:
 
 ```typescript
 export enum UserRole {
-  RIDER = 'RIDER',
-  DRIVER = 'DRIVER',
-  ADMIN = 'ADMIN',
+  RIDER = "RIDER",
+  DRIVER = "DRIVER",
+  ADMIN = "ADMIN",
 }
 
 export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  BANNED = 'BANNED',
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  SUSPENDED = "SUSPENDED",
+  BANNED = "BANNED",
 }
 
 export interface User {
@@ -133,21 +133,21 @@ export interface GeoFence {
 Create `packages/shared-types/src/trip.types.ts`:
 
 ```typescript
-import { Coordinates } from './location.types';
+import { Coordinates } from "./location.types";
 
 export enum TripStatus {
-  REQUESTED = 'REQUESTED',
-  MATCHED = 'MATCHED',
-  DRIVER_ARRIVING = 'DRIVER_ARRIVING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  REQUESTED = "REQUESTED",
+  MATCHED = "MATCHED",
+  DRIVER_ARRIVING = "DRIVER_ARRIVING",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
 
 export enum PaymentMethod {
-  CASH = 'CASH',
-  CARD = 'CARD',
-  WALLET = 'WALLET',
+  CASH = "CASH",
+  CARD = "CARD",
+  WALLET = "WALLET",
 }
 
 export interface Trip {
@@ -186,11 +186,11 @@ Create `packages/shared-types/src/payment.types.ts`:
 
 ```typescript
 export enum PaymentStatus {
-  PENDING = 'PENDING',
-  PROCESSING = 'PROCESSING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  REFUNDED = 'REFUNDED',
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  REFUNDED = "REFUNDED",
 }
 
 export interface Payment {
@@ -220,19 +220,19 @@ export interface Fare {
 Create `packages/shared-types/src/events.types.ts`:
 
 ```typescript
-import { Location, LocationUpdate } from './location.types';
-import { Trip, TripStatus } from './trip.types';
+import { Location, LocationUpdate } from "./location.types";
+import { Trip, TripStatus } from "./trip.types";
 
 // NATS Event Subjects
 export const NATS_SUBJECTS = {
-  LOCATION_UPDATE: 'location.update',
-  TRIP_REQUESTED: 'trip.requested',
-  TRIP_MATCHED: 'trip.matched',
-  TRIP_STARTED: 'trip.started',
-  TRIP_COMPLETED: 'trip.completed',
-  TRIP_CANCELLED: 'trip.cancelled',
-  DRIVER_STATUS_CHANGED: 'driver.status.changed',
-  PAYMENT_PROCESSED: 'payment.processed',
+  LOCATION_UPDATE: "location.update",
+  TRIP_REQUESTED: "trip.requested",
+  TRIP_MATCHED: "trip.matched",
+  TRIP_STARTED: "trip.started",
+  TRIP_COMPLETED: "trip.completed",
+  TRIP_CANCELLED: "trip.cancelled",
+  DRIVER_STATUS_CHANGED: "driver.status.changed",
+  PAYMENT_PROCESSED: "payment.processed",
 } as const;
 
 // Event Payloads
@@ -261,7 +261,10 @@ export interface TripMatchedEvent {
 }
 
 export interface TripStatusChangedEvent {
-  subject: typeof NATS_SUBJECTS.TRIP_STARTED | typeof NATS_SUBJECTS.TRIP_COMPLETED | typeof NATS_SUBJECTS.TRIP_CANCELLED;
+  subject:
+    | typeof NATS_SUBJECTS.TRIP_STARTED
+    | typeof NATS_SUBJECTS.TRIP_COMPLETED
+    | typeof NATS_SUBJECTS.TRIP_CANCELLED;
   data: {
     tripId: string;
     status: TripStatus;
@@ -300,19 +303,19 @@ export type NatsEvent =
 Create `packages/shared-types/src/index.ts`:
 
 ```typescript
-export * from './user.types';
-export * from './location.types';
-export * from './trip.types';
-export * from './payment.types';
-export * from './events.types';
-export * from './vehicle.types';
-export * from './wallet.types';
-export * from './promo.types';
-export * from './notification.types';
-export * from './sos.types';
-export * from './complaint.types';
-export * from './report.types';
-export * from './settings.types';
+export * from "./user.types";
+export * from "./location.types";
+export * from "./trip.types";
+export * from "./payment.types";
+export * from "./events.types";
+export * from "./vehicle.types";
+export * from "./wallet.types";
+export * from "./promo.types";
+export * from "./notification.types";
+export * from "./sos.types";
+export * from "./complaint.types";
+export * from "./report.types";
+export * from "./settings.types";
 ```
 
 **Note**: Additional type files for admin dashboard features (vehicle, wallet, promo, notification, sos, complaint, report, settings) are included in the shared-types package. These types support the complete admin panel functionality including vehicle management, wallet/withdrawals, promotional codes, push notifications, SOS alerts, complaint management, reporting, and system settings.
@@ -376,7 +379,7 @@ Create `packages/nats-client/tsconfig.json`:
 Create `packages/nats-client/src/connection.ts`:
 
 ```typescript
-import { connect, NatsConnection, ConnectionOptions } from 'nats';
+import { connect, NatsConnection, ConnectionOptions } from "nats";
 
 export interface NatsConfig {
   url: string;
@@ -385,10 +388,12 @@ export interface NatsConfig {
   reconnectTimeWait?: number;
 }
 
-export async function createNatsConnection(config: NatsConfig): Promise<NatsConnection> {
+export async function createNatsConnection(
+  config: NatsConfig,
+): Promise<NatsConnection> {
   const options: ConnectionOptions = {
     servers: config.url,
-    name: config.name || 'ain-rider-service',
+    name: config.name || "ain-rider-service",
     maxReconnectAttempts: config.maxReconnectAttempts || -1, // infinite
     reconnectTimeWait: config.reconnectTimeWait || 2000, // 2 seconds
   };
@@ -400,15 +405,20 @@ export async function createNatsConnection(config: NatsConfig): Promise<NatsConn
     // Handle connection events
     (async () => {
       for await (const status of nc.status()) {
-        console.log(`[NATS] Status: ${status.type}: ${status.data}`);
+        console.log(
+          `[NATS] Status: ${status.type}:`,
+          typeof status.data === "object"
+            ? JSON.stringify(status.data)
+            : status.data,
+        );
       }
     })().catch((err) => {
-      console.error('[NATS] Status error:', err);
+      console.error("[NATS] Status error:", err);
     });
 
     return nc;
   } catch (error) {
-    console.error('[NATS] Connection failed:', error);
+    console.error("[NATS] Connection failed:", error);
     throw error;
   }
 }
@@ -417,8 +427,8 @@ export async function createNatsConnection(config: NatsConfig): Promise<NatsConn
 Create `packages/nats-client/src/publisher.ts`:
 
 ```typescript
-import { NatsConnection, JetStreamClient, JetStreamPublishOptions } from 'nats';
-import { NatsEvent } from '@ain-rider/shared-types';
+import { NatsConnection, JetStreamClient, JetStreamPublishOptions } from "nats";
+import { NatsEvent } from "@ain-rider/shared-types";
 
 export class NatsPublisher {
   private js: JetStreamClient;
@@ -429,14 +439,21 @@ export class NatsPublisher {
 
   async publish<T extends NatsEvent>(
     event: T,
-    options?: Partial<JetStreamPublishOptions>
+    options?: Partial<JetStreamPublishOptions>,
   ): Promise<void> {
     try {
       const payload = JSON.stringify(event.data);
-      await this.js.publish(event.subject, new TextEncoder().encode(payload), options);
+      await this.js.publish(
+        event.subject,
+        new TextEncoder().encode(payload),
+        options,
+      );
       console.log(`[NATS Publisher] Published to ${event.subject}`);
     } catch (error) {
-      console.error(`[NATS Publisher] Failed to publish to ${event.subject}:`, error);
+      console.error(
+        `[NATS Publisher] Failed to publish to ${event.subject}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -455,13 +472,13 @@ export function createPublisher(nc: NatsConnection): NatsPublisher {
 Create `packages/nats-client/src/consumer.ts`:
 
 ```typescript
-import { NatsConnection, JetStreamClient, JsMsg, ConsumerConfig } from 'nats';
+import { NatsConnection, JetStreamClient, JsMsg, ConsumerConfig } from "nats";
 
 export interface ConsumerOptions {
   stream: string;
   consumer: string;
   filterSubject?: string;
-  deliverPolicy?: 'all' | 'last' | 'new';
+  deliverPolicy?: "all" | "last" | "new";
   ackWait?: number; // milliseconds
   maxDeliver?: number;
 }
@@ -478,12 +495,12 @@ export class NatsConsumer {
   async subscribe<T = any>(
     subject: string,
     handler: MessageHandler<T>,
-    options?: Partial<ConsumerOptions>
+    options?: Partial<ConsumerOptions>,
   ): Promise<void> {
     try {
       const consumer = await this.js.consumers.get(
-        options?.stream || 'AIN_RIDER',
-        options?.consumer || `${subject}-consumer`
+        options?.stream || "AIN_RIDER",
+        options?.consumer || `${subject}-consumer`,
       );
 
       const messages = await consumer.consume();
@@ -501,7 +518,10 @@ export class NatsConsumer {
         }
       }
     } catch (error) {
-      console.error(`[NATS Consumer] Subscription failed for ${subject}:`, error);
+      console.error(
+        `[NATS Consumer] Subscription failed for ${subject}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -512,13 +532,13 @@ export class NatsConsumer {
       await jsm.streams.add({
         name: streamName,
         subjects,
-        retention: 'limits',
+        retention: "limits",
         max_age: 7 * 24 * 60 * 60 * 1_000_000_000, // 7 days in nanoseconds
-        storage: 'file',
+        storage: "file",
       });
       console.log(`[NATS] Stream ${streamName} created`);
     } catch (error: any) {
-      if (error.message?.includes('already exists')) {
+      if (error.message?.includes("already exists")) {
         console.log(`[NATS] Stream ${streamName} already exists`);
       } else {
         throw error;
@@ -535,9 +555,9 @@ export function createConsumer(nc: NatsConnection): NatsConsumer {
 Create `packages/nats-client/src/index.ts`:
 
 ```typescript
-export * from './connection';
-export * from './publisher';
-export * from './consumer';
+export * from "./connection";
+export * from "./publisher";
+export * from "./consumer";
 ```
 
 ### Step 2.3: Build Package
@@ -598,7 +618,7 @@ Create `packages/redis-client/tsconfig.json`:
 Create `packages/redis-client/src/cluster.ts`:
 
 ```typescript
-import Redis, { Cluster, ClusterOptions } from 'ioredis';
+import Redis, { Cluster, ClusterOptions } from "ioredis";
 
 export interface RedisClusterConfig {
   nodes: string[]; // ["host:port", "host:port", ...]
@@ -610,7 +630,7 @@ export interface RedisClusterConfig {
 
 export function createRedisCluster(config: RedisClusterConfig): Cluster {
   const nodes = config.nodes.map((node) => {
-    const [host, port] = node.split(':');
+    const [host, port] = node.split(":");
     return { host, port: parseInt(port, 10) };
   });
 
@@ -630,28 +650,28 @@ export function createRedisCluster(config: RedisClusterConfig): Cluster {
 
   const cluster = new Redis.Cluster(nodes, options);
 
-  cluster.on('connect', () => {
-    console.log('[Redis Cluster] Connected');
+  cluster.on("connect", () => {
+    console.log("[Redis Cluster] Connected");
   });
 
-  cluster.on('ready', () => {
-    console.log('[Redis Cluster] Ready');
+  cluster.on("ready", () => {
+    console.log("[Redis Cluster] Ready");
   });
 
-  cluster.on('error', (err) => {
-    console.error('[Redis Cluster] Error:', err);
+  cluster.on("error", (err) => {
+    console.error("[Redis Cluster] Error:", err);
   });
 
-  cluster.on('close', () => {
-    console.log('[Redis Cluster] Connection closed');
+  cluster.on("close", () => {
+    console.log("[Redis Cluster] Connection closed");
   });
 
-  cluster.on('reconnecting', () => {
-    console.log('[Redis Cluster] Reconnecting...');
+  cluster.on("reconnecting", () => {
+    console.log("[Redis Cluster] Reconnecting...");
   });
 
-  cluster.on('end', () => {
-    console.log('[Redis Cluster] Connection ended');
+  cluster.on("end", () => {
+    console.log("[Redis Cluster] Connection ended");
   });
 
   return cluster;
@@ -661,7 +681,7 @@ export function createRedisCluster(config: RedisClusterConfig): Cluster {
 Create `packages/redis-client/src/cache.ts`:
 
 ```typescript
-import { Cluster } from 'ioredis';
+import { Cluster } from "ioredis";
 
 export class RedisCache {
   constructor(private cluster: Cluster) {}
@@ -722,7 +742,7 @@ export class RedisCache {
   async mset(entries: Record<string, any>, ttlSeconds?: number): Promise<void> {
     try {
       const pipeline = this.cluster.pipeline();
-      
+
       for (const [key, value] of Object.entries(entries)) {
         const serialized = JSON.stringify(value);
         if (ttlSeconds) {
@@ -731,7 +751,7 @@ export class RedisCache {
           pipeline.set(key, serialized);
         }
       }
-      
+
       await pipeline.exec();
     } catch (error) {
       console.error(`[Redis Cache] Mset error:`, error);
@@ -766,9 +786,9 @@ export function createCache(cluster: Cluster): RedisCache {
 Create `packages/redis-client/src/index.ts`:
 
 ```typescript
-export * from './cluster';
-export * from './cache';
-export { Cluster } from 'ioredis';
+export * from "./cluster";
+export * from "./cache";
+export { Cluster } from "ioredis";
 ```
 
 ### Step 3.3: Build Package
@@ -843,17 +863,22 @@ packages/
 ## Common Issues
 
 ### Issue: TypeScript path mapping not working
+
 **Solution**: Ensure `tsconfig.base.json` paths are correct and run `pnpm install` at root.
 
 ### Issue: Workspace dependencies not resolving
-**Solution**: 
+
+**Solution**:
+
 ```bash
 pnpm install --force
 pnpm --filter './packages/**' build
 ```
 
 ### Issue: Build errors in dependent packages
+
 **Solution**: Build packages in order:
+
 ```bash
 cd packages/shared-types && pnpm build
 cd ../nats-client && pnpm build

@@ -45,4 +45,32 @@ export class PaymentEventPublisher {
     );
     console.log(`[PaymentEventPublisher] Published payment_processed | paymentId=${payment.id} | traceId=${traceId}`);
   }
+
+  /**
+   * Publish wallet_updated event after wallet balance changes
+   */
+  async publishWalletUpdated(
+    wallet: { id: string; balance: number },
+    changeAmount: number,
+    changeType: 'CREDIT' | 'DEBIT' | 'ADJUSTMENT',
+    reason: string,
+    referenceId: string,
+    traceId: string
+  ): Promise<void> {
+    await this.publisher.publish(
+      NATS_SUBJECTS.WALLET_UPDATED,
+      'wallet_updated',
+      {
+        walletId: wallet.id,
+        newBalance: wallet.balance,
+        changeAmount,
+        changeType,
+        reason,
+        referenceId,
+        timestamp: new Date().toISOString(),
+      },
+      { traceId },
+    );
+    console.log(`[PaymentEventPublisher] Published wallet_updated | walletId=${wallet.id} | change=${changeAmount} | traceId=${traceId}`);
+  }
 }

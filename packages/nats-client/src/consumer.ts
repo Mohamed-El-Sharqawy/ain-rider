@@ -2,8 +2,6 @@ import {
   NatsConnection,
   JetStreamClient,
   JsMsg,
-  RetentionPolicy,
-  StorageType,
   AckPolicy,
   DeliverPolicy,
 } from "nats";
@@ -31,12 +29,10 @@ export class NatsConsumer {
     handler: MessageHandler<T>,
     options?: Partial<ConsumerOptions>,
   ): Promise<void> {
-    const streamName = options?.stream || "AIN_RIDER";
+    // Determine stream based on subject - use AIN_RIDER_OPS for operational events
+    const streamName = options?.stream || this.getStreamForSubject(subject);
 
-    // ✅ Always ensure stream exists before consuming
-    await this.ensureStream(streamName, [subject]);
-
-    // ✅ Create consumer if it doesn't exist
+    // Create consumer if it doesn't exist (stream should already exist from setup)
     const consumerName = options?.consumer || `${subject.replace(/\./g, '_')}-consumer`;
     await this.ensureConsumer(
       streamName,
@@ -45,14 +41,11 @@ export class NatsConsumer {
     );
 
     try {
-      const consumer = await this.js.consumers.get(
-        options?.stream || "AIN_RIDER",
-        consumerName,
-      );
+      const consumer = await this.js.consumers.get(streamName, consumerName);
 
       const messages = await consumer.consume();
 
-      console.log(`[NATS Consumer] Subscribed to ${subject}`);
+      console.log(`[NATS Consumer] Subscribed to ${subject} on stream ${streamName}`);
 
       for await (const msg of messages) {
         try {
@@ -73,27 +66,29 @@ export class NatsConsumer {
     }
   }
 
-  // Rename createStream → ensureStream with upsert logic
-  async ensureStream(streamName: string, _subjects: string[]): Promise<void> {
-    const jsm = await this.nc.jetstreamManager();
-    try {
-      await jsm.streams.info(streamName);
-      console.log(`[NATS] Stream ${streamName} already exists`);
-      // Don't update subjects — wildcard covers everything
-    } catch (err: any) {
-      if (err?.api_error?.err_code === 10059) {
-        await jsm.streams.add({
-          name: streamName,
-          subjects: ["ain_rider.>"], // ✅ wildcard covers ALL subjects
-          retention: RetentionPolicy.Limits,
-          max_age: 7 * 24 * 60 * 60 * 1_000_000_000,
-          storage: StorageType.File,
-        });
-        console.log(`[NATS] Stream ${streamName} created`);
-      } else {
-        throw err;
-      }
+  /**
+   * Determine the appropriate stream for a subject
+   */
+  private getStreamForSubject(subject: string): string {
+    // Financial events go to AIN_RIDER_FINANCIAL
+    const financialSubjects = [
+      'ain_rider.payment_processed',
+      'ain_rider.wallet_updated',
+      'ain_rider.withdrawal_requested',
+      'ain_rider.withdrawal_processed',
+    ];
+    
+    if (financialSubjects.some(s => subject.startsWith(s.replace('ain_rider.', '')))) {
+      return 'AIN_RIDER_FINANCIAL';
     }
+    
+    // DLQ events
+    if (subject.startsWith('ain_rider.dlq.')) {
+      return 'AIN_RIDER_DLQ';
+    }
+    
+    // All other operational events go to AIN_RIDER_OPS
+    return 'AIN_RIDER_OPS';
   }
 
   async ensureConsumer(
@@ -115,33 +110,13 @@ export class NatsConsumer {
           deliver_policy: DeliverPolicy.All,
         });
         console.log(
-          `[NATS] Consumer ${consumerName} created for ${filterSubject}`,
+          `[NATS] Consumer ${consumerName} created for ${filterSubject} on ${streamName}`,
         );
       } else {
         throw err;
       }
     }
   }
-
-  // async createStream(streamName: string, subjects: string[]): Promise<void> {
-  //   try {
-  //     const jsm = await this.nc.jetstreamManager();
-  //     await jsm.streams.add({
-  //       name: streamName,
-  //       subjects,
-  //       retention: RetentionPolicy.Limits,
-  //       max_age: 7 * 24 * 60 * 60 * 1_000_000_000, // 7 days in nanoseconds
-  //       storage: StorageType.File,
-  //     });
-  //     console.log(`[NATS] Stream ${streamName} created`);
-  //   } catch (error: any) {
-  //     if (error.message?.includes("already exists")) {
-  //       console.log(`[NATS] Stream ${streamName} already exists`);
-  //     } else {
-  //       throw error;
-  //     }
-  //   }
-  // }
 }
 
 export function createConsumer(nc: NatsConnection): NatsConsumer {

@@ -74,8 +74,9 @@ export class TripCompletedConsumer implements OnModuleInit, OnModuleDestroy {
     })(
       this.natsService.nc,
       {
-        streamName: 'AIN_RIDER',
+        streamName: 'AIN_RIDER_FINANCIAL',
         consumerName: 'trip-completed-consumer',
+        serviceName: 'payment-service',
         filterSubject: 'ain_rider.trip_completed',
         maxDeliver: 3,
         enableIdempotency: true,

@@ -31,6 +31,9 @@ export interface ConsumerConfig {
   /** Subject filter (e.g., 'ain_rider.trip_matched') */
   filterSubject: string;
   
+  /** Service name for metrics (e.g., 'trip-service') */
+  serviceName?: string;
+  
   /** Maximum delivery attempts before DLQ */
   maxDeliver?: number;
   
@@ -190,7 +193,7 @@ export abstract class JetStreamConsumer {
 
       // Record received message
       natsMessagesReceived.inc({ 
-        service: this.config.consumerName, 
+        service: this.config.serviceName || this.config.consumerName, 
         subject: this.config.filterSubject 
       });
 
@@ -224,7 +227,7 @@ export abstract class JetStreamConsumer {
       // Record latency
       const latency = (Date.now() - startTime) / 1000;
       natsMessageLatency.observe(
-        { service: this.config.consumerName, subject: this.config.filterSubject },
+        { service: this.config.serviceName || this.config.consumerName, subject: this.config.filterSubject },
         latency
       );
 
@@ -251,7 +254,7 @@ export abstract class JetStreamConsumer {
           
           // Record DLQ metric
           natsDlqMessages.inc({
-            service: this.config.consumerName,
+            service: this.config.serviceName || this.config.consumerName,
             original_subject: this.config.filterSubject,
             error_type: error instanceof Error ? error.name : 'UnknownError',
           });

@@ -152,4 +152,24 @@ export class AdminNatsClient {
       { traceId, requestedBy: adminId }
     );
   }
+
+  /**
+   * Adjust a payment via payment-service
+   */
+  async adjustPayment(
+    paymentId: string,
+    adjustmentAmount: number,
+    reason: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<{ paymentId: string; newAmount: number; adjustmentId: string }> {
+    return this.requestClient.request<
+      { paymentId: string; adjustmentAmount: number; reason: string; requestedBy: string },
+      { paymentId: string; newAmount: number; adjustmentId: string }
+    >(
+      'payment.adjust.request',
+      { paymentId, adjustmentAmount, reason, requestedBy: adminId },
+      { traceId, requestedBy: adminId }
+    );
+  }
 }

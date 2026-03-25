@@ -11,7 +11,8 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     this._connection = await createNatsConnection({
-      url: process.env.NATS_URL || 'nats://localhost:4222',
+      // url: process.env.NATS_URL || 'nats://localhost:4222',
+      servers: process.env.NATS_SERVERS?.split(',') || ['nats://localhost:4222'],
       name: 'auth-service',
     });
     this._publisher = createPublisher(this._connection);

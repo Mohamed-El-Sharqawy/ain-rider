@@ -4,6 +4,7 @@ import {
   createPublisher,
   createConsumer,
   createRequester,
+  JetStreamPublisher,
 } from '@ain-rider/nats-client';
 import type { NatsPublisher, NatsConsumer, NatsRequester } from '@ain-rider/nats-client';
 import type { NatsConnection } from 'nats';
@@ -15,18 +16,21 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
   private _publisher: NatsPublisher;
   private _consumer: NatsConsumer;
   private _requester: NatsRequester;
+  private _jsPublisher: JetStreamPublisher;
   private isShuttingDown = false;
 
   constructor(private userSync: UserSyncService) {}
 
   async onModuleInit() {
     this._connection = await createNatsConnection({
-      url: process.env.NATS_URL || 'nats://localhost:4222',
+      // url: process.env.NATS_URL || 'nats://localhost:4222',
+      servers: process.env.NATS_SERVERS?.split(',') || ['nats://localhost:4222'],
       name: 'admin-service',
     });
     this._publisher = createPublisher(this._connection);
     this._consumer = createConsumer(this._connection);
     this._requester = createRequester(this._connection);
+    this._jsPublisher = new JetStreamPublisher(this._connection, 'admin-service');
     console.log('[NATS] admin-service connected');
 
     // Start user-event subscriptions now that consumer is ready.
@@ -66,6 +70,10 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 
   get requester(): NatsRequester {
     return this._requester;
+  }
+
+  get jsPublisher(): JetStreamPublisher {
+    return this._jsPublisher;
   }
 
   get nc(): NatsConnection {

@@ -4,7 +4,7 @@
  * Monitors DLQ messages and provides alerting capabilities
  */
 
-import { NatsConnection, JetStreamClient } from 'nats';
+import { NatsConnection, JetStreamClient, Consumer } from 'nats';
 
 export interface DLQAlertConfig {
   /** Alert callback - called when DLQ message is received */
@@ -30,6 +30,9 @@ export interface DLQAlert {
 export class DLQAlertingService {
   private js: JetStreamClient;
   private config: DLQAlertConfig;
+  private consumer: Consumer | null = null;
+  private running = false;
+  private abortController: AbortController | null = null;
 
   constructor(js: JetStreamClient, config?: DLQAlertConfig) {
     this.js = js;
@@ -100,6 +103,11 @@ export class DLQAlertingService {
    * This creates a consumer that processes DLQ messages
    */
   async startMonitoring(nc: NatsConnection): Promise<void> {
+    if (this.running) {
+      console.log('[DLQAlerting] Already monitoring');
+      return;
+    }
+
     const jsm = await nc.jetstreamManager();
     
     // Ensure DLQ stream exists
@@ -133,23 +141,57 @@ export class DLQAlertingService {
     }
 
     // Start consuming
-    const consumer = await this.js.consumers.get('AIN_RIDER_DLQ', consumerName);
-    const messages = await consumer.consume();
+    this.consumer = await this.js.consumers.get('AIN_RIDER_DLQ', consumerName);
+    this.running = true;
+
+    const messages = await this.consumer.consume();
 
     (async () => {
-      for await (const msg of messages) {
-        try {
-          const payload = JSON.parse(new TextDecoder().decode(msg.data));
-          await this.processDLQMessage(payload);
-          msg.ack();
-        } catch (err) {
-          console.error('[DLQAlerting] Error processing DLQ message:', err);
-          msg.nak();
+      try {
+        for await (const msg of messages) {
+          if (!this.running) break;
+          
+          try {
+            const payload = JSON.parse(new TextDecoder().decode(msg.data));
+            await this.processDLQMessage(payload);
+            msg.ack();
+          } catch (err) {
+            console.error('[DLQAlerting] Error processing DLQ message:', err);
+            msg.nak();
+          }
+        }
+      } catch (err: any) {
+        if (this.running) {
+          console.error('[DLQAlerting] Consumer error:', err);
         }
       }
     })();
 
     console.log('[DLQAlerting] Started monitoring DLQ');
+  }
+
+  /**
+   * Stop monitoring DLQ messages
+   */
+  async stop(): Promise<void> {
+    if (!this.running) return;
+
+    this.running = false;
+    
+    // Abort the consume loop
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+
+    console.log('[DLQAlerting] Stopped monitoring DLQ');
+  }
+
+  /**
+   * Check if monitoring is active
+   */
+  isMonitoring(): boolean {
+    return this.running;
   }
 }
 

@@ -6,7 +6,8 @@
 
 // Connection
 export * from './connection';
-export type { NatsConnection } from './connection';
+export type { NatsConnection, JsMsg } from './connection';
+export { getNatsServersFromEnv } from './connection';
 
 // Types
 export * from './types';
@@ -14,8 +15,10 @@ export * from './types';
 // JetStream
 export * from './jetstream';
 
-// Idempotency
+// Idempotency (also re-exports createClient and RedisClientType from redis)
 export * from './idempotency';
+export { createClient } from './idempotency/idempotency.service';
+export type { RedisClientType } from './idempotency/idempotency.service';
 
 // DLQ
 export * from './dlq';

@@ -14,7 +14,9 @@ volumes:
   redis_data_5:
   redis_data_6:
 
-  nats_data:
+  nats_data_1:
+  nats_data_2:
+  nats_data_3:
   minio_data:
 
 services:
@@ -266,16 +268,94 @@ services:
     networks: [ain-rider-net]
     restart: "no"
 
-  # ── NATS JetStream ────────────────────────────────────────────────────────────
-  nats:
+  # ── NATS JetStream Cluster (3 nodes) ───────────────────────────────────────────
+  nats-1:
     image: nats:2.10-alpine
-    container_name: ain-rider-nats
-    command: ["-js", "-m", "8222"]
+    container_name: ain-rider-nats-1
+    command:
+      - "--name"
+      - "nats-1"
+      - "-js"
+      - "-m"
+      - "8222"
+      - "-sd"
+      - "/data"
+      - "--cluster"
+      - "nats://nats-1:6222"
+      - "--cluster_name"
+      - "ain-rider-nats-cluster"
+      - "--routes"
+      - "nats://nats-2:6222,nats://nats-3:6222"
     ports:
       - "4222:4222"
+      - "6222:6222"
       - "8222:8222"
-    volumes: [nats_data:/data]
-    networks: [ain-rider-net]
+    volumes:
+      - nats_data_1:/data
+    networks:
+      - ain-rider-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats-2:
+    image: nats:2.10-alpine
+    container_name: ain-rider-nats-2
+    command:
+      - "--name"
+      - "nats-2"
+      - "-js"
+      - "-m"
+      - "8222"
+      - "-sd"
+      - "/data"
+      - "--cluster"
+      - "nats://nats-2:6222"
+      - "--cluster_name"
+      - "ain-rider-nats-cluster"
+      - "--routes"
+      - "nats://nats-1:6222,nats://nats-3:6222"
+    ports:
+      - "4223:4222"
+      - "6223:6222"
+      - "8223:8222"
+    volumes:
+      - nats_data_2:/data
+    networks:
+      - ain-rider-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats-3:
+    image: nats:2.10-alpine
+    container_name: ain-rider-nats-3
+    command:
+      - "--name"
+      - "nats-3"
+      - "-js"
+      - "-m"
+      - "8222"
+      - "-sd"
+      - "/data"
+      - "--cluster"
+      - "nats://nats-3:6222"
+      - "--cluster_name"
+      - "ain-rider-nats-cluster"
+      - "--routes"
+      - "nats://nats-1:6222,nats://nats-2:6222"
+    ports:
+      - "4224:4222"
+      - "6224:6222"
+      - "8224:8222"
+    volumes:
+      - nats_data_3:/data
+    networks:
+      - ain-rider-net
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
       interval: 10s

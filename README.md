@@ -65,6 +65,18 @@ Production-ready microservices monorepo for the 911 Ain Rider platform.
 
 NATS JetStream is the central event bus for inter-service communication.
 
+### Cluster Configuration
+
+3-node cluster for fault tolerance with quorum-based replication:
+
+| Node | Client Port | Cluster Port | Monitor Port |
+|------|-------------|--------------|--------------|
+| nats-1 | 4222 | 6222 | 8222 |
+| nats-2 | 4223 | 6223 | 8223 |
+| nats-3 | 4224 | 6224 | 8224 |
+
+**Connection**: Services connect to `nats://nats-1:4222` (or any node). The cluster routes internally.
+
 ### Event Subjects
 
 | Subject | Publisher | Consumers |
@@ -99,6 +111,15 @@ Set `NATS_URL` environment variable (default: `nats://localhost:4222`):
 
 ```env
 NATS_URL=nats://localhost:4222
+```
+
+**Stream Replicas:**
+- Default: `NATS_REPLICAS=3` - fault tolerance with quorum-based replication (recommended for both dev and prod)
+- Single-node dev: `NATS_REPLICAS=1` - only if running a single NATS node without clustering
+
+Set via environment variable before running setup scripts:
+```bash
+NATS_REPLICAS=3 pnpm setup:nats
 ```
 
 ### Monitoring
