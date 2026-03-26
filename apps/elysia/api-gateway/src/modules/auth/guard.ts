@@ -1,7 +1,7 @@
-import { Elysia } from 'elysia';
-import { cookie } from '@elysiajs/cookie';
-import { jwt } from '@elysiajs/jwt';
-import { UnauthorizedError } from '@ain-rider/error-handling';
+import { Elysia } from "elysia";
+import { cookie } from "@elysiajs/cookie";
+import { jwt } from "@elysiajs/jwt";
+import { UnauthorizedError } from "@ain-rider/error-handling";
 
 interface JwtPayload {
   sub: string;
@@ -9,30 +9,45 @@ interface JwtPayload {
   role: string;
 }
 
-export const authGuard = new Elysia({ name: 'Auth.Guard' })
-  .use(jwt({
-    name: 'jwt',
-    secret: process.env.JWT_SECRET || 'local_dev_secret_change_in_production',
-  }))
+export const authGuard = new Elysia({ name: "Auth.Guard" })
+  .use(
+    jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET || "local_dev_secret_change_in_production",
+    }),
+  )
   .use(cookie())
-  .derive({ as: 'scoped' }, async (ctx) => {
-    const { cookie: cookies, jwt } = ctx;
+  .derive({ as: "scoped" }, async (ctx) => {
+    const { cookie: cookies, jwt, request } = ctx;
 
-    const token = cookies.accessToken?.value;
-    
-    console.log('[AuthGuard] Cookie check:', {
-      hasCookie: !!cookies.accessToken,
-      hasValue: !!token,
-      tokenPreview: token ? (token as string).substring(0, 20) + '...' : 'none',
+    // Resolve token: Bearer header first, then cookie fallback
+    const authHeader = request.headers.get("authorization");
+    let token: string | undefined;
+    let tokenSource = "none";
+
+    if (authHeader?.startsWith("Bearer ")) {
+      token = authHeader.slice(7);
+      tokenSource = "bearer";
+    } else if (cookies.accessToken?.value) {
+      token = cookies.accessToken.value as string;
+      tokenSource = "cookie";
+    }
+
+    console.log("[AuthGuard] Token resolution:", {
+      source: tokenSource,
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 20) + "..." : "none",
     });
 
     if (!token) {
-      throw new UnauthorizedError('Not authenticated - no access token');
+      throw new UnauthorizedError("Not authenticated - no access token");
     }
 
     try {
-      const payload = await jwt.verify(token as string) as unknown as JwtPayload;
-      
+      const payload = (await jwt.verify(
+        token as string,
+      )) as unknown as JwtPayload;
+
       return {
         accessToken: token,
         user: {
@@ -42,6 +57,6 @@ export const authGuard = new Elysia({ name: 'Auth.Guard' })
         },
       };
     } catch {
-      throw new UnauthorizedError('Invalid or expired access token');
+      throw new UnauthorizedError("Invalid or expired access token");
     }
   });

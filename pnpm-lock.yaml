@@ -299,6 +299,42 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  apps/nest/admin-service/dist/generated/auth-prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/admin-service/dist/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/admin-service/dist/generated/trip-prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/admin-service/src/generated/auth-prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/admin-service/src/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/admin-service/src/generated/trip-prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
   apps/nest/auth-service:
     dependencies:
       '@ain-rider/error-handling':
@@ -408,6 +444,18 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  apps/nest/auth-service/dist/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/auth-service/src/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
   apps/nest/payment-service:
     dependencies:
       '@ain-rider/error-handling':
@@ -496,6 +544,18 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  apps/nest/payment-service/dist/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/payment-service/src/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
   apps/nest/trip-service:
     dependencies:
       '@ain-rider/error-handling':
@@ -583,6 +643,18 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
+
+  apps/nest/trip-service/dist/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
+
+  apps/nest/trip-service/src/generated/prisma:
+    dependencies:
+      '@prisma/client-runtime-utils':
+        specifier: 7.5.0
+        version: 7.5.0
 
   packages/error-handling:
     dependencies:
