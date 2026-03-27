@@ -12,7 +12,7 @@ import { UserRole } from "@ain-rider/shared-types";
 import { generateTraceId } from "@ain-rider/nats-client";
 import type { RegisterDto } from "./dto/register.dto";
 import { Prisma } from "../generated/prisma/client";
-import { FirebaseService } from "./firebase.service";
+import { OtpService } from "./otp.service";
 
 @Injectable()
 export class AuthService {
@@ -20,7 +20,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private userEventPublisher: UserEventPublisher,
-    private firebaseService: FirebaseService,
+    private otpService: OtpService,
   ) {}
 
   async register(data: RegisterDto) {
@@ -310,12 +310,12 @@ export class AuthService {
   }
 
   /**
-   * Verifies a Firebase Phone Auth ID token and publishes an otp_verified NATS event.
+   * Verifies a phone number via OTP and publishes otp_verified NATS event.
    *
    * Flow:
-   * 1. Verifies the ID token with Firebase Admin SDK
+   * 1. Verifies the ID token using OtpService (provider abstraction)
    * 2. Extracts phone_number and uid from the decoded token
-   * 3. Publishes `ain_rider.otp_verified` NATS event for downstream services
+   * 3. Publishes `ain_rider.otp_verified` NATS event for downstream services (fire-and-forget)
    * 4. Returns the verification result (does NOT create user account)
    *
    * Downstream services should subscribe to the NATS event to:
@@ -324,28 +324,26 @@ export class AuthService {
    * - Send welcome notifications
    *
    * @param idToken - Firebase Phone Auth ID token from client SDK
-   * @param traceId - Request correlation ID for distributed tracing
-   * @returns Object containing success status, phoneNumber (E.164), and Firebase uid
+   * @param traceId - Distributed tracing correlation ID
+   * @returns Object containing success status, phoneNumber (E.164), and uid (Firebase UID)
    * @throws UnauthorizedException if token is invalid or phone_number claim is missing
    */
   async verifyOtp(idToken: string, traceId: string) {
-    const decodedToken = await this.firebaseService.verifyIdToken(idToken);
-    const phoneNumber = decodedToken.phone_number;
-    const uid = decodedToken.uid;
+    const decodedToken = await this.otpService.verify(idToken, traceId);
 
-    if (!phoneNumber) {
-      throw new UnauthorizedException(
-        "Phone number not present in Firebase token",
-      );
-    }
-
-    // Publish event
-    await this.userEventPublisher.publishOtpVerified(phoneNumber, uid, traceId);
+    // Publish event asynchronously (fire-and-forget) - don't block response
+    this.userEventPublisher
+      .publishOtpVerified(decodedToken.phone_number, decodedToken.uid, traceId)
+      .catch((err) => {
+        console.error(
+          `[AuthService] Failed to publish otp_verified event | traceId=${traceId} | error=${err.message}`,
+        );
+      });
 
     return {
       success: true,
-      phoneNumber,
-      uid,
+      phoneNumber: decodedToken.phone_number,
+      uid: decodedToken.uid,
     };
   }
 }

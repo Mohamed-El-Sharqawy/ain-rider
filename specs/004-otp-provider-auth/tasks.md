@@ -40,16 +40,19 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [x] T006 Create `apps/nest/auth-service/src/auth/firebase.service.ts` with FirebaseService class that:
-  - Implements `OnModuleInit` interface
-  - Initializes Firebase Admin SDK in `onModuleInit()` using env vars: `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`
-  - Has `verifyIdToken(idToken: string)` method that calls `admin.auth().verifyIdToken()` and returns decoded token
-  - Logs warning if credentials missing (graceful degradation for dev)
-  - Throws `UnauthorizedException` for invalid tokens
-- [x] T007 Register FirebaseService as provider in `apps/nest/auth-service/src/auth/auth.module.ts` by adding `FirebaseService` to the providers array
-- [x] T008 Inject FirebaseService into AuthService constructor in `apps/nest/auth-service/src/auth/auth.service.ts` by adding `private firebaseService: FirebaseService` parameter
+- [x] T006 [P] Create `apps/nest/auth-service/src/auth/otp.service.ts` with OtpService class that:
+  - Implements provider abstraction pattern with OtpProvider interface
+  - Supports multiple providers via OTP_PROVIDER env var (console/firebase)
+  - Includes circuit breaker for fault tolerance (threshold: 5 failures, timeout: 30s)
+  - Validates provider initialization in onModuleInit()
+  - Has `verify(idToken: string, traceId: string)` method that calls selected provider
+  - Logs warnings if provider not initialized
+  - Throws ServiceUnavailableException for circuit breaker open state
+  - Throws UnauthorizedException for token verification failures
+- [x] T007 [P] Register OtpService and providers in `apps/nest/auth-service/src/auth/auth.module.ts` by adding OtpService, FirebaseProvider, and ConsoleProvider to providers array
+- [x] T008 Inject OtpService into AuthService constructor in `apps/nest/auth-service/src/auth/auth.service.ts` by adding `private otpService: OtpService` parameter
 
-**Checkpoint**: Foundation ready - user story implementation can now begin
+**Checkpoint**: Foundation ready with provider abstraction and circuit breaker - user story implementation can now begin
 
 ---
 
@@ -62,11 +65,10 @@
 ### Implementation for User Story 1
 
 - [x] T009 [US1] Add `verifyOtp(idToken: string, traceId: string)` method to `apps/nest/auth-service/src/auth/auth.service.ts` that:
-  - Calls `this.firebaseService.verifyIdToken(idToken)` to get decoded token
-  - Extracts `phone_number` and `uid` from decoded token
-  - Throws `UnauthorizedException` if `phone_number` is missing with message "Phone number not present in Firebase token"
-  - Returns `{ success: true, phoneNumber, uid }` on success
-  - Catches errors from FirebaseService and re-throws as UnauthorizedException
+  - Calls `this.otpService.verify(idToken, traceId)` to get decoded token (uses provider abstraction)
+  - Returns `{ success: true, phoneNumber: decodedToken.phone_number, uid: decodedToken.uid }` on success
+  - Publishes `otp_verified` NATS event asynchronously (fire-and-forget with error logging)
+  - Catches errors from OtpService and re-throws as UnauthorizedException
 - [x] T010 [US1] Add `POST /auth/verify-otp` endpoint to `apps/nest/auth-service/src/auth/auth.controller.ts` that:
   - Has `@Post('verify-otp')` decorator
   - Has `@ApiOperation({ summary: 'Verify Firebase OTP ID token' })` decorator
@@ -89,10 +91,10 @@
   - On error, tries to parse JSON error body, sets `set.status = res.status`, returns error
   - On JSON parse failure, returns generic error `{ success: false, error: { code: "INTERNAL_ERROR", message: "..." } }`
   - Uses `{ body: AuthModel.verifyOtpBody }` for validation
-- [x] T014 [US1] Add error handling for edge cases in `apps/nest/auth-service/src/auth/firebase.service.ts`:
-  - In `verifyIdToken()`, catch errors and log with `console.error('[FirebaseService] Token verification failed:', error)`
-  - Throw `UnauthorizedException('Invalid or expired Firebase ID token')` for any verification failure
-  - Check if `admin.apps.length === 0` and throw `UnauthorizedException('Firebase Admin is not configured on the server')` before attempting verification
+- [x] T014 [US1] Add error handling for edge cases in `apps/nest/auth-service/src/auth/otp-providers/firebase.provider.ts`:
+  - In `verify()`, catch errors and log with `console.error('[FirebaseProvider] Token verification failed:', error)`
+  - Throw `Error('Invalid or expired Firebase ID token')` for any verification failure
+  - Check if `admin.apps.length === 0` and throw `Error('Firebase Admin is not configured on the server')` before attempting verification
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - OTP verification returns phone + uid
 
@@ -113,7 +115,7 @@
   - Logs: `console.log('[UserEventPublisher] Published otp_verified | phoneNumber=${phoneNumber} | uid=${uid} | traceId=${traceId}')`
 - [x] T016 [US2] Call `publishOtpVerified` in `apps/nest/auth-service/src/auth/auth.service.ts` within the `verifyOtp()` method:
   - After successfully extracting phoneNumber and uid, before returning
-  - Call `await this.userEventPublisher.publishOtpVerified(phoneNumber, uid, traceId)`
+  - Call `await this.userEventPublisher.publishOtpVerified(phoneNumber, uid, traceId)` (fire-and-forget - don't await)
   - The UserEventPublisher should already be injected in constructor (verify it exists)
 
 **Checkpoint**: At this point, User Story 2 should be fully functional - NATS event published on verification
