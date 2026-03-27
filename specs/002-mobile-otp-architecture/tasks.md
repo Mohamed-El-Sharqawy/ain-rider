@@ -52,11 +52,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T011 [P] [US2] Implement `verifyOtp(phone: string, code: string)` API call in `lib/api/auth.ts` (returns `PhoneVerificationResult`)
-- [ ] T012 [US2] Modify OTP Verify UI screen in `app/(auth)/verify-otp.tsx` with a 6-digit code input and verify button
-- [ ] T013 [US2] Connect `app/(auth)/verify-otp.tsx` to `verifyOtp` API local state (WaitingForCode, Verifying, Success, Error)
-- [ ] T014 [US2] Implement the 60-second Resend Timer UI in `app/(auth)/verify-otp.tsx` and wire the resend button to trigger `requestOtp` again
-- [ ] T015 [US2] Ensure `app/(auth)/verify-otp.tsx` saves `accessToken` and `refreshToken` via `lib/storage/secure.ts` on success, then redirects fully out of auth stack
+- [x] T011 [P] [US2] Implement `verifyOtp(phone: string, code: string)` API call in `lib/api/auth.ts` (returns `PhoneVerificationResult`)
+- [x] T012 [US2] Modify OTP Verify UI screen in `app/(auth)/verify-otp.tsx` with a 6-digit code input and verify button
+- [x] T013 [US2] Connect `app/(auth)/verify-otp.tsx` to `verifyOtp` API local state (WaitingForCode, Verifying, Success, Error)
+- [x] T014 [US2] Implement the 60-second Resend Timer UI in `app/(auth)/verify-otp.tsx` and wire the resend button to trigger `requestOtp` again
+- [x] T015 [US2] Ensure `app/(auth)/verify-otp.tsx` saves `accessToken` and `refreshToken` via `lib/storage/secure.ts` on success, then redirects fully out of auth stack
 
 **Checkpoint**: User Story 2 should be fully functional
 

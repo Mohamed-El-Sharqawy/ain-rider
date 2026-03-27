@@ -1,9 +1,14 @@
 import { ApiClient } from './client';
-import { OtpRequestPayload } from './types';
+import { OtpRequestPayload, OtpVerifyPayload, PhoneVerificationResult } from './types';
 
 export const AuthApi = {
   async requestOtp(phone: string): Promise<void> {
     const payload: OtpRequestPayload = { phone };
     await ApiClient.post('/auth/request-otp', payload);
   },
+
+  async verifyOtp(phone: string, code: string): Promise<PhoneVerificationResult> {
+    const payload: OtpVerifyPayload = { phone, code };
+    return ApiClient.post<PhoneVerificationResult>('/auth/verify-otp', payload);
+  }
 };
