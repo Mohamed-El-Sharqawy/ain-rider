@@ -1,24 +1,24 @@
 /**
  * User Event Publisher
- * 
+ *
  * Publishes user lifecycle events to NATS JetStream for downstream services to sync shadow tables.
  */
 
-import { Injectable } from '@nestjs/common';
-import { JetStreamPublisher } from '@ain-rider/nats-client';
-import { NATS_SUBJECTS } from '@ain-rider/shared-types';
-import { NatsService } from '../shared/nats/nats.service';
-import type { User } from '../generated/prisma/client';
+import { Injectable } from "@nestjs/common";
+import { JetStreamPublisher } from "@ain-rider/nats-client";
+import { NATS_SUBJECTS } from "@ain-rider/shared-types";
+import { NatsService } from "../shared/nats/nats.service";
+import type { User } from "../generated/prisma/client";
 
 @Injectable()
 export class UserEventPublisher {
   private _publisher: JetStreamPublisher | null = null;
 
-  constructor(private nats: NatsService) { }
+  constructor(private nats: NatsService) {}
 
   private get publisher(): JetStreamPublisher {
     if (!this._publisher) {
-      this._publisher = new JetStreamPublisher(this.nats.nc, 'auth-service');
+      this._publisher = new JetStreamPublisher(this.nats.nc, "auth-service");
     }
     return this._publisher;
   }
@@ -29,7 +29,7 @@ export class UserEventPublisher {
   async publishUserCreated(user: User, traceId: string): Promise<void> {
     await this.publisher.publish(
       NATS_SUBJECTS.USER_CREATED,
-      'user_created',
+      "user_created",
       {
         id: user.id,
         email: user.email,
@@ -43,7 +43,9 @@ export class UserEventPublisher {
       },
       { traceId },
     );
-    console.log(`[UserEventPublisher] Published user_created | userId=${user.id} | traceId=${traceId}`);
+    console.log(
+      `[UserEventPublisher] Published user_created | userId=${user.id} | traceId=${traceId}`,
+    );
   }
 
   /**
@@ -63,7 +65,7 @@ export class UserEventPublisher {
   ): Promise<void> {
     await this.publisher.publish(
       NATS_SUBJECTS.USER_UPDATED,
-      'user_updated',
+      "user_updated",
       {
         id: user.id,
         ...changes,
@@ -71,7 +73,9 @@ export class UserEventPublisher {
       },
       { traceId },
     );
-    console.log(`[UserEventPublisher] Published user_updated | userId=${user.id} | updatedBy=${updatedBy || 'N/A'} | traceId=${traceId}`);
+    console.log(
+      `[UserEventPublisher] Published user_updated | userId=${user.id} | updatedBy=${updatedBy || "N/A"} | traceId=${traceId}`,
+    );
   }
 
   /**
@@ -86,7 +90,7 @@ export class UserEventPublisher {
   ): Promise<void> {
     await this.publisher.publish(
       NATS_SUBJECTS.USER_STATUS_CHANGED,
-      'user_status_changed',
+      "user_status_changed",
       {
         id: user.id,
         previousStatus,
@@ -97,7 +101,9 @@ export class UserEventPublisher {
       },
       { traceId },
     );
-    console.log(`[UserEventPublisher] Published user_status_changed | userId=${user.id} | ${previousStatus}→${user.status} | traceId=${traceId}`);
+    console.log(
+      `[UserEventPublisher] Published user_status_changed | userId=${user.id} | ${previousStatus}→${user.status} | traceId=${traceId}`,
+    );
   }
 
   /**
@@ -111,7 +117,7 @@ export class UserEventPublisher {
   ): Promise<void> {
     await this.publisher.publish(
       NATS_SUBJECTS.USER_DELETED,
-      'user_deleted',
+      "user_deleted",
       {
         id: userId,
         deletedBy,
@@ -120,11 +126,28 @@ export class UserEventPublisher {
       },
       { traceId },
     );
-    console.log(`[UserEventPublisher] Published user_deleted | userId=${userId} | deletedBy=${deletedBy} | traceId=${traceId}`);
+    console.log(
+      `[UserEventPublisher] Published user_deleted | userId=${userId} | deletedBy=${deletedBy} | traceId=${traceId}`,
+    );
   }
 
   /**
-   * Publish otp_verified event when user verifies phone via Firebase Auth
+   * Publish otp_verified event when user verifies phone via Firebase Auth.
+   *
+   * Event payload structure:
+   * - subject: `ain_rider.otp_verified`
+   * - phoneNumber: E.164 formatted phone number (e.g., "+9647701234567")
+   * - uid: Firebase Auth user ID
+   * - verifiedAt: ISO 8601 timestamp of verification
+   *
+   * Downstream consumers can use this event to:
+   * - Auto-create user accounts with verified phone
+   * - Link Firebase UID to existing user records
+   * - Send welcome SMS or push notifications
+   *
+   * @param phoneNumber - E.164 formatted phone number
+   * @param uid - Firebase Auth UID
+   * @param traceId - Distributed tracing correlation ID
    */
   async publishOtpVerified(
     phoneNumber: string,
@@ -133,7 +156,7 @@ export class UserEventPublisher {
   ): Promise<void> {
     await this.publisher.publish(
       NATS_SUBJECTS.OTP_VERIFIED,
-      'otp_verified',
+      "otp_verified",
       {
         phoneNumber,
         uid,
@@ -141,6 +164,8 @@ export class UserEventPublisher {
       },
       { traceId },
     );
-    console.log(`[UserEventPublisher] Published otp_verified | phoneNumber=${phoneNumber} | uid=${uid} | traceId=${traceId}`);
+    console.log(
+      `[UserEventPublisher] Published otp_verified | phoneNumber=${phoneNumber} | uid=${uid} | traceId=${traceId}`,
+    );
   }
 }

@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: OTP Provider Authentication
+  version: 1.0.0
+  description: Phone number verification via OTP
+
+servers:
+  - url: /api
+    description: API Gateway
+
+paths:
+  /auth/verify-otp:
+    post:
+      summary: Verify OTP token
+      description: |
+        Verifies a Firebase Phone Auth ID token and returns the phone number.
+        Publishes `otp_verified` NATS event on success.
+
+        Rate limited: 10 requests/minute per IP, 5 requests/hour per phone number.
+      operationId: verifyOtp
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpRequest"
+            example:
+              idToken: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        "200":
+          description: Verification successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyOtpResponse"
+              example:
+                success: true
+                phoneNumber: "+9647701234567"
+                uid: "abc123def456"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "idToken is required"
+        "401":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or expired Firebase ID token"
+        "429":
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until rate limit resets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: "RATE_LIMIT_EXCEEDED"
+                  message: "Too many requests. Please try again later."
+        "503":
+          description: OTP provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error:
+                  code: "SERVICE_UNAVAILABLE"
+                  message: "OTP verification service is temporarily unavailable"
+
+components:
+  schemas:
+    VerifyOtpRequest:
+      type: object
+      required:
+        - idToken
+      properties:
+        idToken:
+          type: string
+          description: Firebase Phone Auth ID token from client SDK
+          minLength: 1
+
+    VerifyOtpResponse:
+      type: object
+      required:
+        - success
+        - phoneNumber
+        - uid
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        phoneNumber:
+          type: string
+          description: E.164 formatted phone number
+          example: "+9647701234567"
+        uid:
+          type: string
+          description: Firebase Auth user ID
+          example: "abc123def456"
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_ERROR
+                - UNAUTHORIZED
+                - RATE_LIMIT_EXCEEDED
+                - SERVICE_UNAVAILABLE
+            message:
+              type: string

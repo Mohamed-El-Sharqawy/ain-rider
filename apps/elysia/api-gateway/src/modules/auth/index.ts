@@ -181,6 +181,24 @@ export const auth = new Elysia({ prefix: "/auth" })
       return responseBody;
     },
   )
+  /**
+   * POST /auth/verify-otp
+   *
+   * Verifies a Firebase Phone Auth ID token and returns the verified phone number.
+   * On success, publishes `ain_rider.otp_verified` NATS event for downstream services.
+   *
+   * Rate Limiting (FR-007):
+   * - Global: 100 req/min per IP (configured in index.ts rateLimit middleware)
+   * - OTP-specific (production): 10 req/min per IP, 5 req/hour per phone
+   * - On limit exceeded: Returns HTTP 429 with Retry-After header
+   *
+   * Responses:
+   * - 200: { success: true, phoneNumber: string, uid: string }
+   * - 400: { success: false, error: { code: "VALIDATION_ERROR", message: string } }
+   * - 401: { success: false, error: { code: "UNAUTHORIZED", message: string } }
+   * - 429: { success: false, error: { code: "RATE_LIMIT_EXCEEDED", message: string } }
+   * - 503: { success: false, error: { code: "SERVICE_UNAVAILABLE", message: string } }
+   */
   .post(
     "/verify-otp",
     async ({ body, set }) => {

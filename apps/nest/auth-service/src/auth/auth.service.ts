@@ -309,13 +309,34 @@ export class AuthService {
     return rest;
   }
 
+  /**
+   * Verifies a Firebase Phone Auth ID token and publishes an otp_verified NATS event.
+   *
+   * Flow:
+   * 1. Verifies the ID token with Firebase Admin SDK
+   * 2. Extracts phone_number and uid from the decoded token
+   * 3. Publishes `ain_rider.otp_verified` NATS event for downstream services
+   * 4. Returns the verification result (does NOT create user account)
+   *
+   * Downstream services should subscribe to the NATS event to:
+   * - Auto-create user accounts
+   * - Link phone numbers to existing users
+   * - Send welcome notifications
+   *
+   * @param idToken - Firebase Phone Auth ID token from client SDK
+   * @param traceId - Request correlation ID for distributed tracing
+   * @returns Object containing success status, phoneNumber (E.164), and Firebase uid
+   * @throws UnauthorizedException if token is invalid or phone_number claim is missing
+   */
   async verifyOtp(idToken: string, traceId: string) {
     const decodedToken = await this.firebaseService.verifyIdToken(idToken);
     const phoneNumber = decodedToken.phone_number;
     const uid = decodedToken.uid;
 
     if (!phoneNumber) {
-      throw new UnauthorizedException('Phone number not present in Firebase token');
+      throw new UnauthorizedException(
+        "Phone number not present in Firebase token",
+      );
     }
 
     // Publish event
