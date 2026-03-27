@@ -34,11 +34,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Implement `requestOtp(phone: string)` API call in `lib/api/auth.ts` using `lib/api/client.ts`
-- [ ] T007 [US1] Modify OTP Request UI screen in `app/(auth)/phone.tsx` with a phone number input and submit button
-- [ ] T008 [US1] Connect `app/(auth)/phone.tsx` to `requestOtp` API local state (Idle, Requesting, Success, Error)
-- [ ] T009 [US1] Add rate limit error handling to `app/(auth)/phone.tsx` UI to display wait time if backend gives 429 Too Many Requests
-- [ ] T010 [US1] On successful API response in `app/(auth)/phone.tsx`, route to the OTP Verify screen passing the phone string parameter
+- [x] T006 [P] [US1] Implement `requestOtp(phone: string)` API call in `lib/api/auth.ts` using `lib/api/client.ts`
+- [x] T007 [US1] Modify OTP Request UI screen in `app/(auth)/phone.tsx` with a phone number input and submit button
+- [x] T008 [US1] Connect `app/(auth)/phone.tsx` to `requestOtp` API local state (Idle, Requesting, Success, Error)
+- [x] T009 [US1] Add rate limit error handling to `app/(auth)/phone.tsx` UI to display wait time if backend gives 429 Too Many Requests
+- [x] T010 [US1] On successful API response in `app/(auth)/phone.tsx`, route to the OTP Verify screen passing the phone string parameter
 
 **Checkpoint**: User Story 1 should be fully functional and testable independently
 
