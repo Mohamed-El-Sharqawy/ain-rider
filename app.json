@@ -3,6 +3,7 @@
     "name": "ain-rider",
     "slug": "ain-rider",
     "version": "1.0.0",
+    "scheme": "ain-rider",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -25,6 +26,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-router"
+    ]
   }
 }
