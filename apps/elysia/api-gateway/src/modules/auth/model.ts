@@ -24,8 +24,12 @@ export const AuthModel = {
   refreshBody: t.Object({
     refreshToken: t.String(),
   }),
+  requestOtpBody: t.Object({
+    phone: t.String(),
+  }),
   verifyOtpBody: t.Object({
-    idToken: t.String(),
+    phone: t.String(),
+    code: t.String({ minLength: 6, maxLength: 6 }),
   }),
   tokenResponse: t.Object({
     accessToken: t.String(),

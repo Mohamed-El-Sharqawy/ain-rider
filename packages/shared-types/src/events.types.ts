@@ -4,11 +4,11 @@ import { TripStatus } from './trip.types';
 // NATS Event Subjects (pub/sub)
 export const NATS_SUBJECTS = {
   // User lifecycle — published by auth-service, consumed by all services needing user data
-  USER_CREATED: 'ain_rider.user_created',
-  USER_UPDATED: 'ain_rider.user_updated',
-  USER_STATUS_CHANGED: 'ain_rider.user_status_changed',
-  USER_DELETED: 'ain_rider.user_deleted',
-  OTP_VERIFIED: 'ain_rider.otp_verified',
+  USER_CREATED: 'ain_rider.user.created',
+  USER_UPDATED: 'ain_rider.user.updated',
+  USER_STATUS_CHANGED: 'ain_rider.user.status_changed',
+  USER_DELETED: 'ain_rider.user.deleted',
+  OTP_VERIFIED: 'ain_rider.otp.verified',
 
   LOCATION_UPDATE: 'ain_rider.location_update',
   TRIP_REQUESTED: 'ain_rider.trip_requested',
@@ -17,7 +17,7 @@ export const NATS_SUBJECTS = {
   TRIP_COMPLETED: 'ain_rider.trip_completed',
   TRIP_CANCELLED: 'ain_rider.trip_cancelled',
   DRIVER_STATUS_CHANGED: 'ain_rider.driver_status_changed',
-  PAYMENT_PROCESSED: 'ain_rider.payment_processed',
+  PAYMENT_PROCESSED: 'ain_rider.payment.processed',
   WALLET_UPDATED: 'ain_rider.wallet_updated',
   WITHDRAWAL_REQUESTED: 'ain_rider.withdrawal_requested',
   WITHDRAWAL_PROCESSED: 'ain_rider.withdrawal_processed',

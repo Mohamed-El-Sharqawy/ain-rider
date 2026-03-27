@@ -46,9 +46,11 @@ export class AuthService {
         await this.prisma.rider.create({ data: { userId: user.id } });
       }
 
-      // Publish user_created event for downstream services
+      // Publish user_created event for downstream services (non-blocking)
       const traceId = generateTraceId();
-      await this.userEventPublisher.publishUserCreated(user, traceId);
+      this.userEventPublisher.publishUserCreated(user, traceId).catch(err => {
+        console.error(`[AuthService] Failed to publish user_created event | traceId=${traceId} | error=${err.message}`);
+      });
 
       const family = this.generateFamilyId();
       const accessToken = this.signAccessToken(user);
@@ -62,11 +64,20 @@ export class AuthService {
         refreshToken,
       };
     } catch (error) {
+      console.error("[AuthService] Registration Error Detail:", error);
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         (error as Prisma.PrismaClientKnownRequestError).code === "P2002"
       ) {
-        throw new ConflictException("Email already registered");
+        const prismaError = error as Prisma.PrismaClientKnownRequestError;
+        const target = (prismaError.meta?.target as any) || [];
+        if (target.includes("email")) {
+          throw new ConflictException("Email already registered");
+        }
+        if (target.includes("phoneNumber")) {
+          throw new ConflictException("Phone number already registered");
+        }
+        throw new ConflictException("User already exists with these credentials");
       }
       throw error;
     }
@@ -309,27 +320,21 @@ export class AuthService {
     return rest;
   }
 
+  async requestOtp(phone: string, traceId: string) {
+    await this.otpService.requestOtp(phone, traceId);
+    return { success: true };
+  }
+
   /**
    * Verifies a phone number via OTP and publishes otp_verified NATS event.
    *
-   * Flow:
-   * 1. Verifies the ID token using OtpService (provider abstraction)
-   * 2. Extracts phone_number and uid from the decoded token
-   * 3. Publishes `ain_rider.otp_verified` NATS event for downstream services (fire-and-forget)
-   * 4. Returns the verification result (does NOT create user account)
-   *
-   * Downstream services should subscribe to the NATS event to:
-   * - Auto-create user accounts
-   * - Link phone numbers to existing users
-   * - Send welcome notifications
-   *
-   * @param idToken - Firebase Phone Auth ID token from client SDK
+   * @param phone - E.164 formatted phone number
+   * @param code - 6-digit OTP code
    * @param traceId - Distributed tracing correlation ID
    * @returns Object containing success status, phoneNumber (E.164), and uid (Firebase UID)
-   * @throws UnauthorizedException if token is invalid or phone_number claim is missing
    */
-  async verifyOtp(idToken: string, traceId: string) {
-    const decodedToken = await this.otpService.verify(idToken, traceId);
+  async verifyOtp(phone: string, code: string, traceId: string) {
+    const decodedToken = await this.otpService.verifyCode(phone, code, traceId);
 
     // Publish event asynchronously (fire-and-forget) - don't block response
     this.userEventPublisher
@@ -340,8 +345,33 @@ export class AuthService {
         );
       });
 
+    // Check if user exists, if not, they will be registered after this step by the mobile app calling /register
+    // However, we must return tokens if we want them to stay logged in or proceed with a session.
+    // For now, let's find the user or return a flag that registration is needed.
+    const user = await this.prisma.user.findFirst({
+      where: { phoneNumber: decodedToken.phone_number },
+    });
+
+    if (user) {
+      const family = this.generateFamilyId();
+      const accessToken = this.signAccessToken(user);
+      const refreshToken = this.signRefreshToken(user, family);
+      await this.storeRefreshToken(user.id, refreshToken, family);
+
+      return {
+        success: true,
+        isRegistered: true,
+        user: this.sanitize(user),
+        accessToken,
+        refreshToken,
+        phoneNumber: decodedToken.phone_number,
+        uid: decodedToken.uid,
+      };
+    }
+
     return {
       success: true,
+      isRegistered: false,
       phoneNumber: decodedToken.phone_number,
       uid: decodedToken.uid,
     };

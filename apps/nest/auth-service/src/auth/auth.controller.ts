@@ -14,6 +14,8 @@ import { JwtAuthGuard } from "./jwt-auth.guard";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { AdminCreateUserDto } from "./dto/admin-create-user.dto";
+import { RequestOtpDto } from "./dto/request-otp.dto";
+import { VerifyOtpDto } from "./dto/verify-otp.dto";
 import { UserRole } from "@ain-rider/shared-types";
 import { generateTraceId } from "@ain-rider/nats-client";
 
@@ -77,10 +79,19 @@ export class AuthController {
     }
   }
 
-  @Post("verify-otp")
-  @ApiOperation({ summary: "Verify Firebase OTP ID token" })
-  verifyOtp(@Body() body: { idToken: string }) {
+  @Post("request-otp")
+  @ApiOperation({ summary: "Request 6-digit OTP code for a phone number" })
+  async requestOtp(@Body() body: RequestOtpDto) {
+    console.log(`[AuthController] POST /auth/request-otp | phone=${body.phone}`);
     const traceId = generateTraceId();
-    return this.authService.verifyOtp(body.idToken, traceId);
+    return this.authService.requestOtp(body.phone, traceId);
+  }
+
+  @Post("verify-otp")
+  @ApiOperation({ summary: "Verify 6-digit OTP code" })
+  async verifyOtp(@Body() body: VerifyOtpDto) {
+    console.log(`[AuthController] POST /auth/verify-otp | phone=${body.phone} | code=${body.code}`);
+    const traceId = generateTraceId();
+    return this.authService.verifyOtp(body.phone, body.code, traceId);
   }
 }

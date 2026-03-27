@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum, Length } from 'class-validator';
 import { UserRole } from '@ain-rider/shared-types';
 
 export class RegisterDto {
@@ -6,8 +6,9 @@ export class RegisterDto {
   @IsNotEmpty()
   email: string;
 
-  @IsPhoneNumber(null)
+  @IsString()
   @IsNotEmpty()
+  @Length(8, 15)
   phoneNumber: string;
 
   @IsString()

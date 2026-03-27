@@ -7,7 +7,6 @@ import {
 import {
   OtpProvider,
   DecodedOtpToken,
-  OTP_PROVIDER,
 } from "./otp-providers/otp-provider.interface";
 import { FirebaseProvider } from "./otp-providers/firebase.provider";
 import { ConsoleProvider } from "./otp-providers/console.provider";
@@ -34,7 +33,7 @@ export class OtpService implements OnModuleInit {
   private readonly CIRCUIT_BREAKER_HALF_OPEN_REQUESTS = 1;
 
   onModuleInit() {
-    const providerName = OTP_PROVIDER.toLowerCase();
+    const providerName = (process.env.OTP_PROVIDER || "console").toLowerCase();
     console.log(`[OtpService] Initializing with provider: ${providerName}`);
 
     if (providerName === "console") {
@@ -50,11 +49,26 @@ export class OtpService implements OnModuleInit {
     }
   }
 
-  async verify(idToken: string, traceId: string): Promise<DecodedOtpToken> {
+  async requestOtp(phone: string, traceId: string): Promise<void> {
+    console.log(`[OtpService] Requesting OTP | phone=${phone} | traceId=${traceId}`);
+    this.checkCircuitBreaker();
+    try {
+      await this.provider.requestOtp(phone, traceId);
+      this.onSuccess();
+    } catch (error) {
+      return this.onFailure(error, traceId);
+    }
+  }
+
+  async verifyCode(
+    phone: string,
+    code: string,
+    traceId: string,
+  ): Promise<DecodedOtpToken> {
     this.checkCircuitBreaker();
 
     try {
-      const result = await this.provider.verify(idToken, traceId);
+      const result = await this.provider.verifyCode(phone, code, traceId);
       this.onSuccess();
       return result;
     } catch (error) {
@@ -71,7 +85,7 @@ export class OtpService implements OnModuleInit {
         this.CIRCUIT_BREAKER_TIMEOUT_MS
       ) {
         console.log("[OtpService] Circuit breaker entering half-open state");
-        this.halfOpenAttempts = 0;
+        this.circuitBreaker.halfOpenAttempts = 0;
         return;
       }
       throw new ServiceUnavailableException(
@@ -87,7 +101,7 @@ export class OtpService implements OnModuleInit {
       );
       this.circuitBreaker.isOpen = false;
       this.circuitBreaker.failures = 0;
-      this.halfOpenAttempts = 0;
+      this.circuitBreaker.halfOpenAttempts = 0;
     } else if (this.circuitBreaker.failures >= this.CIRCUIT_BREAKER_THRESHOLD) {
       this.circuitBreaker.isOpen = true;
       console.error(
@@ -102,8 +116,11 @@ export class OtpService implements OnModuleInit {
     this.circuitBreaker.lastFailureTime = now;
 
     if (this.circuitBreaker.isOpen) {
-      this.halfOpenAttempts++;
-      if (this.halfOpenAttempts >= this.CIRCUIT_BREAKER_HALF_OPEN_REQUESTS) {
+      this.circuitBreaker.halfOpenAttempts++;
+      if (
+        this.circuitBreaker.halfOpenAttempts >=
+        this.CIRCUIT_BREAKER_HALF_OPEN_REQUESTS
+      ) {
         console.log(
           "[OtpService] Circuit breaker re-opened after half-open failure",
         );
@@ -123,7 +140,15 @@ export class OtpService implements OnModuleInit {
       throw error;
     }
 
-    throw new UnauthorizedException("Invalid or expired OTP token");
+    // Capture the original error message for client visibility
+    const message = error.message || "Invalid or expired OTP token";
+
+    // For local dev, let's distinguish between provider errors and auth errors
+    if (message.includes("does not support") || message.includes("not configured")) {
+      throw new ServiceUnavailableException(message);
+    }
+
+    throw new UnauthorizedException(message);
   }
 
   getProviderName(): string {

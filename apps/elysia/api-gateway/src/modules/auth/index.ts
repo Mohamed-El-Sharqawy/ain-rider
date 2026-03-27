@@ -1,4 +1,5 @@
 import { Elysia, status } from "elysia";
+import { rateLimit } from "elysia-rate-limit";
 import { AuthProxyService } from "./service";
 import { AuthModel } from "./model";
 
@@ -11,6 +12,8 @@ const isMobileClient = (headers: Headers): boolean => {
   return headers.get("x-client-type") === "mobile";
 };
 
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:4000';
+
 console.log("[Auth Module] Configuration:", {
   isProduction,
   sameSite: SAME_SITE,
@@ -18,6 +21,9 @@ console.log("[Auth Module] Configuration:", {
 });
 
 export const auth = new Elysia({ prefix: "/auth" })
+  .onRequest(({ request }) => {
+    console.log(`[Gateway] [${request.method}] ${request.url}`);
+  })
   .post(
     "/login",
     async ({ body, cookie: { accessToken, refreshToken }, set, request }) => {
@@ -184,12 +190,12 @@ export const auth = new Elysia({ prefix: "/auth" })
   /**
    * POST /auth/verify-otp
    *
-   * Verifies a Firebase Phone Auth ID token and returns the verified phone number.
+   * Verifies a Firebase Phone Auth ID token and returns verified phone number.
    * On success, publishes `ain_rider.otp_verified` NATS event for downstream services.
    *
    * Rate Limiting (FR-007):
    * - Global: 100 req/min per IP (configured in index.ts rateLimit middleware)
-   * - OTP-specific (production): 10 req/min per IP, 5 req/hour per phone
+   * - OTP-specific: 10 req/min per IP, 5 req/hour per IP
    * - On limit exceeded: Returns HTTP 429 with Retry-After header
    *
    * Responses:
@@ -199,10 +205,44 @@ export const auth = new Elysia({ prefix: "/auth" })
    * - 429: { success: false, error: { code: "RATE_LIMIT_EXCEEDED", message: string } }
    * - 503: { success: false, error: { code: "SERVICE_UNAVAILABLE", message: string } }
    */
+  .use(
+    rateLimit({
+      duration: 60_000,
+      max: 10,
+      generator: (req) =>
+        req.headers.get("x-forwarded-for") ||
+        req.headers.get("x-real-ip") ||
+        "anonymous",
+    }),
+  )
+  .post(
+    "/request-otp",
+    async ({ body, set }) => {
+      const res = await AuthProxyService.requestOtp(body);
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+      return res.json();
+    },
+    { body: AuthModel.requestOtpBody },
+  )
   .post(
     "/verify-otp",
     async ({ body, set }) => {
-      const res = await AuthProxyService.verifyOtp(body as any);
+      const res = await AuthProxyService.verifyOtp(body);
       if (!res.ok) {
         try {
           const errorBody = await res.json();

@@ -2,7 +2,8 @@ import { proxyRequestsTotal } from '../../shared/metrics';
 import { log } from '../../shared/logger';
 import type { LoginBody, RegisterBody } from './model';
 
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://auth-service:4000';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:4000';
+console.log(`[Proxy] Auth service base URL: ${AUTH_SERVICE_URL}`);
 
 export abstract class AuthProxyService {
   static async login(body: LoginBody): Promise<Response> {
@@ -58,7 +59,25 @@ export abstract class AuthProxyService {
     }
   }
 
-  static async verifyOtp(body: { idToken: string }): Promise<Response> {
+  static async requestOtp(body: { phone: string }): Promise<Response> {
+    console.log(`[Proxy] Forwarding to: ${AUTH_SERVICE_URL}/auth/request-otp`);
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/request-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service requestOtp proxy failed', { error: String(error) });
+      throw error;
+    }
+  }
+
+  static async verifyOtp(body: { phone: string; code: string }): Promise<Response> {
     proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
     try {
       const res = await fetch(`${AUTH_SERVICE_URL}/auth/verify-otp`, {
