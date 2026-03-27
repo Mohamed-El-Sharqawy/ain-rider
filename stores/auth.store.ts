@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-
-import { ApiClient } from '../lib/api';
+import { AuthApi } from '../lib/api/auth';
+import { RegisterPayload, UserRole } from '../lib/api/types';
 
 interface AuthState {
   isAuthenticated: boolean;
-  role: 'RIDER' | 'DRIVER' | 'ADMIN' | null;
-  setAuth: (isAuthenticated: boolean, role: 'RIDER' | 'DRIVER' | 'ADMIN' | null) => void;
+  role: UserRole | null;
+  setAuth: (isAuthenticated: boolean, role: UserRole | null) => void;
   logout: () => void;
-  registerUser: (data: any) => Promise<void>;
+  registerUser: (data: RegisterPayload) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -15,12 +15,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   role: null,
   setAuth: (isAuthenticated, role) => set({ isAuthenticated, role }),
   logout: () => set({ isAuthenticated: false, role: null }),
-  registerUser: async (data: any) => {
-    const res = await ApiClient.register(data);
+  registerUser: async (data: RegisterPayload) => {
+    const res = await AuthApi.register(data);
     if (res.success) {
       set({ isAuthenticated: true, role: res.user.role });
     } else {
-      throw new Error(res.error?.message || 'Registration failed');
+      throw new Error('Registration failed');
     }
   }
 }));

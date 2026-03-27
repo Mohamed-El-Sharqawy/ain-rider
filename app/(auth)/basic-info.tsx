@@ -28,8 +28,8 @@ export default function BasicInfoScreen() {
         lastName,
         email,
         password,
-        phoneNumber: `+964${phone}`,
-        role: role || 'RIDER' // Default fallback
+        phoneNumber: phone?.startsWith('+') ? phone : `+964${phone}`,
+        role: (role || 'RIDER') as any // Cast to match UserRole enum from types
       });
 
       if (role === 'DRIVER') {

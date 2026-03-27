@@ -56,7 +56,7 @@ export default function VerifyOtpScreen() {
     setIsResending(true);
     setErrorMessage(null);
     try {
-      const formattedPhone = `+964${phone}`;
+      const formattedPhone = phone?.startsWith('+') ? phone : `+964${phone}`;
       await AuthApi.requestOtp(formattedPhone);
       setResendTimer(60);
     } catch (err: unknown) {
@@ -83,14 +83,21 @@ export default function VerifyOtpScreen() {
       }
 
       // 1. Verify token with our abstract backend 
-      const formattedPhone = `+964${phone}`;
+      const formattedPhone = phone?.startsWith('+') ? phone : `+964${phone}`;
       const result = await AuthApi.verifyOtp(formattedPhone, otp);
 
-      // 2. Persist backend-provided tokens
-      await SecureStorage.saveTokens(result.accessToken, result.refreshToken);
-
-      // 3. Move to basic info
-      router.replace('/(auth)/basic-info');
+      // 2. Handle based on registration status
+      if (result.isRegistered && result.accessToken && result.refreshToken) {
+        // Existing user: Persist tokens and go home
+        await SecureStorage.saveTokens(result.accessToken, result.refreshToken);
+        
+        // Fix SecureStore error by ensuring tokens are strings (redundant but safe)
+        const targetPath = result.user?.role === 'DRIVER' ? '/(driver)/(tabs)/home' : '/(rider)/(tabs)/home';
+        router.replace(targetPath as any);
+      } else {
+        // New user: Go to basic info
+        router.replace('/(auth)/basic-info');
+      }
     } catch (err: unknown) {
       console.error('OTP Verification Error:', err);
       // Specific messaging for incorrect codes vs general errors

@@ -22,7 +22,7 @@ export default function PhoneScreen() {
     setWaitTime(null);
 
     try {
-      const formattedPhone = `+964${phoneNumber}`;
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+964${phoneNumber}`;
       
       // Request abstract OTP from our backend
       await AuthApi.requestOtp(formattedPhone);

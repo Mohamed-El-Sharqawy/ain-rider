@@ -29,10 +29,19 @@ export const ApiClient = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(url, { ...options, headers });
+    console.log(`[ApiClient] Request: ${options.method || 'GET'} ${url}`);
     
+    let response: Response;
+    try {
+      response = await fetch(url, { ...options, headers });
+      console.log(`[ApiClient] Response Status: ${response.status}`);
+    } catch (error) {
+      console.error(`[ApiClient] Fetch Error for ${url}:`, error);
+      throw error;
+    }
+
     // Attempt parsing JSON gracefully
-    let data;
+    let data: any;
     try {
       if (response.status !== 204) {
         data = await response.json();
@@ -48,7 +57,7 @@ export const ApiClient = {
         data = data || {};
         data.retryAfterSeconds = parseInt(waitTime, 10);
       }
-      
+
       const errorMessage = data?.error?.message || data?.message || `API Error: ${response.status}`;
       throw new ApiError(response.status, errorMessage, data);
     }
@@ -62,7 +71,7 @@ export const ApiClient = {
       body: body ? JSON.stringify(body) : undefined,
     });
   },
-  
+
   async get<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET' });
   }
