@@ -12,6 +12,7 @@ import { UserRole } from "@ain-rider/shared-types";
 import { generateTraceId } from "@ain-rider/nats-client";
 import type { RegisterDto } from "./dto/register.dto";
 import { Prisma } from "../generated/prisma/client";
+import { FirebaseService } from "./firebase.service";
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private userEventPublisher: UserEventPublisher,
+    private firebaseService: FirebaseService,
   ) {}
 
   async register(data: RegisterDto) {
@@ -305,5 +307,24 @@ export class AuthService {
   private sanitize(user: any) {
     const { passwordHash, ...rest } = user;
     return rest;
+  }
+
+  async verifyOtp(idToken: string, traceId: string) {
+    const decodedToken = await this.firebaseService.verifyIdToken(idToken);
+    const phoneNumber = decodedToken.phone_number;
+    const uid = decodedToken.uid;
+
+    if (!phoneNumber) {
+      throw new UnauthorizedException('Phone number not present in Firebase token');
+    }
+
+    // Publish event
+    await this.userEventPublisher.publishOtpVerified(phoneNumber, uid, traceId);
+
+    return {
+      success: true,
+      phoneNumber,
+      uid,
+    };
   }
 }

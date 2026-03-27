@@ -181,6 +181,31 @@ export const auth = new Elysia({ prefix: "/auth" })
       return responseBody;
     },
   )
+  .post(
+    "/verify-otp",
+    async ({ body, set }) => {
+      const res = await AuthProxyService.verifyOtp(body as any);
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    },
+    { body: AuthModel.verifyOtpBody },
+  )
   .post("/logout", async ({ cookie: { accessToken, refreshToken } }) => {
     accessToken.remove();
     refreshToken.remove();

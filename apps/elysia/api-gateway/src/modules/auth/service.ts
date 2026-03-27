@@ -58,6 +58,23 @@ export abstract class AuthProxyService {
     }
   }
 
+  static async verifyOtp(body: { idToken: string }): Promise<Response> {
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service verifyOtp proxy failed', { error: String(error) });
+      throw error;
+    }
+  }
+
   static async getMe(token: string): Promise<Response> {
     proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
     try {

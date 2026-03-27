@@ -8,6 +8,7 @@ export const NATS_SUBJECTS = {
   USER_UPDATED: 'ain_rider.user_updated',
   USER_STATUS_CHANGED: 'ain_rider.user_status_changed',
   USER_DELETED: 'ain_rider.user_deleted',
+  OTP_VERIFIED: 'ain_rider.otp_verified',
 
   LOCATION_UPDATE: 'ain_rider.location_update',
   TRIP_REQUESTED: 'ain_rider.trip_requested',
@@ -188,6 +189,15 @@ export interface UserDeletedEvent {
   };
 }
 
+export interface OtpVerifiedEvent {
+  subject: typeof NATS_SUBJECTS.OTP_VERIFIED;
+  data: {
+    phoneNumber: string;
+    uid: string;
+    verifiedAt: string;
+  };
+}
+
 export interface NotificationSentEvent {
   subject: typeof NATS_SUBJECTS.NOTIFICATION_SENT;
   data: {
@@ -210,4 +220,5 @@ export type NatsEvent =
   | UserUpdatedEvent
   | UserStatusChangedEvent
   | UserDeletedEvent
-  | NotificationSentEvent;
+  | NotificationSentEvent
+  | OtpVerifiedEvent;

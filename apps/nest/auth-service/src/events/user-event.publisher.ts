@@ -14,7 +14,7 @@ import type { User } from '../generated/prisma/client';
 export class UserEventPublisher {
   private _publisher: JetStreamPublisher | null = null;
 
-  constructor(private nats: NatsService) {}
+  constructor(private nats: NatsService) { }
 
   private get publisher(): JetStreamPublisher {
     if (!this._publisher) {
@@ -121,5 +121,26 @@ export class UserEventPublisher {
       { traceId },
     );
     console.log(`[UserEventPublisher] Published user_deleted | userId=${userId} | deletedBy=${deletedBy} | traceId=${traceId}`);
+  }
+
+  /**
+   * Publish otp_verified event when user verifies phone via Firebase Auth
+   */
+  async publishOtpVerified(
+    phoneNumber: string,
+    uid: string,
+    traceId: string,
+  ): Promise<void> {
+    await this.publisher.publish(
+      NATS_SUBJECTS.OTP_VERIFIED,
+      'otp_verified',
+      {
+        phoneNumber,
+        uid,
+        verifiedAt: new Date().toISOString(),
+      },
+      { traceId },
+    );
+    console.log(`[UserEventPublisher] Published otp_verified | phoneNumber=${phoneNumber} | uid=${uid} | traceId=${traceId}`);
   }
 }

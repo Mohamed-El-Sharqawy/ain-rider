@@ -44,3 +44,6 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Firebase credentials
+*firebase-adminsdk*.json

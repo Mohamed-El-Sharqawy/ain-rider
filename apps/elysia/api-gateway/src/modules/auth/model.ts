@@ -24,6 +24,9 @@ export const AuthModel = {
   refreshBody: t.Object({
     refreshToken: t.String(),
   }),
+  verifyOtpBody: t.Object({
+    idToken: t.String(),
+  }),
   tokenResponse: t.Object({
     accessToken: t.String(),
     refreshToken: t.String(),

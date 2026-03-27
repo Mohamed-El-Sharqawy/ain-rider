@@ -10,6 +10,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserSuspendResponder } from '../nats/responders/user-suspend.responder';
 import { UserActivateResponder } from '../nats/responders/user-activate.responder';
 import { UserEventPublisher } from '../events/user-event.publisher';
+import { FirebaseService } from './firebase.service';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserEventPublisher } from '../events/user-event.publisher';
     UserSuspendResponder,
     UserActivateResponder,
     UserEventPublisher,
+    FirebaseService,
   ],
   controllers: [AuthController],
   exports: [AuthService],

@@ -15,6 +15,7 @@ import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { AdminCreateUserDto } from "./dto/admin-create-user.dto";
 import { UserRole } from "@ain-rider/shared-types";
+import { generateTraceId } from "@ain-rider/nats-client";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -74,5 +75,12 @@ export class AuthController {
     } catch {
       throw new UnauthorizedException("Invalid refresh token");
     }
+  }
+
+  @Post("verify-otp")
+  @ApiOperation({ summary: "Verify Firebase OTP ID token" })
+  verifyOtp(@Body() body: { idToken: string }) {
+    const traceId = generateTraceId();
+    return this.authService.verifyOtp(body.idToken, traceId);
   }
 }
