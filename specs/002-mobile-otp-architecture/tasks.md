@@ -18,9 +18,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Implement `expo-secure-store` wrapper for reading and writing JWTs in `lib/storage/secure.ts`
-- [ ] T004 [P] Implement base fetch API client in `lib/api/client.ts` to attach base URL and parse generic JSON responses
-- [ ] T005 Define OTP interfaces (`OtpRequestPayload`, `OtpVerifyPayload`, `PhoneVerificationResult`) in `lib/api/types.ts`
+- [x] T003 Implement `expo-secure-store` wrapper for reading and writing JWTs in `lib/storage/secure.ts`
+- [x] T004 [P] Implement base fetch API client in `lib/api/client.ts` to attach base URL and parse generic JSON responses
+- [x] T005 Define OTP interfaces (`OtpRequestPayload`, `OtpVerifyPayload`, `PhoneVerificationResult`) in `lib/api/types.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
