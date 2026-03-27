@@ -35,6 +35,10 @@ The mobile app serves **two user roles** from a single codebase:
 | **Rider** | Request trips, track driver, pay, rate |
 | **Driver** | Go online, accept trips, navigate, collect payment |
 
+> [!IMPORTANT]
+> **Core Non-Functional Requirement: Robust Background Operation**
+> Ain Rider is a ride-hailing application. A rider may request a trip and switch to another app while waiting for a match. A driver must receive trip assignments while the app is backgrounded. Background location, WebSocket persistence, and push notifications must all remain active when the app is not in the foreground. This is not optional — it is the same baseline expectation users have from Uber and Careem. Any screen or feature that assumes the app is always foregrounded is a design defect.
+
 The app talks to the backend through:
 - **REST API** → `api-gateway:3000` (all CRUD operations)
 - **WebSocket** → `websocket-server:3001` (real-time events: trip matching, location tracking, notifications)

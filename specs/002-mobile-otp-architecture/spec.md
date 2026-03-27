@@ -42,13 +42,12 @@ As a mobile application user, I want to submit the verification code I received 
 2. **Given** the user has received a temporary code, **When** they submit an incorrect code, **Then** the application displays an error message keeping them on the verification screen to try again.
 3. **Given** the user is waiting to receive a code, **When** they press the resend button after the 60-second timeout period, **Then** a new code request is dispatched securely.
 
-### Edge Cases
+### Edge Cases & Explicit UX Constraints
 
-- When a "Too Many Requests" (rate limit) error is received, the application must display the specific wait time provided by the backend and disable the request button for that duration.
-- What happens when the user enters an invalid or incomplete phone number format?
-- How does the system handle the user attempting to verify an expired code?
-- What happens if the user loses network connectivity right after submitting the code verification request?
-- How does the UI behave when the user requests a code, leaves the app entirely, and returns 10 minutes later?
+**FR-006 (Input Validation)**: The mobile application MUST dynamically disable the request button if the phone number length, format, or country code is invalid. Obvious errors must be caught strictly client-side via real-time format blocking.
+**FR-007 (Expired Code)**: If the user inputs an expired code, the UI MUST display "This code has expired. Please request a new one." The system MUST NOT auto-resend. Instead, the UI MUST visually highlight the Resend button so the user initiates the request consciously.
+**FR-008 (Network Loss)**: If network connectivity is lost during an API request, the system MUST halt the loading spinner immediately and display: "No internet connection. Please check your network and try again." Verification inputs (the typed 6 digits) MUST NOT be cleared, allowing the user to simply press Verify again upon reconnection mapping.
+**FR-009 (Session Expiration during Backgrounding)**: When the user backgrounds the application and returns after the 5-minute backend window, the system MUST keep them pinned on the `otp-verify` screen format (dropping to the start screen is forbidden). The UI MUST surface a banner reading "Your code has expired." and visually prompt the Resend action.
 
 ## Requirements *(mandatory)*
 

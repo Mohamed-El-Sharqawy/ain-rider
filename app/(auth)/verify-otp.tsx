@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, AppState } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { useOnboardingStore } from '../../stores/onboarding.store';
@@ -15,6 +15,8 @@ export default function VerifyOtpScreen() {
   // Resend timer state
   const [resendTimer, setResendTimer] = useState(60);
   const [isResending, setIsResending] = useState(false);
+  const [sessionStartTime] = useState(Date.now());
+  const [isExpired, setIsExpired] = useState(false);
 
   const { phone } = useOnboardingStore();
 
@@ -25,6 +27,28 @@ export default function VerifyOtpScreen() {
     }
     return () => clearInterval(interval);
   }, [resendTimer]);
+
+  // FR-009: Background/Foreground session expiry check
+  useEffect(() => {
+    const checkExpiry = () => {
+      const fiveMinutes = 5 * 60 * 1000;
+      if (Date.now() - sessionStartTime > fiveMinutes) {
+        setIsExpired(true);
+        setErrorMessage('Your code has expired.');
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        checkExpiry();
+      }
+    });
+
+    // Also check on initial mount
+    checkExpiry();
+
+    return () => subscription.remove();
+  }, [sessionStartTime]);
 
   const handleResend = async () => {
     if (resendTimer > 0 || isResending) return;
@@ -115,7 +139,7 @@ export default function VerifyOtpScreen() {
           otp.length === 6 && !isLoading ? 'bg-emerald-500' : 'bg-zinc-800 border border-zinc-700'
         }`}
         onPress={handleVerify}
-        disabled={otp.length < 6 || isLoading}
+        disabled={otp.length < 6 || isLoading || isExpired}
       >
         {isLoading && <ActivityIndicator color="#10b981" className="mr-2" />}
         <Text className={`text-xl font-bold ${otp.length === 6 && !isLoading ? 'text-white' : 'text-zinc-600'}`}>

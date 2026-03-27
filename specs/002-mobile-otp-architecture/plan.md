@@ -45,8 +45,8 @@ specs/002-mobile-otp-architecture/
 ```text
 app/
 ├── (auth)/
-│   ├── otp-request.tsx
-│   └── otp-verify.tsx
+│   ├── phone.tsx
+│   └── verify-otp.tsx
 lib/
 ├── api/
 │   └── auth.ts
