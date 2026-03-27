@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { useOnboardingStore } from '../../stores/onboarding.store';
@@ -35,7 +35,7 @@ export default function VerifyOtpScreen() {
       const formattedPhone = `+964${phone}`;
       await AuthApi.requestOtp(formattedPhone);
       setResendTimer(60);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('OTP Resend Error:', err);
       if (err instanceof ApiError && err.status === 429 && err.data?.retryAfterSeconds) {
         setResendTimer(err.data.retryAfterSeconds);
@@ -66,8 +66,8 @@ export default function VerifyOtpScreen() {
       await SecureStorage.saveTokens(result.accessToken, result.refreshToken);
 
       // 3. Move to basic info
-      router.push('/(auth)/basic-info');
-    } catch (err: any) {
+      router.replace('/(auth)/basic-info');
+    } catch (err: unknown) {
       console.error('OTP Verification Error:', err);
       // Specific messaging for incorrect codes vs general errors
       setErrorMessage(err instanceof ApiError ? err.message : 'Invalid code or connection error.');
@@ -111,12 +111,13 @@ export default function VerifyOtpScreen() {
       />
 
       <TouchableOpacity 
-        className={`py-4 rounded-xl items-center shadow-sm ${
+        className={`py-4 rounded-xl items-center shadow-sm flex-row justify-center ${
           otp.length === 6 && !isLoading ? 'bg-emerald-500' : 'bg-zinc-800 border border-zinc-700'
         }`}
         onPress={handleVerify}
         disabled={otp.length < 6 || isLoading}
       >
+        {isLoading && <ActivityIndicator color="#10b981" className="mr-2" />}
         <Text className={`text-xl font-bold ${otp.length === 6 && !isLoading ? 'text-white' : 'text-zinc-600'}`}>
           {isLoading ? 'Verifying...' : 'Verify & Continue'}
         </Text>

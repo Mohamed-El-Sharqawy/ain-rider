@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { useOnboardingStore } from '../../stores/onboarding.store';
@@ -31,7 +31,7 @@ export default function PhoneScreen() {
       setPhone(phoneNumber);
 
       router.push('/(auth)/verify-otp');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('OTP Request Error:', err);
       if (err instanceof ApiError) {
         if (err.status === 429 && err.data?.retryAfterSeconds) {
@@ -85,12 +85,13 @@ export default function PhoneScreen() {
       </View>
 
       <TouchableOpacity
-        className={`py-4 mt-6 rounded-xl items-center shadow-sm ${
+        className={`py-4 mt-6 rounded-xl items-center shadow-sm flex-row justify-center ${
           phoneNumber.length > 8 && !isLoading && !waitTime ? 'bg-emerald-500' : 'bg-zinc-800 border border-zinc-700'
         }`}
         onPress={handleNext}
         disabled={phoneNumber.length <= 8 || isLoading || !!waitTime}
       >
+        {isLoading && <ActivityIndicator color="#10b981" className="mr-2" />}
         <Text className={`text-xl font-bold ${phoneNumber.length > 8 && !isLoading && !waitTime ? 'text-white' : 'text-zinc-600'}`}>
           {isLoading ? 'Requesting...' : waitTime ? `Wait ${waitTime}s` : 'Next'}
         </Text>

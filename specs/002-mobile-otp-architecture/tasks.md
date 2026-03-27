@@ -66,9 +66,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T016 [P] Prevent users from navigating back to OTP screens using hardware back button once logged in
-- [ ] T017 Add visual loading spinners and disable buttons during active network requests in both UI screens
-- [ ] T018 Validate all typescript types ensure no explicit `any` usage exists within `lib/api/auth.ts`
+- [x] T016 [P] Prevent users from navigating back to OTP screens using hardware back button once logged in
+- [x] T017 Add visual loading spinners and disable buttons during active network requests in both UI screens
+- [x] T018 Validate all typescript types ensure no explicit `any` usage exists within `lib/api/auth.ts`
 
 ---
 
