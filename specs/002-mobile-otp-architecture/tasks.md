@@ -76,9 +76,9 @@
 
 **Purpose**: Formal confirmation of refined UX requirements
 
-- [ ] T019 [US1] [FR-006] Verify `app/(auth)/phone.tsx` strictly blocks and disables the Submit button for invalid number formats (length/characters)
-- [ ] T020 [US2] [FR-007] Verify `app/(auth)/verify-otp.tsx` displays the "Code has expired" prompt on 401/403/400 expiry errors without auto-triggering resend
-- [ ] T021 [P] [FR-008] Test network disconnection during OTP request/verify; confirm spinner stops and error banner persists input values
+- [x] T019 [US1] [FR-006] Verify `app/(auth)/phone.tsx` strictly blocks and disables the Submit button for invalid number formats (length/characters)
+- [x] T020 [US2] [FR-007] Verify `app/(auth)/verify-otp.tsx` displays the "Code has expired" prompt on 401/403/400 expiry errors without auto-triggering resend
+- [x] T021 [P] [FR-008] Test network disconnection during OTP request/verify; confirm spinner stops and error banner persists input values
 - [x] T022 [US2] [FR-009] Implement and verify Foreground/Background timer check in `app/(auth)/verify-otp.tsx` to surface "Code has expired" banner after 5-minute window
 
 ---
@@ -100,5 +100,5 @@
 ### Implementation Strategy
 
 1. **Foundation Core**: Build `lib/storage/secure.ts` and `lib/api/auth.ts` entirely.
-2. **UI Scaffolding**: Build `app/(auth)/otp-request.tsx` and `app/(auth)/otp-verify.tsx` purely for visual states.
+2. **UI Scaffolding**: Build `app/(auth)/phone.tsx` and `app/(auth)/verify-otp.tsx` purely for visual states.
 3. **Integration**: Connect UI screens logic to the real API clients and Secure Storage to seal the MVP.
