@@ -9,7 +9,7 @@ import { TableSkeleton } from '@/components/shared/TableSkeleton';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
-import { MessageSquareWarning, TicketPercent, Wallet, TrendingUp } from 'lucide-react';
+import { MessageSquareWarning, TicketPercent, Wallet } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { useNavigate } from 'react-router';
 import type { Complaint } from '@/pages/complaints/services/transformers';
@@ -83,7 +83,7 @@ export function DashboardPage() {
           <DataTable
             data={recentComplaints}
             columns={columns}
-            onRowClick={(row) => navigate('/complaints')}
+            onRowClick={(_row) => navigate('/complaints')}
           />
         )}
       </Card>

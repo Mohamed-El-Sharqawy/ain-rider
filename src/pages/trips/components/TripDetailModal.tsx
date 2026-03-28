@@ -28,7 +28,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { useCancelTrip } from '../services/mutations'
 import { useAuthStore } from '@/stores/authStore'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { Loader2, MapPin, Calendar, DollarSign, User, Car, Banknote } from 'lucide-react'
+import { Loader2, MapPin, Calendar, User, Car, Banknote } from 'lucide-react'
 import type { Trip } from '../services/transformers'
 
 interface TripDetailModalProps {

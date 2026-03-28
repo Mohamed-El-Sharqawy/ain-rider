@@ -71,17 +71,17 @@ export function WalletsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
-          title="طلبات معلقة"
+          label="طلبات معلقة"
           value={pendingCount.toLocaleString('ar-IQ')}
           icon={Clock}
         />
         <StatCard
-          title="إجمالي المعلق"
+          label="إجمالي المعلق"
           value={formatCurrency(totalPending)}
           icon={Banknote}
         />
         <StatCard
-          title="طلبات مكتملة"
+          label="طلبات مكتملة"
           value={completedCount.toLocaleString('ar-IQ')}
           icon={CheckCircle}
         />

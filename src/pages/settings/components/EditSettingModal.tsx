@@ -48,6 +48,8 @@ export function EditSettingModal({ setting, open, onClose }: EditSettingModalPro
         key: setting.key,
         data: {
           value: parsedValue,
+          type: setting.type,
+          category: setting.category,
           description: description || undefined,
         },
       },

@@ -1,13 +1,13 @@
-import { api } from '@/api/client';
-import type { LoginDTO, LoginResponseDTO, AuthUserDTO } from './dto';
+import { api } from "@/api/client";
+import type { LoginDTO, LoginResponseDTO, AuthUserDTO } from "./dto";
 
 export const authApi = {
   login: (data: LoginDTO) =>
-    api.post<LoginResponseDTO>('/auth/login', data),
+    api.post<LoginResponseDTO>("/auth/login", data, {
+      withCredentials: true,
+    }),
 
-  getMe: () =>
-    api.get<AuthUserDTO>('/auth/me'),
+  getMe: () => api.get<AuthUserDTO>("/auth/me"),
 
-  logout: () =>
-    api.post<{ success: boolean }>('/auth/logout'),
+  logout: () => api.post<{ success: boolean }>("/auth/logout"),
 };

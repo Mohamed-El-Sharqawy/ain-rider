@@ -11,6 +11,7 @@ import type { LoginDTO } from './dto';
 export const useLogin = () => {
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: LoginDTO) => authApi.login(data),
@@ -22,7 +23,11 @@ export const useLogin = () => {
         return;
       }
 
-      setUser(transformAuthUser(user));
+      const adminUser = transformAuthUser(user);
+      // GuestRoute runs useGetMe() before login; 401 is cached forever (staleTime: Infinity).
+      // Without this, ProtectedRoute still sees isError and redirects back to /login immediately.
+      queryClient.setQueryData(authKeys.me, adminUser);
+      setUser(adminUser);
       navigate('/');
     },
     onError: (err) => {

@@ -78,7 +78,7 @@ export function TripsPage() {
     {
       key: 'paymentMethodLabel',
       label: 'الدفع',
-      render: (v, row) => (
+      render: (v, _row) => (
         <div className="flex items-center gap-1">
           <Banknote size={14} style={{ color: 'var(--color-success)' }} />
           <span>{String(v)}</span>
@@ -123,34 +123,38 @@ export function TripsPage() {
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <StatCard
-            title="إجمالي الرحلات"
+            label="إجمالي الرحلات"
             value={stats.total.toLocaleString('ar-IQ')}
             icon={Car}
           />
           <StatCard
-            title="رحلات مكتملة"
+            label="رحلات مكتملة"
             value={stats.completed.toLocaleString('ar-IQ')}
-            trend={{ value: 12, isPositive: true }}
+            change={{ value: 12, label: 'مكتملة الآن' }}
             icon={Car}
           />
           <StatCard
-            title="رحلات جارية"
+            label="رحلات جارية"
             value={stats.inProgress.toLocaleString('ar-IQ')}
+            change={{ value: 12, label: 'جارية الآن' }}
             icon={Car}
           />
           <StatCard
-            title="إيرادات محصلة"
+            label="إيرادات محصلة"
             value={formatCurrency(stats.revenue)}
+            change={{ value: 12, label: 'محصلة الآن' }}
             icon={Banknote}
           />
           <StatCard
-            title="مدفوعات معلقة"
+            label="مدفوعات معلقة"
             value={stats.pendingPayments?.toLocaleString('ar-IQ') ?? '0'}
+            change={{ value: 12, label: 'معلقة الآن' }}
             icon={Banknote}
           />
           <StatCard
-            title="مدفوعات محصلة"
+            label="مدفوعات محصلة"
             value={stats.collectedPayments?.toLocaleString('ar-IQ') ?? '0'}
+            change={{ value: 12, label: 'محصلة الآن' }}
             icon={Banknote}
           />
         </div>
