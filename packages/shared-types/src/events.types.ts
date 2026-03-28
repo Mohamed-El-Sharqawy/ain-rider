@@ -1,51 +1,52 @@
-import { Location, LocationUpdate } from './location.types';
-import { TripStatus } from './trip.types';
+import { Location, LocationUpdate } from "./location.types";
+import { TripStatus } from "./trip.types";
 
 // NATS Event Subjects (pub/sub)
 export const NATS_SUBJECTS = {
   // User lifecycle — published by auth-service, consumed by all services needing user data
-  USER_CREATED: 'ain_rider.user.created',
-  USER_UPDATED: 'ain_rider.user.updated',
-  USER_STATUS_CHANGED: 'ain_rider.user.status_changed',
-  USER_DELETED: 'ain_rider.user.deleted',
-  OTP_VERIFIED: 'ain_rider.otp.verified',
+  USER_CREATED: "ain_rider.user.created",
+  USER_UPDATED: "ain_rider.user.updated",
+  USER_STATUS_CHANGED: "ain_rider.user.status_changed",
+  USER_DELETED: "ain_rider.user.deleted",
+  OTP_VERIFIED: "ain_rider.otp.verified",
+  DRIVER_APPROVED: "ain_rider.driver.approved",
 
-  LOCATION_UPDATE: 'ain_rider.location_update',
-  TRIP_REQUESTED: 'ain_rider.trip_requested',
-  TRIP_MATCHED: 'ain_rider.trip_matched',
-  TRIP_STARTED: 'ain_rider.trip_started',
-  TRIP_COMPLETED: 'ain_rider.trip_completed',
-  TRIP_CANCELLED: 'ain_rider.trip_cancelled',
-  DRIVER_STATUS_CHANGED: 'ain_rider.driver_status_changed',
-  PAYMENT_PROCESSED: 'ain_rider.payment.processed',
-  WALLET_UPDATED: 'ain_rider.wallet_updated',
-  WITHDRAWAL_REQUESTED: 'ain_rider.withdrawal_requested',
-  WITHDRAWAL_PROCESSED: 'ain_rider.withdrawal_processed',
-  SOS_CREATED: 'ain_rider.sos_created',
-  SOS_RESOLVED: 'ain_rider.sos_resolved',
-  COMPLAINT_CREATED: 'ain_rider.complaint_created',
-  COMPLAINT_UPDATED: 'ain_rider.complaint_updated',
-  NOTIFICATION_SENT: 'ain_rider.notification_sent',
-  PROMO_USED: 'ain_rider.promo_used',
+  LOCATION_UPDATE: "ain_rider.location_update",
+  TRIP_REQUESTED: "ain_rider.trip_requested",
+  TRIP_MATCHED: "ain_rider.trip_matched",
+  TRIP_STARTED: "ain_rider.trip_started",
+  TRIP_COMPLETED: "ain_rider.trip_completed",
+  TRIP_CANCELLED: "ain_rider.trip_cancelled",
+  DRIVER_STATUS_CHANGED: "ain_rider.driver_status_changed",
+  PAYMENT_PROCESSED: "ain_rider.payment.processed",
+  WALLET_UPDATED: "ain_rider.wallet_updated",
+  WITHDRAWAL_REQUESTED: "ain_rider.withdrawal_requested",
+  WITHDRAWAL_PROCESSED: "ain_rider.withdrawal_processed",
+  SOS_CREATED: "ain_rider.sos_created",
+  SOS_RESOLVED: "ain_rider.sos_resolved",
+  COMPLAINT_CREATED: "ain_rider.complaint_created",
+  COMPLAINT_UPDATED: "ain_rider.complaint_updated",
+  NOTIFICATION_SENT: "ain_rider.notification_sent",
+  PROMO_USED: "ain_rider.promo_used",
 } as const;
 
 // NATS Request-Reply Subjects (synchronous command pattern)
 // Pattern: {domain}.{action}.request — admin-service sends, owning service responds
 export const NATS_REQUESTS = {
   // Trip commands — handled by trip-service
-  TRIP_CREATE: 'trip.create.request',
-  TRIP_CANCEL: 'trip.cancel.request',
-  TRIP_ASSIGN_DRIVER: 'trip.assign_driver.request',
-  TRIP_UPDATE_STATUS: 'trip.update_status.request',
+  TRIP_CREATE: "trip.create.request",
+  TRIP_CANCEL: "trip.cancel.request",
+  TRIP_ASSIGN_DRIVER: "trip.assign_driver.request",
+  TRIP_UPDATE_STATUS: "trip.update_status.request",
 
   // Payment commands — handled by payment-service
-  PAYMENT_REFUND: 'payment.refund.request',
-  PAYMENT_ADJUST: 'payment.adjust.request',
+  PAYMENT_REFUND: "payment.refund.request",
+  PAYMENT_ADJUST: "payment.adjust.request",
 
   // User commands — handled by auth-service
-  USER_SUSPEND: 'user.suspend.request',
-  USER_ACTIVATE: 'user.activate.request',
-  USER_UPDATE: 'user.update.request',
+  USER_SUSPEND: "user.suspend.request",
+  USER_ACTIVATE: "user.activate.request",
+  USER_UPDATE: "user.update.request",
 } as const;
 
 // Event Payloads
@@ -198,6 +199,16 @@ export interface OtpVerifiedEvent {
   };
 }
 
+export interface DriverApprovedEvent {
+  subject: typeof NATS_SUBJECTS.DRIVER_APPROVED;
+  data: {
+    driverId: string;
+    userId: string;
+    approvedAt: string;
+    approvedBy?: string;
+  };
+}
+
 export interface NotificationSentEvent {
   subject: typeof NATS_SUBJECTS.NOTIFICATION_SENT;
   data: {
@@ -221,4 +232,5 @@ export type NatsEvent =
   | UserStatusChangedEvent
   | UserDeletedEvent
   | NotificationSentEvent
-  | OtpVerifiedEvent;
+  | OtpVerifiedEvent
+  | DriverApprovedEvent;

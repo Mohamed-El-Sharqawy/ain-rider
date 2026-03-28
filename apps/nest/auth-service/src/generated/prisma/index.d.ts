@@ -29,10 +29,52 @@ export type RefreshToken = $Result.DefaultSelection<Prisma.$RefreshTokenPayload>
  */
 export type Driver = $Result.DefaultSelection<Prisma.$DriverPayload>
 /**
+ * Model DriverDocument
+ * 
+ */
+export type DriverDocument = $Result.DefaultSelection<Prisma.$DriverDocumentPayload>
+/**
+ * Model Vehicle
+ * 
+ */
+export type Vehicle = $Result.DefaultSelection<Prisma.$VehiclePayload>
+/**
  * Model Rider
  * 
  */
 export type Rider = $Result.DefaultSelection<Prisma.$RiderPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const OnboardingStatus: {
+  PENDING_DOCUMENTS: 'PENDING_DOCUMENTS',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+export type OnboardingStatus = (typeof OnboardingStatus)[keyof typeof OnboardingStatus]
+
+
+export const DocumentStatus: {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus]
+
+}
+
+export type OnboardingStatus = $Enums.OnboardingStatus
+
+export const OnboardingStatus: typeof $Enums.OnboardingStatus
+
+export type DocumentStatus = $Enums.DocumentStatus
+
+export const DocumentStatus: typeof $Enums.DocumentStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -184,6 +226,26 @@ export class PrismaClient<
     * ```
     */
   get driver(): Prisma.DriverDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.driverDocument`: Exposes CRUD operations for the **DriverDocument** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DriverDocuments
+    * const driverDocuments = await prisma.driverDocument.findMany()
+    * ```
+    */
+  get driverDocument(): Prisma.DriverDocumentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.vehicle`: Exposes CRUD operations for the **Vehicle** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Vehicles
+    * const vehicles = await prisma.vehicle.findMany()
+    * ```
+    */
+  get vehicle(): Prisma.VehicleDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.rider`: Exposes CRUD operations for the **Rider** model.
@@ -631,6 +693,8 @@ export namespace Prisma {
     User: 'User',
     RefreshToken: 'RefreshToken',
     Driver: 'Driver',
+    DriverDocument: 'DriverDocument',
+    Vehicle: 'Vehicle',
     Rider: 'Rider'
   };
 
@@ -647,7 +711,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "refreshToken" | "driver" | "rider"
+      modelProps: "user" | "refreshToken" | "driver" | "driverDocument" | "vehicle" | "rider"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -873,6 +937,154 @@ export namespace Prisma {
           }
         }
       }
+      DriverDocument: {
+        payload: Prisma.$DriverDocumentPayload<ExtArgs>
+        fields: Prisma.DriverDocumentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DriverDocumentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DriverDocumentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>
+          }
+          findFirst: {
+            args: Prisma.DriverDocumentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DriverDocumentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>
+          }
+          findMany: {
+            args: Prisma.DriverDocumentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>[]
+          }
+          create: {
+            args: Prisma.DriverDocumentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>
+          }
+          createMany: {
+            args: Prisma.DriverDocumentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DriverDocumentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>[]
+          }
+          delete: {
+            args: Prisma.DriverDocumentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>
+          }
+          update: {
+            args: Prisma.DriverDocumentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>
+          }
+          deleteMany: {
+            args: Prisma.DriverDocumentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DriverDocumentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DriverDocumentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>[]
+          }
+          upsert: {
+            args: Prisma.DriverDocumentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DriverDocumentPayload>
+          }
+          aggregate: {
+            args: Prisma.DriverDocumentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDriverDocument>
+          }
+          groupBy: {
+            args: Prisma.DriverDocumentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DriverDocumentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DriverDocumentCountArgs<ExtArgs>
+            result: $Utils.Optional<DriverDocumentCountAggregateOutputType> | number
+          }
+        }
+      }
+      Vehicle: {
+        payload: Prisma.$VehiclePayload<ExtArgs>
+        fields: Prisma.VehicleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VehicleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VehicleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>
+          }
+          findFirst: {
+            args: Prisma.VehicleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VehicleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>
+          }
+          findMany: {
+            args: Prisma.VehicleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>[]
+          }
+          create: {
+            args: Prisma.VehicleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>
+          }
+          createMany: {
+            args: Prisma.VehicleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VehicleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>[]
+          }
+          delete: {
+            args: Prisma.VehicleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>
+          }
+          update: {
+            args: Prisma.VehicleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>
+          }
+          deleteMany: {
+            args: Prisma.VehicleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VehicleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VehicleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>[]
+          }
+          upsert: {
+            args: Prisma.VehicleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehiclePayload>
+          }
+          aggregate: {
+            args: Prisma.VehicleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVehicle>
+          }
+          groupBy: {
+            args: Prisma.VehicleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VehicleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VehicleCountArgs<ExtArgs>
+            result: $Utils.Optional<VehicleCountAggregateOutputType> | number
+          }
+        }
+      }
       Rider: {
         payload: Prisma.$RiderPayload<ExtArgs>
         fields: Prisma.RiderFieldRefs
@@ -1058,6 +1270,8 @@ export namespace Prisma {
     user?: UserOmit
     refreshToken?: RefreshTokenOmit
     driver?: DriverOmit
+    driverDocument?: DriverDocumentOmit
+    vehicle?: VehicleOmit
     rider?: RiderOmit
   }
 
@@ -1166,6 +1380,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type VehicleCountOutputType
+   */
+
+  export type VehicleCountOutputType = {
+    drivers: number
+  }
+
+  export type VehicleCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    drivers?: boolean | VehicleCountOutputTypeCountDriversArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * VehicleCountOutputType without action
+   */
+  export type VehicleCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleCountOutputType
+     */
+    select?: VehicleCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * VehicleCountOutputType without action
+   */
+  export type VehicleCountOutputTypeCountDriversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DriverWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -1189,6 +1434,13 @@ export namespace Prisma {
     role: string | null
     status: string | null
     profileImage: string | null
+    address: string | null
+    city: string | null
+    state: string | null
+    country: string | null
+    dateOfBirth: Date | null
+    emergencyContactName: string | null
+    emergencyContactPhone: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1203,6 +1455,13 @@ export namespace Prisma {
     role: string | null
     status: string | null
     profileImage: string | null
+    address: string | null
+    city: string | null
+    state: string | null
+    country: string | null
+    dateOfBirth: Date | null
+    emergencyContactName: string | null
+    emergencyContactPhone: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1217,6 +1476,13 @@ export namespace Prisma {
     role: number
     status: number
     profileImage: number
+    address: number
+    city: number
+    state: number
+    country: number
+    dateOfBirth: number
+    emergencyContactName: number
+    emergencyContactPhone: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1233,6 +1499,13 @@ export namespace Prisma {
     role?: true
     status?: true
     profileImage?: true
+    address?: true
+    city?: true
+    state?: true
+    country?: true
+    dateOfBirth?: true
+    emergencyContactName?: true
+    emergencyContactPhone?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1247,6 +1520,13 @@ export namespace Prisma {
     role?: true
     status?: true
     profileImage?: true
+    address?: true
+    city?: true
+    state?: true
+    country?: true
+    dateOfBirth?: true
+    emergencyContactName?: true
+    emergencyContactPhone?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1261,6 +1541,13 @@ export namespace Prisma {
     role?: true
     status?: true
     profileImage?: true
+    address?: true
+    city?: true
+    state?: true
+    country?: true
+    dateOfBirth?: true
+    emergencyContactName?: true
+    emergencyContactPhone?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1348,6 +1635,13 @@ export namespace Prisma {
     role: string
     status: string
     profileImage: string | null
+    address: string | null
+    city: string | null
+    state: string | null
+    country: string | null
+    dateOfBirth: Date | null
+    emergencyContactName: string | null
+    emergencyContactPhone: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1379,9 +1673,18 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     profileImage?: boolean
+    address?: boolean
+    city?: boolean
+    state?: boolean
+    country?: boolean
+    dateOfBirth?: boolean
+    emergencyContactName?: boolean
+    emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
+    driver?: boolean | User$driverArgs<ExtArgs>
+    rider?: boolean | User$riderArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1395,6 +1698,13 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     profileImage?: boolean
+    address?: boolean
+    city?: boolean
+    state?: boolean
+    country?: boolean
+    dateOfBirth?: boolean
+    emergencyContactName?: boolean
+    emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1409,6 +1719,13 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     profileImage?: boolean
+    address?: boolean
+    city?: boolean
+    state?: boolean
+    country?: boolean
+    dateOfBirth?: boolean
+    emergencyContactName?: boolean
+    emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1423,13 +1740,22 @@ export namespace Prisma {
     role?: boolean
     status?: boolean
     profileImage?: boolean
+    address?: boolean
+    city?: boolean
+    state?: boolean
+    country?: boolean
+    dateOfBirth?: boolean
+    emergencyContactName?: boolean
+    emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "phoneNumber" | "passwordHash" | "firstName" | "lastName" | "role" | "status" | "profileImage" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "phoneNumber" | "passwordHash" | "firstName" | "lastName" | "role" | "status" | "profileImage" | "address" | "city" | "state" | "country" | "dateOfBirth" | "emergencyContactName" | "emergencyContactPhone" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
+    driver?: boolean | User$driverArgs<ExtArgs>
+    rider?: boolean | User$riderArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1439,6 +1765,8 @@ export namespace Prisma {
     name: "User"
     objects: {
       refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
+      driver: Prisma.$DriverPayload<ExtArgs> | null
+      rider: Prisma.$RiderPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1450,6 +1778,13 @@ export namespace Prisma {
       role: string
       status: string
       profileImage: string | null
+      address: string | null
+      city: string | null
+      state: string | null
+      country: string | null
+      dateOfBirth: Date | null
+      emergencyContactName: string | null
+      emergencyContactPhone: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -1847,6 +2182,8 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     refreshTokens<T extends User$refreshTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    driver<T extends User$driverArgs<ExtArgs> = {}>(args?: Subset<T, User$driverArgs<ExtArgs>>): Prisma__DriverClient<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    rider<T extends User$riderArgs<ExtArgs> = {}>(args?: Subset<T, User$riderArgs<ExtArgs>>): Prisma__RiderClient<$Result.GetResult<Prisma.$RiderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1885,6 +2222,13 @@ export namespace Prisma {
     readonly role: FieldRef<"User", 'String'>
     readonly status: FieldRef<"User", 'String'>
     readonly profileImage: FieldRef<"User", 'String'>
+    readonly address: FieldRef<"User", 'String'>
+    readonly city: FieldRef<"User", 'String'>
+    readonly state: FieldRef<"User", 'String'>
+    readonly country: FieldRef<"User", 'String'>
+    readonly dateOfBirth: FieldRef<"User", 'DateTime'>
+    readonly emergencyContactName: FieldRef<"User", 'String'>
+    readonly emergencyContactPhone: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -2301,6 +2645,44 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RefreshTokenScalarFieldEnum | RefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * User.driver
+   */
+  export type User$driverArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Driver
+     */
+    select?: DriverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Driver
+     */
+    omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    where?: DriverWhereInput
+  }
+
+  /**
+   * User.rider
+   */
+  export type User$riderArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Rider
+     */
+    select?: RiderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Rider
+     */
+    omit?: RiderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
+    where?: RiderWhereInput
   }
 
   /**
@@ -3440,6 +3822,7 @@ export namespace Prisma {
     licenseNumber: string | null
     rating: number | null
     totalTrips: number | null
+    onboardingStatus: $Enums.OnboardingStatus | null
     isOnline: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3452,6 +3835,7 @@ export namespace Prisma {
     licenseNumber: string | null
     rating: number | null
     totalTrips: number | null
+    onboardingStatus: $Enums.OnboardingStatus | null
     isOnline: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3464,6 +3848,7 @@ export namespace Prisma {
     licenseNumber: number
     rating: number
     totalTrips: number
+    onboardingStatus: number
     isOnline: number
     createdAt: number
     updatedAt: number
@@ -3488,6 +3873,7 @@ export namespace Prisma {
     licenseNumber?: true
     rating?: true
     totalTrips?: true
+    onboardingStatus?: true
     isOnline?: true
     createdAt?: true
     updatedAt?: true
@@ -3500,6 +3886,7 @@ export namespace Prisma {
     licenseNumber?: true
     rating?: true
     totalTrips?: true
+    onboardingStatus?: true
     isOnline?: true
     createdAt?: true
     updatedAt?: true
@@ -3512,6 +3899,7 @@ export namespace Prisma {
     licenseNumber?: true
     rating?: true
     totalTrips?: true
+    onboardingStatus?: true
     isOnline?: true
     createdAt?: true
     updatedAt?: true
@@ -3611,6 +3999,7 @@ export namespace Prisma {
     licenseNumber: string
     rating: number
     totalTrips: number
+    onboardingStatus: $Enums.OnboardingStatus
     isOnline: boolean
     createdAt: Date
     updatedAt: Date
@@ -3642,9 +4031,13 @@ export namespace Prisma {
     licenseNumber?: boolean
     rating?: boolean
     totalTrips?: boolean
+    onboardingStatus?: boolean
     isOnline?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    vehicle?: boolean | Driver$vehicleArgs<ExtArgs>
+    document?: boolean | Driver$documentArgs<ExtArgs>
   }, ExtArgs["result"]["driver"]>
 
   export type DriverSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3654,9 +4047,12 @@ export namespace Prisma {
     licenseNumber?: boolean
     rating?: boolean
     totalTrips?: boolean
+    onboardingStatus?: boolean
     isOnline?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    vehicle?: boolean | Driver$vehicleArgs<ExtArgs>
   }, ExtArgs["result"]["driver"]>
 
   export type DriverSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3666,9 +4062,12 @@ export namespace Prisma {
     licenseNumber?: boolean
     rating?: boolean
     totalTrips?: boolean
+    onboardingStatus?: boolean
     isOnline?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    vehicle?: boolean | Driver$vehicleArgs<ExtArgs>
   }, ExtArgs["result"]["driver"]>
 
   export type DriverSelectScalar = {
@@ -3678,16 +4077,34 @@ export namespace Prisma {
     licenseNumber?: boolean
     rating?: boolean
     totalTrips?: boolean
+    onboardingStatus?: boolean
     isOnline?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "vehicleId" | "licenseNumber" | "rating" | "totalTrips" | "isOnline" | "createdAt" | "updatedAt", ExtArgs["result"]["driver"]>
+  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "vehicleId" | "licenseNumber" | "rating" | "totalTrips" | "onboardingStatus" | "isOnline" | "createdAt" | "updatedAt", ExtArgs["result"]["driver"]>
+  export type DriverInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    vehicle?: boolean | Driver$vehicleArgs<ExtArgs>
+    document?: boolean | Driver$documentArgs<ExtArgs>
+  }
+  export type DriverIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    vehicle?: boolean | Driver$vehicleArgs<ExtArgs>
+  }
+  export type DriverIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    vehicle?: boolean | Driver$vehicleArgs<ExtArgs>
+  }
 
   export type $DriverPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Driver"
-    objects: {}
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      vehicle: Prisma.$VehiclePayload<ExtArgs> | null
+      document: Prisma.$DriverDocumentPayload<ExtArgs> | null
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
@@ -3695,6 +4112,7 @@ export namespace Prisma {
       licenseNumber: string
       rating: number
       totalTrips: number
+      onboardingStatus: $Enums.OnboardingStatus
       isOnline: boolean
       createdAt: Date
       updatedAt: Date
@@ -4092,6 +4510,9 @@ export namespace Prisma {
    */
   export interface Prisma__DriverClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    vehicle<T extends Driver$vehicleArgs<ExtArgs> = {}>(args?: Subset<T, Driver$vehicleArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    document<T extends Driver$documentArgs<ExtArgs> = {}>(args?: Subset<T, Driver$documentArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4127,6 +4548,7 @@ export namespace Prisma {
     readonly licenseNumber: FieldRef<"Driver", 'String'>
     readonly rating: FieldRef<"Driver", 'Float'>
     readonly totalTrips: FieldRef<"Driver", 'Int'>
+    readonly onboardingStatus: FieldRef<"Driver", 'OnboardingStatus'>
     readonly isOnline: FieldRef<"Driver", 'Boolean'>
     readonly createdAt: FieldRef<"Driver", 'DateTime'>
     readonly updatedAt: FieldRef<"Driver", 'DateTime'>
@@ -4147,6 +4569,10 @@ export namespace Prisma {
      */
     omit?: DriverOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    /**
      * Filter, which Driver to fetch.
      */
     where: DriverWhereUniqueInput
@@ -4165,6 +4591,10 @@ export namespace Prisma {
      */
     omit?: DriverOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    /**
      * Filter, which Driver to fetch.
      */
     where: DriverWhereUniqueInput
@@ -4182,6 +4612,10 @@ export namespace Prisma {
      * Omit specific fields from the Driver
      */
     omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
     /**
      * Filter, which Driver to fetch.
      */
@@ -4231,6 +4665,10 @@ export namespace Prisma {
      */
     omit?: DriverOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    /**
      * Filter, which Driver to fetch.
      */
     where?: DriverWhereInput
@@ -4278,6 +4716,10 @@ export namespace Prisma {
      * Omit specific fields from the Driver
      */
     omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
     /**
      * Filter, which Drivers to fetch.
      */
@@ -4327,6 +4769,10 @@ export namespace Prisma {
      */
     omit?: DriverOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    /**
      * The data needed to create a Driver.
      */
     data: XOR<DriverCreateInput, DriverUncheckedCreateInput>
@@ -4360,6 +4806,10 @@ export namespace Prisma {
      */
     data: DriverCreateManyInput | DriverCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4374,6 +4824,10 @@ export namespace Prisma {
      * Omit specific fields from the Driver
      */
     omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
     /**
      * The data needed to update a Driver.
      */
@@ -4426,6 +4880,10 @@ export namespace Prisma {
      * Limit how many Drivers to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4440,6 +4898,10 @@ export namespace Prisma {
      * Omit specific fields from the Driver
      */
     omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
     /**
      * The filter to search for the Driver to update in case it exists.
      */
@@ -4467,6 +4929,10 @@ export namespace Prisma {
      */
     omit?: DriverOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    /**
      * Filter which Driver to delete.
      */
     where: DriverWhereUniqueInput
@@ -4487,6 +4953,44 @@ export namespace Prisma {
   }
 
   /**
+   * Driver.vehicle
+   */
+  export type Driver$vehicleArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    where?: VehicleWhereInput
+  }
+
+  /**
+   * Driver.document
+   */
+  export type Driver$documentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    where?: DriverDocumentWhereInput
+  }
+
+  /**
    * Driver without action
    */
   export type DriverDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4498,6 +5002,2424 @@ export namespace Prisma {
      * Omit specific fields from the Driver
      */
     omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DriverDocument
+   */
+
+  export type AggregateDriverDocument = {
+    _count: DriverDocumentCountAggregateOutputType | null
+    _avg: DriverDocumentAvgAggregateOutputType | null
+    _sum: DriverDocumentSumAggregateOutputType | null
+    _min: DriverDocumentMinAggregateOutputType | null
+    _max: DriverDocumentMaxAggregateOutputType | null
+  }
+
+  export type DriverDocumentAvgAggregateOutputType = {
+    identityUploadAttempts: number | null
+    drivingLicenseUploadAttempts: number | null
+  }
+
+  export type DriverDocumentSumAggregateOutputType = {
+    identityUploadAttempts: number | null
+    drivingLicenseUploadAttempts: number | null
+  }
+
+  export type DriverDocumentMinAggregateOutputType = {
+    id: string | null
+    driverId: string | null
+    identityStatus: $Enums.DocumentStatus | null
+    identityRejectionReason: string | null
+    identityUploadAttempts: number | null
+    drivingLicenseStatus: $Enums.DocumentStatus | null
+    drivingLicenseRejectionReason: string | null
+    drivingLicenseUploadAttempts: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DriverDocumentMaxAggregateOutputType = {
+    id: string | null
+    driverId: string | null
+    identityStatus: $Enums.DocumentStatus | null
+    identityRejectionReason: string | null
+    identityUploadAttempts: number | null
+    drivingLicenseStatus: $Enums.DocumentStatus | null
+    drivingLicenseRejectionReason: string | null
+    drivingLicenseUploadAttempts: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DriverDocumentCountAggregateOutputType = {
+    id: number
+    driverId: number
+    identityImages: number
+    identityStatus: number
+    identityRejectionReason: number
+    identityUploadAttempts: number
+    drivingLicenseImages: number
+    drivingLicenseStatus: number
+    drivingLicenseRejectionReason: number
+    drivingLicenseUploadAttempts: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DriverDocumentAvgAggregateInputType = {
+    identityUploadAttempts?: true
+    drivingLicenseUploadAttempts?: true
+  }
+
+  export type DriverDocumentSumAggregateInputType = {
+    identityUploadAttempts?: true
+    drivingLicenseUploadAttempts?: true
+  }
+
+  export type DriverDocumentMinAggregateInputType = {
+    id?: true
+    driverId?: true
+    identityStatus?: true
+    identityRejectionReason?: true
+    identityUploadAttempts?: true
+    drivingLicenseStatus?: true
+    drivingLicenseRejectionReason?: true
+    drivingLicenseUploadAttempts?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DriverDocumentMaxAggregateInputType = {
+    id?: true
+    driverId?: true
+    identityStatus?: true
+    identityRejectionReason?: true
+    identityUploadAttempts?: true
+    drivingLicenseStatus?: true
+    drivingLicenseRejectionReason?: true
+    drivingLicenseUploadAttempts?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DriverDocumentCountAggregateInputType = {
+    id?: true
+    driverId?: true
+    identityImages?: true
+    identityStatus?: true
+    identityRejectionReason?: true
+    identityUploadAttempts?: true
+    drivingLicenseImages?: true
+    drivingLicenseStatus?: true
+    drivingLicenseRejectionReason?: true
+    drivingLicenseUploadAttempts?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DriverDocumentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DriverDocument to aggregate.
+     */
+    where?: DriverDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DriverDocuments to fetch.
+     */
+    orderBy?: DriverDocumentOrderByWithRelationInput | DriverDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DriverDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DriverDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DriverDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DriverDocuments
+    **/
+    _count?: true | DriverDocumentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DriverDocumentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DriverDocumentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DriverDocumentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DriverDocumentMaxAggregateInputType
+  }
+
+  export type GetDriverDocumentAggregateType<T extends DriverDocumentAggregateArgs> = {
+        [P in keyof T & keyof AggregateDriverDocument]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDriverDocument[P]>
+      : GetScalarType<T[P], AggregateDriverDocument[P]>
+  }
+
+
+
+
+  export type DriverDocumentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DriverDocumentWhereInput
+    orderBy?: DriverDocumentOrderByWithAggregationInput | DriverDocumentOrderByWithAggregationInput[]
+    by: DriverDocumentScalarFieldEnum[] | DriverDocumentScalarFieldEnum
+    having?: DriverDocumentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DriverDocumentCountAggregateInputType | true
+    _avg?: DriverDocumentAvgAggregateInputType
+    _sum?: DriverDocumentSumAggregateInputType
+    _min?: DriverDocumentMinAggregateInputType
+    _max?: DriverDocumentMaxAggregateInputType
+  }
+
+  export type DriverDocumentGroupByOutputType = {
+    id: string
+    driverId: string
+    identityImages: string[]
+    identityStatus: $Enums.DocumentStatus
+    identityRejectionReason: string | null
+    identityUploadAttempts: number
+    drivingLicenseImages: string[]
+    drivingLicenseStatus: $Enums.DocumentStatus
+    drivingLicenseRejectionReason: string | null
+    drivingLicenseUploadAttempts: number
+    createdAt: Date
+    updatedAt: Date
+    _count: DriverDocumentCountAggregateOutputType | null
+    _avg: DriverDocumentAvgAggregateOutputType | null
+    _sum: DriverDocumentSumAggregateOutputType | null
+    _min: DriverDocumentMinAggregateOutputType | null
+    _max: DriverDocumentMaxAggregateOutputType | null
+  }
+
+  type GetDriverDocumentGroupByPayload<T extends DriverDocumentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DriverDocumentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DriverDocumentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DriverDocumentGroupByOutputType[P]>
+            : GetScalarType<T[P], DriverDocumentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DriverDocumentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    driverId?: boolean
+    identityImages?: boolean
+    identityStatus?: boolean
+    identityRejectionReason?: boolean
+    identityUploadAttempts?: boolean
+    drivingLicenseImages?: boolean
+    drivingLicenseStatus?: boolean
+    drivingLicenseRejectionReason?: boolean
+    drivingLicenseUploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    driver?: boolean | DriverDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["driverDocument"]>
+
+  export type DriverDocumentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    driverId?: boolean
+    identityImages?: boolean
+    identityStatus?: boolean
+    identityRejectionReason?: boolean
+    identityUploadAttempts?: boolean
+    drivingLicenseImages?: boolean
+    drivingLicenseStatus?: boolean
+    drivingLicenseRejectionReason?: boolean
+    drivingLicenseUploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    driver?: boolean | DriverDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["driverDocument"]>
+
+  export type DriverDocumentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    driverId?: boolean
+    identityImages?: boolean
+    identityStatus?: boolean
+    identityRejectionReason?: boolean
+    identityUploadAttempts?: boolean
+    drivingLicenseImages?: boolean
+    drivingLicenseStatus?: boolean
+    drivingLicenseRejectionReason?: boolean
+    drivingLicenseUploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    driver?: boolean | DriverDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["driverDocument"]>
+
+  export type DriverDocumentSelectScalar = {
+    id?: boolean
+    driverId?: boolean
+    identityImages?: boolean
+    identityStatus?: boolean
+    identityRejectionReason?: boolean
+    identityUploadAttempts?: boolean
+    drivingLicenseImages?: boolean
+    drivingLicenseStatus?: boolean
+    drivingLicenseRejectionReason?: boolean
+    drivingLicenseUploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DriverDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "driverId" | "identityImages" | "identityStatus" | "identityRejectionReason" | "identityUploadAttempts" | "drivingLicenseImages" | "drivingLicenseStatus" | "drivingLicenseRejectionReason" | "drivingLicenseUploadAttempts" | "createdAt" | "updatedAt", ExtArgs["result"]["driverDocument"]>
+  export type DriverDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    driver?: boolean | DriverDefaultArgs<ExtArgs>
+  }
+  export type DriverDocumentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    driver?: boolean | DriverDefaultArgs<ExtArgs>
+  }
+  export type DriverDocumentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    driver?: boolean | DriverDefaultArgs<ExtArgs>
+  }
+
+  export type $DriverDocumentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DriverDocument"
+    objects: {
+      driver: Prisma.$DriverPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      driverId: string
+      identityImages: string[]
+      identityStatus: $Enums.DocumentStatus
+      identityRejectionReason: string | null
+      identityUploadAttempts: number
+      drivingLicenseImages: string[]
+      drivingLicenseStatus: $Enums.DocumentStatus
+      drivingLicenseRejectionReason: string | null
+      drivingLicenseUploadAttempts: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["driverDocument"]>
+    composites: {}
+  }
+
+  type DriverDocumentGetPayload<S extends boolean | null | undefined | DriverDocumentDefaultArgs> = $Result.GetResult<Prisma.$DriverDocumentPayload, S>
+
+  type DriverDocumentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DriverDocumentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DriverDocumentCountAggregateInputType | true
+    }
+
+  export interface DriverDocumentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DriverDocument'], meta: { name: 'DriverDocument' } }
+    /**
+     * Find zero or one DriverDocument that matches the filter.
+     * @param {DriverDocumentFindUniqueArgs} args - Arguments to find a DriverDocument
+     * @example
+     * // Get one DriverDocument
+     * const driverDocument = await prisma.driverDocument.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DriverDocumentFindUniqueArgs>(args: SelectSubset<T, DriverDocumentFindUniqueArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DriverDocument that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DriverDocumentFindUniqueOrThrowArgs} args - Arguments to find a DriverDocument
+     * @example
+     * // Get one DriverDocument
+     * const driverDocument = await prisma.driverDocument.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DriverDocumentFindUniqueOrThrowArgs>(args: SelectSubset<T, DriverDocumentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DriverDocument that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DriverDocumentFindFirstArgs} args - Arguments to find a DriverDocument
+     * @example
+     * // Get one DriverDocument
+     * const driverDocument = await prisma.driverDocument.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DriverDocumentFindFirstArgs>(args?: SelectSubset<T, DriverDocumentFindFirstArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DriverDocument that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DriverDocumentFindFirstOrThrowArgs} args - Arguments to find a DriverDocument
+     * @example
+     * // Get one DriverDocument
+     * const driverDocument = await prisma.driverDocument.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DriverDocumentFindFirstOrThrowArgs>(args?: SelectSubset<T, DriverDocumentFindFirstOrThrowArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DriverDocuments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DriverDocumentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DriverDocuments
+     * const driverDocuments = await prisma.driverDocument.findMany()
+     * 
+     * // Get first 10 DriverDocuments
+     * const driverDocuments = await prisma.driverDocument.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const driverDocumentWithIdOnly = await prisma.driverDocument.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DriverDocumentFindManyArgs>(args?: SelectSubset<T, DriverDocumentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DriverDocument.
+     * @param {DriverDocumentCreateArgs} args - Arguments to create a DriverDocument.
+     * @example
+     * // Create one DriverDocument
+     * const DriverDocument = await prisma.driverDocument.create({
+     *   data: {
+     *     // ... data to create a DriverDocument
+     *   }
+     * })
+     * 
+     */
+    create<T extends DriverDocumentCreateArgs>(args: SelectSubset<T, DriverDocumentCreateArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DriverDocuments.
+     * @param {DriverDocumentCreateManyArgs} args - Arguments to create many DriverDocuments.
+     * @example
+     * // Create many DriverDocuments
+     * const driverDocument = await prisma.driverDocument.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DriverDocumentCreateManyArgs>(args?: SelectSubset<T, DriverDocumentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DriverDocuments and returns the data saved in the database.
+     * @param {DriverDocumentCreateManyAndReturnArgs} args - Arguments to create many DriverDocuments.
+     * @example
+     * // Create many DriverDocuments
+     * const driverDocument = await prisma.driverDocument.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DriverDocuments and only return the `id`
+     * const driverDocumentWithIdOnly = await prisma.driverDocument.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DriverDocumentCreateManyAndReturnArgs>(args?: SelectSubset<T, DriverDocumentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DriverDocument.
+     * @param {DriverDocumentDeleteArgs} args - Arguments to delete one DriverDocument.
+     * @example
+     * // Delete one DriverDocument
+     * const DriverDocument = await prisma.driverDocument.delete({
+     *   where: {
+     *     // ... filter to delete one DriverDocument
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DriverDocumentDeleteArgs>(args: SelectSubset<T, DriverDocumentDeleteArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DriverDocument.
+     * @param {DriverDocumentUpdateArgs} args - Arguments to update one DriverDocument.
+     * @example
+     * // Update one DriverDocument
+     * const driverDocument = await prisma.driverDocument.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DriverDocumentUpdateArgs>(args: SelectSubset<T, DriverDocumentUpdateArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DriverDocuments.
+     * @param {DriverDocumentDeleteManyArgs} args - Arguments to filter DriverDocuments to delete.
+     * @example
+     * // Delete a few DriverDocuments
+     * const { count } = await prisma.driverDocument.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DriverDocumentDeleteManyArgs>(args?: SelectSubset<T, DriverDocumentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DriverDocuments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DriverDocumentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DriverDocuments
+     * const driverDocument = await prisma.driverDocument.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DriverDocumentUpdateManyArgs>(args: SelectSubset<T, DriverDocumentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DriverDocuments and returns the data updated in the database.
+     * @param {DriverDocumentUpdateManyAndReturnArgs} args - Arguments to update many DriverDocuments.
+     * @example
+     * // Update many DriverDocuments
+     * const driverDocument = await prisma.driverDocument.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DriverDocuments and only return the `id`
+     * const driverDocumentWithIdOnly = await prisma.driverDocument.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DriverDocumentUpdateManyAndReturnArgs>(args: SelectSubset<T, DriverDocumentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DriverDocument.
+     * @param {DriverDocumentUpsertArgs} args - Arguments to update or create a DriverDocument.
+     * @example
+     * // Update or create a DriverDocument
+     * const driverDocument = await prisma.driverDocument.upsert({
+     *   create: {
+     *     // ... data to create a DriverDocument
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DriverDocument we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DriverDocumentUpsertArgs>(args: SelectSubset<T, DriverDocumentUpsertArgs<ExtArgs>>): Prisma__DriverDocumentClient<$Result.GetResult<Prisma.$DriverDocumentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DriverDocuments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DriverDocumentCountArgs} args - Arguments to filter DriverDocuments to count.
+     * @example
+     * // Count the number of DriverDocuments
+     * const count = await prisma.driverDocument.count({
+     *   where: {
+     *     // ... the filter for the DriverDocuments we want to count
+     *   }
+     * })
+    **/
+    count<T extends DriverDocumentCountArgs>(
+      args?: Subset<T, DriverDocumentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DriverDocumentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DriverDocument.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DriverDocumentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DriverDocumentAggregateArgs>(args: Subset<T, DriverDocumentAggregateArgs>): Prisma.PrismaPromise<GetDriverDocumentAggregateType<T>>
+
+    /**
+     * Group by DriverDocument.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DriverDocumentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DriverDocumentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DriverDocumentGroupByArgs['orderBy'] }
+        : { orderBy?: DriverDocumentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DriverDocumentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDriverDocumentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DriverDocument model
+   */
+  readonly fields: DriverDocumentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DriverDocument.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DriverDocumentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    driver<T extends DriverDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DriverDefaultArgs<ExtArgs>>): Prisma__DriverClient<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DriverDocument model
+   */
+  interface DriverDocumentFieldRefs {
+    readonly id: FieldRef<"DriverDocument", 'String'>
+    readonly driverId: FieldRef<"DriverDocument", 'String'>
+    readonly identityImages: FieldRef<"DriverDocument", 'String[]'>
+    readonly identityStatus: FieldRef<"DriverDocument", 'DocumentStatus'>
+    readonly identityRejectionReason: FieldRef<"DriverDocument", 'String'>
+    readonly identityUploadAttempts: FieldRef<"DriverDocument", 'Int'>
+    readonly drivingLicenseImages: FieldRef<"DriverDocument", 'String[]'>
+    readonly drivingLicenseStatus: FieldRef<"DriverDocument", 'DocumentStatus'>
+    readonly drivingLicenseRejectionReason: FieldRef<"DriverDocument", 'String'>
+    readonly drivingLicenseUploadAttempts: FieldRef<"DriverDocument", 'Int'>
+    readonly createdAt: FieldRef<"DriverDocument", 'DateTime'>
+    readonly updatedAt: FieldRef<"DriverDocument", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DriverDocument findUnique
+   */
+  export type DriverDocumentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which DriverDocument to fetch.
+     */
+    where: DriverDocumentWhereUniqueInput
+  }
+
+  /**
+   * DriverDocument findUniqueOrThrow
+   */
+  export type DriverDocumentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which DriverDocument to fetch.
+     */
+    where: DriverDocumentWhereUniqueInput
+  }
+
+  /**
+   * DriverDocument findFirst
+   */
+  export type DriverDocumentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which DriverDocument to fetch.
+     */
+    where?: DriverDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DriverDocuments to fetch.
+     */
+    orderBy?: DriverDocumentOrderByWithRelationInput | DriverDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DriverDocuments.
+     */
+    cursor?: DriverDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DriverDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DriverDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DriverDocuments.
+     */
+    distinct?: DriverDocumentScalarFieldEnum | DriverDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * DriverDocument findFirstOrThrow
+   */
+  export type DriverDocumentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which DriverDocument to fetch.
+     */
+    where?: DriverDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DriverDocuments to fetch.
+     */
+    orderBy?: DriverDocumentOrderByWithRelationInput | DriverDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DriverDocuments.
+     */
+    cursor?: DriverDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DriverDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DriverDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DriverDocuments.
+     */
+    distinct?: DriverDocumentScalarFieldEnum | DriverDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * DriverDocument findMany
+   */
+  export type DriverDocumentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which DriverDocuments to fetch.
+     */
+    where?: DriverDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DriverDocuments to fetch.
+     */
+    orderBy?: DriverDocumentOrderByWithRelationInput | DriverDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DriverDocuments.
+     */
+    cursor?: DriverDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DriverDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DriverDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DriverDocuments.
+     */
+    distinct?: DriverDocumentScalarFieldEnum | DriverDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * DriverDocument create
+   */
+  export type DriverDocumentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DriverDocument.
+     */
+    data: XOR<DriverDocumentCreateInput, DriverDocumentUncheckedCreateInput>
+  }
+
+  /**
+   * DriverDocument createMany
+   */
+  export type DriverDocumentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DriverDocuments.
+     */
+    data: DriverDocumentCreateManyInput | DriverDocumentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DriverDocument createManyAndReturn
+   */
+  export type DriverDocumentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * The data used to create many DriverDocuments.
+     */
+    data: DriverDocumentCreateManyInput | DriverDocumentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DriverDocument update
+   */
+  export type DriverDocumentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DriverDocument.
+     */
+    data: XOR<DriverDocumentUpdateInput, DriverDocumentUncheckedUpdateInput>
+    /**
+     * Choose, which DriverDocument to update.
+     */
+    where: DriverDocumentWhereUniqueInput
+  }
+
+  /**
+   * DriverDocument updateMany
+   */
+  export type DriverDocumentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DriverDocuments.
+     */
+    data: XOR<DriverDocumentUpdateManyMutationInput, DriverDocumentUncheckedUpdateManyInput>
+    /**
+     * Filter which DriverDocuments to update
+     */
+    where?: DriverDocumentWhereInput
+    /**
+     * Limit how many DriverDocuments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DriverDocument updateManyAndReturn
+   */
+  export type DriverDocumentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * The data used to update DriverDocuments.
+     */
+    data: XOR<DriverDocumentUpdateManyMutationInput, DriverDocumentUncheckedUpdateManyInput>
+    /**
+     * Filter which DriverDocuments to update
+     */
+    where?: DriverDocumentWhereInput
+    /**
+     * Limit how many DriverDocuments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DriverDocument upsert
+   */
+  export type DriverDocumentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DriverDocument to update in case it exists.
+     */
+    where: DriverDocumentWhereUniqueInput
+    /**
+     * In case the DriverDocument found by the `where` argument doesn't exist, create a new DriverDocument with this data.
+     */
+    create: XOR<DriverDocumentCreateInput, DriverDocumentUncheckedCreateInput>
+    /**
+     * In case the DriverDocument was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DriverDocumentUpdateInput, DriverDocumentUncheckedUpdateInput>
+  }
+
+  /**
+   * DriverDocument delete
+   */
+  export type DriverDocumentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+    /**
+     * Filter which DriverDocument to delete.
+     */
+    where: DriverDocumentWhereUniqueInput
+  }
+
+  /**
+   * DriverDocument deleteMany
+   */
+  export type DriverDocumentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DriverDocuments to delete
+     */
+    where?: DriverDocumentWhereInput
+    /**
+     * Limit how many DriverDocuments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DriverDocument without action
+   */
+  export type DriverDocumentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DriverDocument
+     */
+    select?: DriverDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DriverDocument
+     */
+    omit?: DriverDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverDocumentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Vehicle
+   */
+
+  export type AggregateVehicle = {
+    _count: VehicleCountAggregateOutputType | null
+    _avg: VehicleAvgAggregateOutputType | null
+    _sum: VehicleSumAggregateOutputType | null
+    _min: VehicleMinAggregateOutputType | null
+    _max: VehicleMaxAggregateOutputType | null
+  }
+
+  export type VehicleAvgAggregateOutputType = {
+    year: number | null
+    uploadAttempts: number | null
+  }
+
+  export type VehicleSumAggregateOutputType = {
+    year: number | null
+    uploadAttempts: number | null
+  }
+
+  export type VehicleMinAggregateOutputType = {
+    id: string | null
+    make: string | null
+    model: string | null
+    year: number | null
+    color: string | null
+    plateNumber: string | null
+    carImage: string | null
+    carLicenseImage: string | null
+    carLicenseText: string | null
+    status: $Enums.DocumentStatus | null
+    rejectionReason: string | null
+    uploadAttempts: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleMaxAggregateOutputType = {
+    id: string | null
+    make: string | null
+    model: string | null
+    year: number | null
+    color: string | null
+    plateNumber: string | null
+    carImage: string | null
+    carLicenseImage: string | null
+    carLicenseText: string | null
+    status: $Enums.DocumentStatus | null
+    rejectionReason: string | null
+    uploadAttempts: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleCountAggregateOutputType = {
+    id: number
+    make: number
+    model: number
+    year: number
+    color: number
+    plateNumber: number
+    carImage: number
+    carLicenseImage: number
+    carLicenseText: number
+    status: number
+    rejectionReason: number
+    uploadAttempts: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type VehicleAvgAggregateInputType = {
+    year?: true
+    uploadAttempts?: true
+  }
+
+  export type VehicleSumAggregateInputType = {
+    year?: true
+    uploadAttempts?: true
+  }
+
+  export type VehicleMinAggregateInputType = {
+    id?: true
+    make?: true
+    model?: true
+    year?: true
+    color?: true
+    plateNumber?: true
+    carImage?: true
+    carLicenseImage?: true
+    carLicenseText?: true
+    status?: true
+    rejectionReason?: true
+    uploadAttempts?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleMaxAggregateInputType = {
+    id?: true
+    make?: true
+    model?: true
+    year?: true
+    color?: true
+    plateNumber?: true
+    carImage?: true
+    carLicenseImage?: true
+    carLicenseText?: true
+    status?: true
+    rejectionReason?: true
+    uploadAttempts?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleCountAggregateInputType = {
+    id?: true
+    make?: true
+    model?: true
+    year?: true
+    color?: true
+    plateNumber?: true
+    carImage?: true
+    carLicenseImage?: true
+    carLicenseText?: true
+    status?: true
+    rejectionReason?: true
+    uploadAttempts?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type VehicleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Vehicle to aggregate.
+     */
+    where?: VehicleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Vehicles to fetch.
+     */
+    orderBy?: VehicleOrderByWithRelationInput | VehicleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VehicleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Vehicles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Vehicles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Vehicles
+    **/
+    _count?: true | VehicleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: VehicleAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: VehicleSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VehicleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VehicleMaxAggregateInputType
+  }
+
+  export type GetVehicleAggregateType<T extends VehicleAggregateArgs> = {
+        [P in keyof T & keyof AggregateVehicle]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVehicle[P]>
+      : GetScalarType<T[P], AggregateVehicle[P]>
+  }
+
+
+
+
+  export type VehicleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VehicleWhereInput
+    orderBy?: VehicleOrderByWithAggregationInput | VehicleOrderByWithAggregationInput[]
+    by: VehicleScalarFieldEnum[] | VehicleScalarFieldEnum
+    having?: VehicleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VehicleCountAggregateInputType | true
+    _avg?: VehicleAvgAggregateInputType
+    _sum?: VehicleSumAggregateInputType
+    _min?: VehicleMinAggregateInputType
+    _max?: VehicleMaxAggregateInputType
+  }
+
+  export type VehicleGroupByOutputType = {
+    id: string
+    make: string
+    model: string
+    year: number
+    color: string
+    plateNumber: string
+    carImage: string
+    carLicenseImage: string
+    carLicenseText: string | null
+    status: $Enums.DocumentStatus
+    rejectionReason: string | null
+    uploadAttempts: number
+    createdAt: Date
+    updatedAt: Date
+    _count: VehicleCountAggregateOutputType | null
+    _avg: VehicleAvgAggregateOutputType | null
+    _sum: VehicleSumAggregateOutputType | null
+    _min: VehicleMinAggregateOutputType | null
+    _max: VehicleMaxAggregateOutputType | null
+  }
+
+  type GetVehicleGroupByPayload<T extends VehicleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VehicleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VehicleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VehicleGroupByOutputType[P]>
+            : GetScalarType<T[P], VehicleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VehicleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    make?: boolean
+    model?: boolean
+    year?: boolean
+    color?: boolean
+    plateNumber?: boolean
+    carImage?: boolean
+    carLicenseImage?: boolean
+    carLicenseText?: boolean
+    status?: boolean
+    rejectionReason?: boolean
+    uploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    drivers?: boolean | Vehicle$driversArgs<ExtArgs>
+    _count?: boolean | VehicleCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vehicle"]>
+
+  export type VehicleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    make?: boolean
+    model?: boolean
+    year?: boolean
+    color?: boolean
+    plateNumber?: boolean
+    carImage?: boolean
+    carLicenseImage?: boolean
+    carLicenseText?: boolean
+    status?: boolean
+    rejectionReason?: boolean
+    uploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["vehicle"]>
+
+  export type VehicleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    make?: boolean
+    model?: boolean
+    year?: boolean
+    color?: boolean
+    plateNumber?: boolean
+    carImage?: boolean
+    carLicenseImage?: boolean
+    carLicenseText?: boolean
+    status?: boolean
+    rejectionReason?: boolean
+    uploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["vehicle"]>
+
+  export type VehicleSelectScalar = {
+    id?: boolean
+    make?: boolean
+    model?: boolean
+    year?: boolean
+    color?: boolean
+    plateNumber?: boolean
+    carImage?: boolean
+    carLicenseImage?: boolean
+    carLicenseText?: boolean
+    status?: boolean
+    rejectionReason?: boolean
+    uploadAttempts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type VehicleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "make" | "model" | "year" | "color" | "plateNumber" | "carImage" | "carLicenseImage" | "carLicenseText" | "status" | "rejectionReason" | "uploadAttempts" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>
+  export type VehicleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    drivers?: boolean | Vehicle$driversArgs<ExtArgs>
+    _count?: boolean | VehicleCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type VehicleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type VehicleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $VehiclePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Vehicle"
+    objects: {
+      drivers: Prisma.$DriverPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      make: string
+      model: string
+      year: number
+      color: string
+      plateNumber: string
+      carImage: string
+      carLicenseImage: string
+      carLicenseText: string | null
+      status: $Enums.DocumentStatus
+      rejectionReason: string | null
+      uploadAttempts: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["vehicle"]>
+    composites: {}
+  }
+
+  type VehicleGetPayload<S extends boolean | null | undefined | VehicleDefaultArgs> = $Result.GetResult<Prisma.$VehiclePayload, S>
+
+  type VehicleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VehicleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VehicleCountAggregateInputType | true
+    }
+
+  export interface VehicleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Vehicle'], meta: { name: 'Vehicle' } }
+    /**
+     * Find zero or one Vehicle that matches the filter.
+     * @param {VehicleFindUniqueArgs} args - Arguments to find a Vehicle
+     * @example
+     * // Get one Vehicle
+     * const vehicle = await prisma.vehicle.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VehicleFindUniqueArgs>(args: SelectSubset<T, VehicleFindUniqueArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Vehicle that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VehicleFindUniqueOrThrowArgs} args - Arguments to find a Vehicle
+     * @example
+     * // Get one Vehicle
+     * const vehicle = await prisma.vehicle.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VehicleFindUniqueOrThrowArgs>(args: SelectSubset<T, VehicleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Vehicle that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleFindFirstArgs} args - Arguments to find a Vehicle
+     * @example
+     * // Get one Vehicle
+     * const vehicle = await prisma.vehicle.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VehicleFindFirstArgs>(args?: SelectSubset<T, VehicleFindFirstArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Vehicle that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleFindFirstOrThrowArgs} args - Arguments to find a Vehicle
+     * @example
+     * // Get one Vehicle
+     * const vehicle = await prisma.vehicle.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VehicleFindFirstOrThrowArgs>(args?: SelectSubset<T, VehicleFindFirstOrThrowArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Vehicles that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Vehicles
+     * const vehicles = await prisma.vehicle.findMany()
+     * 
+     * // Get first 10 Vehicles
+     * const vehicles = await prisma.vehicle.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const vehicleWithIdOnly = await prisma.vehicle.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VehicleFindManyArgs>(args?: SelectSubset<T, VehicleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Vehicle.
+     * @param {VehicleCreateArgs} args - Arguments to create a Vehicle.
+     * @example
+     * // Create one Vehicle
+     * const Vehicle = await prisma.vehicle.create({
+     *   data: {
+     *     // ... data to create a Vehicle
+     *   }
+     * })
+     * 
+     */
+    create<T extends VehicleCreateArgs>(args: SelectSubset<T, VehicleCreateArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Vehicles.
+     * @param {VehicleCreateManyArgs} args - Arguments to create many Vehicles.
+     * @example
+     * // Create many Vehicles
+     * const vehicle = await prisma.vehicle.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VehicleCreateManyArgs>(args?: SelectSubset<T, VehicleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Vehicles and returns the data saved in the database.
+     * @param {VehicleCreateManyAndReturnArgs} args - Arguments to create many Vehicles.
+     * @example
+     * // Create many Vehicles
+     * const vehicle = await prisma.vehicle.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Vehicles and only return the `id`
+     * const vehicleWithIdOnly = await prisma.vehicle.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VehicleCreateManyAndReturnArgs>(args?: SelectSubset<T, VehicleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Vehicle.
+     * @param {VehicleDeleteArgs} args - Arguments to delete one Vehicle.
+     * @example
+     * // Delete one Vehicle
+     * const Vehicle = await prisma.vehicle.delete({
+     *   where: {
+     *     // ... filter to delete one Vehicle
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VehicleDeleteArgs>(args: SelectSubset<T, VehicleDeleteArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Vehicle.
+     * @param {VehicleUpdateArgs} args - Arguments to update one Vehicle.
+     * @example
+     * // Update one Vehicle
+     * const vehicle = await prisma.vehicle.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VehicleUpdateArgs>(args: SelectSubset<T, VehicleUpdateArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Vehicles.
+     * @param {VehicleDeleteManyArgs} args - Arguments to filter Vehicles to delete.
+     * @example
+     * // Delete a few Vehicles
+     * const { count } = await prisma.vehicle.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VehicleDeleteManyArgs>(args?: SelectSubset<T, VehicleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Vehicles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Vehicles
+     * const vehicle = await prisma.vehicle.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VehicleUpdateManyArgs>(args: SelectSubset<T, VehicleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Vehicles and returns the data updated in the database.
+     * @param {VehicleUpdateManyAndReturnArgs} args - Arguments to update many Vehicles.
+     * @example
+     * // Update many Vehicles
+     * const vehicle = await prisma.vehicle.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Vehicles and only return the `id`
+     * const vehicleWithIdOnly = await prisma.vehicle.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VehicleUpdateManyAndReturnArgs>(args: SelectSubset<T, VehicleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Vehicle.
+     * @param {VehicleUpsertArgs} args - Arguments to update or create a Vehicle.
+     * @example
+     * // Update or create a Vehicle
+     * const vehicle = await prisma.vehicle.upsert({
+     *   create: {
+     *     // ... data to create a Vehicle
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Vehicle we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VehicleUpsertArgs>(args: SelectSubset<T, VehicleUpsertArgs<ExtArgs>>): Prisma__VehicleClient<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Vehicles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleCountArgs} args - Arguments to filter Vehicles to count.
+     * @example
+     * // Count the number of Vehicles
+     * const count = await prisma.vehicle.count({
+     *   where: {
+     *     // ... the filter for the Vehicles we want to count
+     *   }
+     * })
+    **/
+    count<T extends VehicleCountArgs>(
+      args?: Subset<T, VehicleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VehicleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Vehicle.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VehicleAggregateArgs>(args: Subset<T, VehicleAggregateArgs>): Prisma.PrismaPromise<GetVehicleAggregateType<T>>
+
+    /**
+     * Group by Vehicle.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VehicleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VehicleGroupByArgs['orderBy'] }
+        : { orderBy?: VehicleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VehicleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVehicleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Vehicle model
+   */
+  readonly fields: VehicleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Vehicle.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VehicleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    drivers<T extends Vehicle$driversArgs<ExtArgs> = {}>(args?: Subset<T, Vehicle$driversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Vehicle model
+   */
+  interface VehicleFieldRefs {
+    readonly id: FieldRef<"Vehicle", 'String'>
+    readonly make: FieldRef<"Vehicle", 'String'>
+    readonly model: FieldRef<"Vehicle", 'String'>
+    readonly year: FieldRef<"Vehicle", 'Int'>
+    readonly color: FieldRef<"Vehicle", 'String'>
+    readonly plateNumber: FieldRef<"Vehicle", 'String'>
+    readonly carImage: FieldRef<"Vehicle", 'String'>
+    readonly carLicenseImage: FieldRef<"Vehicle", 'String'>
+    readonly carLicenseText: FieldRef<"Vehicle", 'String'>
+    readonly status: FieldRef<"Vehicle", 'DocumentStatus'>
+    readonly rejectionReason: FieldRef<"Vehicle", 'String'>
+    readonly uploadAttempts: FieldRef<"Vehicle", 'Int'>
+    readonly createdAt: FieldRef<"Vehicle", 'DateTime'>
+    readonly updatedAt: FieldRef<"Vehicle", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Vehicle findUnique
+   */
+  export type VehicleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * Filter, which Vehicle to fetch.
+     */
+    where: VehicleWhereUniqueInput
+  }
+
+  /**
+   * Vehicle findUniqueOrThrow
+   */
+  export type VehicleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * Filter, which Vehicle to fetch.
+     */
+    where: VehicleWhereUniqueInput
+  }
+
+  /**
+   * Vehicle findFirst
+   */
+  export type VehicleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * Filter, which Vehicle to fetch.
+     */
+    where?: VehicleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Vehicles to fetch.
+     */
+    orderBy?: VehicleOrderByWithRelationInput | VehicleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Vehicles.
+     */
+    cursor?: VehicleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Vehicles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Vehicles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Vehicles.
+     */
+    distinct?: VehicleScalarFieldEnum | VehicleScalarFieldEnum[]
+  }
+
+  /**
+   * Vehicle findFirstOrThrow
+   */
+  export type VehicleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * Filter, which Vehicle to fetch.
+     */
+    where?: VehicleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Vehicles to fetch.
+     */
+    orderBy?: VehicleOrderByWithRelationInput | VehicleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Vehicles.
+     */
+    cursor?: VehicleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Vehicles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Vehicles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Vehicles.
+     */
+    distinct?: VehicleScalarFieldEnum | VehicleScalarFieldEnum[]
+  }
+
+  /**
+   * Vehicle findMany
+   */
+  export type VehicleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * Filter, which Vehicles to fetch.
+     */
+    where?: VehicleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Vehicles to fetch.
+     */
+    orderBy?: VehicleOrderByWithRelationInput | VehicleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Vehicles.
+     */
+    cursor?: VehicleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Vehicles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Vehicles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Vehicles.
+     */
+    distinct?: VehicleScalarFieldEnum | VehicleScalarFieldEnum[]
+  }
+
+  /**
+   * Vehicle create
+   */
+  export type VehicleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Vehicle.
+     */
+    data: XOR<VehicleCreateInput, VehicleUncheckedCreateInput>
+  }
+
+  /**
+   * Vehicle createMany
+   */
+  export type VehicleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Vehicles.
+     */
+    data: VehicleCreateManyInput | VehicleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Vehicle createManyAndReturn
+   */
+  export type VehicleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * The data used to create many Vehicles.
+     */
+    data: VehicleCreateManyInput | VehicleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Vehicle update
+   */
+  export type VehicleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Vehicle.
+     */
+    data: XOR<VehicleUpdateInput, VehicleUncheckedUpdateInput>
+    /**
+     * Choose, which Vehicle to update.
+     */
+    where: VehicleWhereUniqueInput
+  }
+
+  /**
+   * Vehicle updateMany
+   */
+  export type VehicleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Vehicles.
+     */
+    data: XOR<VehicleUpdateManyMutationInput, VehicleUncheckedUpdateManyInput>
+    /**
+     * Filter which Vehicles to update
+     */
+    where?: VehicleWhereInput
+    /**
+     * Limit how many Vehicles to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Vehicle updateManyAndReturn
+   */
+  export type VehicleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * The data used to update Vehicles.
+     */
+    data: XOR<VehicleUpdateManyMutationInput, VehicleUncheckedUpdateManyInput>
+    /**
+     * Filter which Vehicles to update
+     */
+    where?: VehicleWhereInput
+    /**
+     * Limit how many Vehicles to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Vehicle upsert
+   */
+  export type VehicleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Vehicle to update in case it exists.
+     */
+    where: VehicleWhereUniqueInput
+    /**
+     * In case the Vehicle found by the `where` argument doesn't exist, create a new Vehicle with this data.
+     */
+    create: XOR<VehicleCreateInput, VehicleUncheckedCreateInput>
+    /**
+     * In case the Vehicle was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VehicleUpdateInput, VehicleUncheckedUpdateInput>
+  }
+
+  /**
+   * Vehicle delete
+   */
+  export type VehicleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
+    /**
+     * Filter which Vehicle to delete.
+     */
+    where: VehicleWhereUniqueInput
+  }
+
+  /**
+   * Vehicle deleteMany
+   */
+  export type VehicleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Vehicles to delete
+     */
+    where?: VehicleWhereInput
+    /**
+     * Limit how many Vehicles to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Vehicle.drivers
+   */
+  export type Vehicle$driversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Driver
+     */
+    select?: DriverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Driver
+     */
+    omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    where?: DriverWhereInput
+    orderBy?: DriverOrderByWithRelationInput | DriverOrderByWithRelationInput[]
+    cursor?: DriverWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DriverScalarFieldEnum | DriverScalarFieldEnum[]
+  }
+
+  /**
+   * Vehicle without action
+   */
+  export type VehicleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vehicle
+     */
+    select?: VehicleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vehicle
+     */
+    omit?: VehicleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleInclude<ExtArgs> | null
   }
 
 
@@ -4711,6 +7633,7 @@ export namespace Prisma {
     totalTrips?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rider"]>
 
   export type RiderSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4720,6 +7643,7 @@ export namespace Prisma {
     totalTrips?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rider"]>
 
   export type RiderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4729,6 +7653,7 @@ export namespace Prisma {
     totalTrips?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rider"]>
 
   export type RiderSelectScalar = {
@@ -4741,10 +7666,21 @@ export namespace Prisma {
   }
 
   export type RiderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "rating" | "totalTrips" | "createdAt" | "updatedAt", ExtArgs["result"]["rider"]>
+  export type RiderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type RiderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type RiderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
 
   export type $RiderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Rider"
-    objects: {}
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
@@ -5146,6 +8082,7 @@ export namespace Prisma {
    */
   export interface Prisma__RiderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5198,6 +8135,10 @@ export namespace Prisma {
      */
     omit?: RiderOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
+    /**
      * Filter, which Rider to fetch.
      */
     where: RiderWhereUniqueInput
@@ -5216,6 +8157,10 @@ export namespace Prisma {
      */
     omit?: RiderOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
+    /**
      * Filter, which Rider to fetch.
      */
     where: RiderWhereUniqueInput
@@ -5233,6 +8178,10 @@ export namespace Prisma {
      * Omit specific fields from the Rider
      */
     omit?: RiderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
     /**
      * Filter, which Rider to fetch.
      */
@@ -5282,6 +8231,10 @@ export namespace Prisma {
      */
     omit?: RiderOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
+    /**
      * Filter, which Rider to fetch.
      */
     where?: RiderWhereInput
@@ -5329,6 +8282,10 @@ export namespace Prisma {
      * Omit specific fields from the Rider
      */
     omit?: RiderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
     /**
      * Filter, which Riders to fetch.
      */
@@ -5378,6 +8335,10 @@ export namespace Prisma {
      */
     omit?: RiderOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
+    /**
      * The data needed to create a Rider.
      */
     data: XOR<RiderCreateInput, RiderUncheckedCreateInput>
@@ -5411,6 +8372,10 @@ export namespace Prisma {
      */
     data: RiderCreateManyInput | RiderCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -5425,6 +8390,10 @@ export namespace Prisma {
      * Omit specific fields from the Rider
      */
     omit?: RiderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
     /**
      * The data needed to update a Rider.
      */
@@ -5477,6 +8446,10 @@ export namespace Prisma {
      * Limit how many Riders to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -5491,6 +8464,10 @@ export namespace Prisma {
      * Omit specific fields from the Rider
      */
     omit?: RiderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
     /**
      * The filter to search for the Rider to update in case it exists.
      */
@@ -5517,6 +8494,10 @@ export namespace Prisma {
      * Omit specific fields from the Rider
      */
     omit?: RiderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
     /**
      * Filter which Rider to delete.
      */
@@ -5549,6 +8530,10 @@ export namespace Prisma {
      * Omit specific fields from the Rider
      */
     omit?: RiderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RiderInclude<ExtArgs> | null
   }
 
 
@@ -5576,6 +8561,13 @@ export namespace Prisma {
     role: 'role',
     status: 'status',
     profileImage: 'profileImage',
+    address: 'address',
+    city: 'city',
+    state: 'state',
+    country: 'country',
+    dateOfBirth: 'dateOfBirth',
+    emergencyContactName: 'emergencyContactName',
+    emergencyContactPhone: 'emergencyContactPhone',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5603,12 +8595,51 @@ export namespace Prisma {
     licenseNumber: 'licenseNumber',
     rating: 'rating',
     totalTrips: 'totalTrips',
+    onboardingStatus: 'onboardingStatus',
     isOnline: 'isOnline',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type DriverScalarFieldEnum = (typeof DriverScalarFieldEnum)[keyof typeof DriverScalarFieldEnum]
+
+
+  export const DriverDocumentScalarFieldEnum: {
+    id: 'id',
+    driverId: 'driverId',
+    identityImages: 'identityImages',
+    identityStatus: 'identityStatus',
+    identityRejectionReason: 'identityRejectionReason',
+    identityUploadAttempts: 'identityUploadAttempts',
+    drivingLicenseImages: 'drivingLicenseImages',
+    drivingLicenseStatus: 'drivingLicenseStatus',
+    drivingLicenseRejectionReason: 'drivingLicenseRejectionReason',
+    drivingLicenseUploadAttempts: 'drivingLicenseUploadAttempts',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DriverDocumentScalarFieldEnum = (typeof DriverDocumentScalarFieldEnum)[keyof typeof DriverDocumentScalarFieldEnum]
+
+
+  export const VehicleScalarFieldEnum: {
+    id: 'id',
+    make: 'make',
+    model: 'model',
+    year: 'year',
+    color: 'color',
+    plateNumber: 'plateNumber',
+    carImage: 'carImage',
+    carLicenseImage: 'carLicenseImage',
+    carLicenseText: 'carLicenseText',
+    status: 'status',
+    rejectionReason: 'rejectionReason',
+    uploadAttempts: 'uploadAttempts',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type VehicleScalarFieldEnum = (typeof VehicleScalarFieldEnum)[keyof typeof VehicleScalarFieldEnum]
 
 
   export const RiderScalarFieldEnum: {
@@ -5713,6 +8744,34 @@ export namespace Prisma {
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
+
+
+  /**
+   * Reference to a field of type 'OnboardingStatus'
+   */
+  export type EnumOnboardingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OnboardingStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'OnboardingStatus[]'
+   */
+  export type ListEnumOnboardingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OnboardingStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DocumentStatus'
+   */
+  export type EnumDocumentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'DocumentStatus[]'
+   */
+  export type ListEnumDocumentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentStatus[]'>
+    
   /**
    * Deep Input Types
    */
@@ -5731,9 +8790,18 @@ export namespace Prisma {
     role?: StringFilter<"User"> | string
     status?: StringFilter<"User"> | string
     profileImage?: StringNullableFilter<"User"> | string | null
+    address?: StringNullableFilter<"User"> | string | null
+    city?: StringNullableFilter<"User"> | string | null
+    state?: StringNullableFilter<"User"> | string | null
+    country?: StringNullableFilter<"User"> | string | null
+    dateOfBirth?: DateTimeNullableFilter<"User"> | Date | string | null
+    emergencyContactName?: StringNullableFilter<"User"> | string | null
+    emergencyContactPhone?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshTokens?: RefreshTokenListRelationFilter
+    driver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
+    rider?: XOR<RiderNullableScalarRelationFilter, RiderWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -5746,9 +8814,18 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     profileImage?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    state?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    dateOfBirth?: SortOrderInput | SortOrder
+    emergencyContactName?: SortOrderInput | SortOrder
+    emergencyContactPhone?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     refreshTokens?: RefreshTokenOrderByRelationAggregateInput
+    driver?: DriverOrderByWithRelationInput
+    rider?: RiderOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -5764,9 +8841,18 @@ export namespace Prisma {
     role?: StringFilter<"User"> | string
     status?: StringFilter<"User"> | string
     profileImage?: StringNullableFilter<"User"> | string | null
+    address?: StringNullableFilter<"User"> | string | null
+    city?: StringNullableFilter<"User"> | string | null
+    state?: StringNullableFilter<"User"> | string | null
+    country?: StringNullableFilter<"User"> | string | null
+    dateOfBirth?: DateTimeNullableFilter<"User"> | Date | string | null
+    emergencyContactName?: StringNullableFilter<"User"> | string | null
+    emergencyContactPhone?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshTokens?: RefreshTokenListRelationFilter
+    driver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
+    rider?: XOR<RiderNullableScalarRelationFilter, RiderWhereInput> | null
   }, "id" | "email" | "phoneNumber">
 
   export type UserOrderByWithAggregationInput = {
@@ -5779,6 +8865,13 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     profileImage?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    state?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    dateOfBirth?: SortOrderInput | SortOrder
+    emergencyContactName?: SortOrderInput | SortOrder
+    emergencyContactPhone?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -5799,6 +8892,13 @@ export namespace Prisma {
     role?: StringWithAggregatesFilter<"User"> | string
     status?: StringWithAggregatesFilter<"User"> | string
     profileImage?: StringNullableWithAggregatesFilter<"User"> | string | null
+    address?: StringNullableWithAggregatesFilter<"User"> | string | null
+    city?: StringNullableWithAggregatesFilter<"User"> | string | null
+    state?: StringNullableWithAggregatesFilter<"User"> | string | null
+    country?: StringNullableWithAggregatesFilter<"User"> | string | null
+    dateOfBirth?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    emergencyContactName?: StringNullableWithAggregatesFilter<"User"> | string | null
+    emergencyContactPhone?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -5878,9 +8978,13 @@ export namespace Prisma {
     licenseNumber?: StringFilter<"Driver"> | string
     rating?: FloatFilter<"Driver"> | number
     totalTrips?: IntFilter<"Driver"> | number
+    onboardingStatus?: EnumOnboardingStatusFilter<"Driver"> | $Enums.OnboardingStatus
     isOnline?: BoolFilter<"Driver"> | boolean
     createdAt?: DateTimeFilter<"Driver"> | Date | string
     updatedAt?: DateTimeFilter<"Driver"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    vehicle?: XOR<VehicleNullableScalarRelationFilter, VehicleWhereInput> | null
+    document?: XOR<DriverDocumentNullableScalarRelationFilter, DriverDocumentWhereInput> | null
   }
 
   export type DriverOrderByWithRelationInput = {
@@ -5890,9 +8994,13 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    onboardingStatus?: SortOrder
     isOnline?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    vehicle?: VehicleOrderByWithRelationInput
+    document?: DriverDocumentOrderByWithRelationInput
   }
 
   export type DriverWhereUniqueInput = Prisma.AtLeast<{
@@ -5905,9 +9013,13 @@ export namespace Prisma {
     vehicleId?: StringNullableFilter<"Driver"> | string | null
     rating?: FloatFilter<"Driver"> | number
     totalTrips?: IntFilter<"Driver"> | number
+    onboardingStatus?: EnumOnboardingStatusFilter<"Driver"> | $Enums.OnboardingStatus
     isOnline?: BoolFilter<"Driver"> | boolean
     createdAt?: DateTimeFilter<"Driver"> | Date | string
     updatedAt?: DateTimeFilter<"Driver"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    vehicle?: XOR<VehicleNullableScalarRelationFilter, VehicleWhereInput> | null
+    document?: XOR<DriverDocumentNullableScalarRelationFilter, DriverDocumentWhereInput> | null
   }, "id" | "userId" | "licenseNumber">
 
   export type DriverOrderByWithAggregationInput = {
@@ -5917,6 +9029,7 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    onboardingStatus?: SortOrder
     isOnline?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -5937,9 +9050,204 @@ export namespace Prisma {
     licenseNumber?: StringWithAggregatesFilter<"Driver"> | string
     rating?: FloatWithAggregatesFilter<"Driver"> | number
     totalTrips?: IntWithAggregatesFilter<"Driver"> | number
+    onboardingStatus?: EnumOnboardingStatusWithAggregatesFilter<"Driver"> | $Enums.OnboardingStatus
     isOnline?: BoolWithAggregatesFilter<"Driver"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Driver"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Driver"> | Date | string
+  }
+
+  export type DriverDocumentWhereInput = {
+    AND?: DriverDocumentWhereInput | DriverDocumentWhereInput[]
+    OR?: DriverDocumentWhereInput[]
+    NOT?: DriverDocumentWhereInput | DriverDocumentWhereInput[]
+    id?: StringFilter<"DriverDocument"> | string
+    driverId?: StringFilter<"DriverDocument"> | string
+    identityImages?: StringNullableListFilter<"DriverDocument">
+    identityStatus?: EnumDocumentStatusFilter<"DriverDocument"> | $Enums.DocumentStatus
+    identityRejectionReason?: StringNullableFilter<"DriverDocument"> | string | null
+    identityUploadAttempts?: IntFilter<"DriverDocument"> | number
+    drivingLicenseImages?: StringNullableListFilter<"DriverDocument">
+    drivingLicenseStatus?: EnumDocumentStatusFilter<"DriverDocument"> | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: StringNullableFilter<"DriverDocument"> | string | null
+    drivingLicenseUploadAttempts?: IntFilter<"DriverDocument"> | number
+    createdAt?: DateTimeFilter<"DriverDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"DriverDocument"> | Date | string
+    driver?: XOR<DriverScalarRelationFilter, DriverWhereInput>
+  }
+
+  export type DriverDocumentOrderByWithRelationInput = {
+    id?: SortOrder
+    driverId?: SortOrder
+    identityImages?: SortOrder
+    identityStatus?: SortOrder
+    identityRejectionReason?: SortOrderInput | SortOrder
+    identityUploadAttempts?: SortOrder
+    drivingLicenseImages?: SortOrder
+    drivingLicenseStatus?: SortOrder
+    drivingLicenseRejectionReason?: SortOrderInput | SortOrder
+    drivingLicenseUploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    driver?: DriverOrderByWithRelationInput
+  }
+
+  export type DriverDocumentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    driverId?: string
+    AND?: DriverDocumentWhereInput | DriverDocumentWhereInput[]
+    OR?: DriverDocumentWhereInput[]
+    NOT?: DriverDocumentWhereInput | DriverDocumentWhereInput[]
+    identityImages?: StringNullableListFilter<"DriverDocument">
+    identityStatus?: EnumDocumentStatusFilter<"DriverDocument"> | $Enums.DocumentStatus
+    identityRejectionReason?: StringNullableFilter<"DriverDocument"> | string | null
+    identityUploadAttempts?: IntFilter<"DriverDocument"> | number
+    drivingLicenseImages?: StringNullableListFilter<"DriverDocument">
+    drivingLicenseStatus?: EnumDocumentStatusFilter<"DriverDocument"> | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: StringNullableFilter<"DriverDocument"> | string | null
+    drivingLicenseUploadAttempts?: IntFilter<"DriverDocument"> | number
+    createdAt?: DateTimeFilter<"DriverDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"DriverDocument"> | Date | string
+    driver?: XOR<DriverScalarRelationFilter, DriverWhereInput>
+  }, "id" | "driverId">
+
+  export type DriverDocumentOrderByWithAggregationInput = {
+    id?: SortOrder
+    driverId?: SortOrder
+    identityImages?: SortOrder
+    identityStatus?: SortOrder
+    identityRejectionReason?: SortOrderInput | SortOrder
+    identityUploadAttempts?: SortOrder
+    drivingLicenseImages?: SortOrder
+    drivingLicenseStatus?: SortOrder
+    drivingLicenseRejectionReason?: SortOrderInput | SortOrder
+    drivingLicenseUploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DriverDocumentCountOrderByAggregateInput
+    _avg?: DriverDocumentAvgOrderByAggregateInput
+    _max?: DriverDocumentMaxOrderByAggregateInput
+    _min?: DriverDocumentMinOrderByAggregateInput
+    _sum?: DriverDocumentSumOrderByAggregateInput
+  }
+
+  export type DriverDocumentScalarWhereWithAggregatesInput = {
+    AND?: DriverDocumentScalarWhereWithAggregatesInput | DriverDocumentScalarWhereWithAggregatesInput[]
+    OR?: DriverDocumentScalarWhereWithAggregatesInput[]
+    NOT?: DriverDocumentScalarWhereWithAggregatesInput | DriverDocumentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DriverDocument"> | string
+    driverId?: StringWithAggregatesFilter<"DriverDocument"> | string
+    identityImages?: StringNullableListFilter<"DriverDocument">
+    identityStatus?: EnumDocumentStatusWithAggregatesFilter<"DriverDocument"> | $Enums.DocumentStatus
+    identityRejectionReason?: StringNullableWithAggregatesFilter<"DriverDocument"> | string | null
+    identityUploadAttempts?: IntWithAggregatesFilter<"DriverDocument"> | number
+    drivingLicenseImages?: StringNullableListFilter<"DriverDocument">
+    drivingLicenseStatus?: EnumDocumentStatusWithAggregatesFilter<"DriverDocument"> | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: StringNullableWithAggregatesFilter<"DriverDocument"> | string | null
+    drivingLicenseUploadAttempts?: IntWithAggregatesFilter<"DriverDocument"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"DriverDocument"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DriverDocument"> | Date | string
+  }
+
+  export type VehicleWhereInput = {
+    AND?: VehicleWhereInput | VehicleWhereInput[]
+    OR?: VehicleWhereInput[]
+    NOT?: VehicleWhereInput | VehicleWhereInput[]
+    id?: StringFilter<"Vehicle"> | string
+    make?: StringFilter<"Vehicle"> | string
+    model?: StringFilter<"Vehicle"> | string
+    year?: IntFilter<"Vehicle"> | number
+    color?: StringFilter<"Vehicle"> | string
+    plateNumber?: StringFilter<"Vehicle"> | string
+    carImage?: StringFilter<"Vehicle"> | string
+    carLicenseImage?: StringFilter<"Vehicle"> | string
+    carLicenseText?: StringNullableFilter<"Vehicle"> | string | null
+    status?: EnumDocumentStatusFilter<"Vehicle"> | $Enums.DocumentStatus
+    rejectionReason?: StringNullableFilter<"Vehicle"> | string | null
+    uploadAttempts?: IntFilter<"Vehicle"> | number
+    createdAt?: DateTimeFilter<"Vehicle"> | Date | string
+    updatedAt?: DateTimeFilter<"Vehicle"> | Date | string
+    drivers?: DriverListRelationFilter
+  }
+
+  export type VehicleOrderByWithRelationInput = {
+    id?: SortOrder
+    make?: SortOrder
+    model?: SortOrder
+    year?: SortOrder
+    color?: SortOrder
+    plateNumber?: SortOrder
+    carImage?: SortOrder
+    carLicenseImage?: SortOrder
+    carLicenseText?: SortOrderInput | SortOrder
+    status?: SortOrder
+    rejectionReason?: SortOrderInput | SortOrder
+    uploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    drivers?: DriverOrderByRelationAggregateInput
+  }
+
+  export type VehicleWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    plateNumber?: string
+    AND?: VehicleWhereInput | VehicleWhereInput[]
+    OR?: VehicleWhereInput[]
+    NOT?: VehicleWhereInput | VehicleWhereInput[]
+    make?: StringFilter<"Vehicle"> | string
+    model?: StringFilter<"Vehicle"> | string
+    year?: IntFilter<"Vehicle"> | number
+    color?: StringFilter<"Vehicle"> | string
+    carImage?: StringFilter<"Vehicle"> | string
+    carLicenseImage?: StringFilter<"Vehicle"> | string
+    carLicenseText?: StringNullableFilter<"Vehicle"> | string | null
+    status?: EnumDocumentStatusFilter<"Vehicle"> | $Enums.DocumentStatus
+    rejectionReason?: StringNullableFilter<"Vehicle"> | string | null
+    uploadAttempts?: IntFilter<"Vehicle"> | number
+    createdAt?: DateTimeFilter<"Vehicle"> | Date | string
+    updatedAt?: DateTimeFilter<"Vehicle"> | Date | string
+    drivers?: DriverListRelationFilter
+  }, "id" | "plateNumber">
+
+  export type VehicleOrderByWithAggregationInput = {
+    id?: SortOrder
+    make?: SortOrder
+    model?: SortOrder
+    year?: SortOrder
+    color?: SortOrder
+    plateNumber?: SortOrder
+    carImage?: SortOrder
+    carLicenseImage?: SortOrder
+    carLicenseText?: SortOrderInput | SortOrder
+    status?: SortOrder
+    rejectionReason?: SortOrderInput | SortOrder
+    uploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: VehicleCountOrderByAggregateInput
+    _avg?: VehicleAvgOrderByAggregateInput
+    _max?: VehicleMaxOrderByAggregateInput
+    _min?: VehicleMinOrderByAggregateInput
+    _sum?: VehicleSumOrderByAggregateInput
+  }
+
+  export type VehicleScalarWhereWithAggregatesInput = {
+    AND?: VehicleScalarWhereWithAggregatesInput | VehicleScalarWhereWithAggregatesInput[]
+    OR?: VehicleScalarWhereWithAggregatesInput[]
+    NOT?: VehicleScalarWhereWithAggregatesInput | VehicleScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Vehicle"> | string
+    make?: StringWithAggregatesFilter<"Vehicle"> | string
+    model?: StringWithAggregatesFilter<"Vehicle"> | string
+    year?: IntWithAggregatesFilter<"Vehicle"> | number
+    color?: StringWithAggregatesFilter<"Vehicle"> | string
+    plateNumber?: StringWithAggregatesFilter<"Vehicle"> | string
+    carImage?: StringWithAggregatesFilter<"Vehicle"> | string
+    carLicenseImage?: StringWithAggregatesFilter<"Vehicle"> | string
+    carLicenseText?: StringNullableWithAggregatesFilter<"Vehicle"> | string | null
+    status?: EnumDocumentStatusWithAggregatesFilter<"Vehicle"> | $Enums.DocumentStatus
+    rejectionReason?: StringNullableWithAggregatesFilter<"Vehicle"> | string | null
+    uploadAttempts?: IntWithAggregatesFilter<"Vehicle"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"Vehicle"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Vehicle"> | Date | string
   }
 
   export type RiderWhereInput = {
@@ -5952,6 +9260,7 @@ export namespace Prisma {
     totalTrips?: IntFilter<"Rider"> | number
     createdAt?: DateTimeFilter<"Rider"> | Date | string
     updatedAt?: DateTimeFilter<"Rider"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type RiderOrderByWithRelationInput = {
@@ -5961,6 +9270,7 @@ export namespace Prisma {
     totalTrips?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
   }
 
   export type RiderWhereUniqueInput = Prisma.AtLeast<{
@@ -5973,6 +9283,7 @@ export namespace Prisma {
     totalTrips?: IntFilter<"Rider"> | number
     createdAt?: DateTimeFilter<"Rider"> | Date | string
     updatedAt?: DateTimeFilter<"Rider"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "userId">
 
   export type RiderOrderByWithAggregationInput = {
@@ -6011,9 +9322,18 @@ export namespace Prisma {
     role: string
     status?: string
     profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    driver?: DriverCreateNestedOneWithoutUserInput
+    rider?: RiderCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -6026,9 +9346,18 @@ export namespace Prisma {
     role: string
     status?: string
     profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    driver?: DriverUncheckedCreateNestedOneWithoutUserInput
+    rider?: RiderUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -6041,9 +9370,18 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    driver?: DriverUpdateOneWithoutUserNestedInput
+    rider?: RiderUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -6056,9 +9394,18 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    driver?: DriverUncheckedUpdateOneWithoutUserNestedInput
+    rider?: RiderUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -6071,6 +9418,13 @@ export namespace Prisma {
     role: string
     status?: string
     profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6085,6 +9439,13 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6099,6 +9460,13 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6174,14 +9542,16 @@ export namespace Prisma {
 
   export type DriverCreateInput = {
     id?: string
-    userId: string
-    vehicleId?: string | null
     licenseNumber: string
     rating?: number
     totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
     isOnline?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDriverInput
+    vehicle?: VehicleCreateNestedOneWithoutDriversInput
+    document?: DriverDocumentCreateNestedOneWithoutDriverInput
   }
 
   export type DriverUncheckedCreateInput = {
@@ -6191,21 +9561,25 @@ export namespace Prisma {
     licenseNumber: string
     rating?: number
     totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
     isOnline?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    document?: DriverDocumentUncheckedCreateNestedOneWithoutDriverInput
   }
 
   export type DriverUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
     licenseNumber?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDriverNestedInput
+    vehicle?: VehicleUpdateOneWithoutDriversNestedInput
+    document?: DriverDocumentUpdateOneWithoutDriverNestedInput
   }
 
   export type DriverUncheckedUpdateInput = {
@@ -6215,9 +9589,11 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    document?: DriverDocumentUncheckedUpdateOneWithoutDriverNestedInput
   }
 
   export type DriverCreateManyInput = {
@@ -6227,6 +9603,7 @@ export namespace Prisma {
     licenseNumber: string
     rating?: number
     totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
     isOnline?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -6234,11 +9611,10 @@ export namespace Prisma {
 
   export type DriverUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
     licenseNumber?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
     isOnline?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6251,18 +9627,246 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
     isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverDocumentCreateInput = {
+    id?: string
+    identityImages?: DriverDocumentCreateidentityImagesInput | string[]
+    identityStatus?: $Enums.DocumentStatus
+    identityRejectionReason?: string | null
+    identityUploadAttempts?: number
+    drivingLicenseImages?: DriverDocumentCreatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: string | null
+    drivingLicenseUploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    driver: DriverCreateNestedOneWithoutDocumentInput
+  }
+
+  export type DriverDocumentUncheckedCreateInput = {
+    id?: string
+    driverId: string
+    identityImages?: DriverDocumentCreateidentityImagesInput | string[]
+    identityStatus?: $Enums.DocumentStatus
+    identityRejectionReason?: string | null
+    identityUploadAttempts?: number
+    drivingLicenseImages?: DriverDocumentCreatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: string | null
+    drivingLicenseUploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DriverDocumentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityImages?: DriverDocumentUpdateidentityImagesInput | string[]
+    identityStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    identityRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    identityUploadAttempts?: IntFieldUpdateOperationsInput | number
+    drivingLicenseImages?: DriverDocumentUpdatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    drivingLicenseUploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    driver?: DriverUpdateOneRequiredWithoutDocumentNestedInput
+  }
+
+  export type DriverDocumentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    driverId?: StringFieldUpdateOperationsInput | string
+    identityImages?: DriverDocumentUpdateidentityImagesInput | string[]
+    identityStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    identityRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    identityUploadAttempts?: IntFieldUpdateOperationsInput | number
+    drivingLicenseImages?: DriverDocumentUpdatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    drivingLicenseUploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverDocumentCreateManyInput = {
+    id?: string
+    driverId: string
+    identityImages?: DriverDocumentCreateidentityImagesInput | string[]
+    identityStatus?: $Enums.DocumentStatus
+    identityRejectionReason?: string | null
+    identityUploadAttempts?: number
+    drivingLicenseImages?: DriverDocumentCreatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: string | null
+    drivingLicenseUploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DriverDocumentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityImages?: DriverDocumentUpdateidentityImagesInput | string[]
+    identityStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    identityRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    identityUploadAttempts?: IntFieldUpdateOperationsInput | number
+    drivingLicenseImages?: DriverDocumentUpdatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    drivingLicenseUploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverDocumentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    driverId?: StringFieldUpdateOperationsInput | string
+    identityImages?: DriverDocumentUpdateidentityImagesInput | string[]
+    identityStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    identityRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    identityUploadAttempts?: IntFieldUpdateOperationsInput | number
+    drivingLicenseImages?: DriverDocumentUpdatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    drivingLicenseUploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleCreateInput = {
+    id?: string
+    make: string
+    model: string
+    year: number
+    color: string
+    plateNumber: string
+    carImage: string
+    carLicenseImage: string
+    carLicenseText?: string | null
+    status?: $Enums.DocumentStatus
+    rejectionReason?: string | null
+    uploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drivers?: DriverCreateNestedManyWithoutVehicleInput
+  }
+
+  export type VehicleUncheckedCreateInput = {
+    id?: string
+    make: string
+    model: string
+    year: number
+    color: string
+    plateNumber: string
+    carImage: string
+    carLicenseImage: string
+    carLicenseText?: string | null
+    status?: $Enums.DocumentStatus
+    rejectionReason?: string | null
+    uploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drivers?: DriverUncheckedCreateNestedManyWithoutVehicleInput
+  }
+
+  export type VehicleUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    make?: StringFieldUpdateOperationsInput | string
+    model?: StringFieldUpdateOperationsInput | string
+    year?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
+    plateNumber?: StringFieldUpdateOperationsInput | string
+    carImage?: StringFieldUpdateOperationsInput | string
+    carLicenseImage?: StringFieldUpdateOperationsInput | string
+    carLicenseText?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    rejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drivers?: DriverUpdateManyWithoutVehicleNestedInput
+  }
+
+  export type VehicleUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    make?: StringFieldUpdateOperationsInput | string
+    model?: StringFieldUpdateOperationsInput | string
+    year?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
+    plateNumber?: StringFieldUpdateOperationsInput | string
+    carImage?: StringFieldUpdateOperationsInput | string
+    carLicenseImage?: StringFieldUpdateOperationsInput | string
+    carLicenseText?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    rejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drivers?: DriverUncheckedUpdateManyWithoutVehicleNestedInput
+  }
+
+  export type VehicleCreateManyInput = {
+    id?: string
+    make: string
+    model: string
+    year: number
+    color: string
+    plateNumber: string
+    carImage: string
+    carLicenseImage: string
+    carLicenseText?: string | null
+    status?: $Enums.DocumentStatus
+    rejectionReason?: string | null
+    uploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    make?: StringFieldUpdateOperationsInput | string
+    model?: StringFieldUpdateOperationsInput | string
+    year?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
+    plateNumber?: StringFieldUpdateOperationsInput | string
+    carImage?: StringFieldUpdateOperationsInput | string
+    carLicenseImage?: StringFieldUpdateOperationsInput | string
+    carLicenseText?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    rejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    make?: StringFieldUpdateOperationsInput | string
+    model?: StringFieldUpdateOperationsInput | string
+    year?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
+    plateNumber?: StringFieldUpdateOperationsInput | string
+    carImage?: StringFieldUpdateOperationsInput | string
+    carLicenseImage?: StringFieldUpdateOperationsInput | string
+    carLicenseText?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    rejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadAttempts?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RiderCreateInput = {
     id?: string
-    userId: string
     rating?: number
     totalTrips?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutRiderInput
   }
 
   export type RiderUncheckedCreateInput = {
@@ -6276,11 +9880,11 @@ export namespace Prisma {
 
   export type RiderUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutRiderNestedInput
   }
 
   export type RiderUncheckedUpdateInput = {
@@ -6303,7 +9907,6 @@ export namespace Prisma {
 
   export type RiderUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6349,6 +9952,17 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -6364,6 +9978,16 @@ export namespace Prisma {
     every?: RefreshTokenWhereInput
     some?: RefreshTokenWhereInput
     none?: RefreshTokenWhereInput
+  }
+
+  export type DriverNullableScalarRelationFilter = {
+    is?: DriverWhereInput | null
+    isNot?: DriverWhereInput | null
+  }
+
+  export type RiderNullableScalarRelationFilter = {
+    is?: RiderWhereInput | null
+    isNot?: RiderWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -6385,6 +10009,13 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     profileImage?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    state?: SortOrder
+    country?: SortOrder
+    dateOfBirth?: SortOrder
+    emergencyContactName?: SortOrder
+    emergencyContactPhone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6399,6 +10030,13 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     profileImage?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    state?: SortOrder
+    country?: SortOrder
+    dateOfBirth?: SortOrder
+    emergencyContactName?: SortOrder
+    emergencyContactPhone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6413,6 +10051,13 @@ export namespace Prisma {
     role?: SortOrder
     status?: SortOrder
     profileImage?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    state?: SortOrder
+    country?: SortOrder
+    dateOfBirth?: SortOrder
+    emergencyContactName?: SortOrder
+    emergencyContactPhone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6451,6 +10096,20 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -6537,6 +10196,23 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type EnumOnboardingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingStatus | EnumOnboardingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingStatusFilter<$PrismaModel> | $Enums.OnboardingStatus
+  }
+
+  export type VehicleNullableScalarRelationFilter = {
+    is?: VehicleWhereInput | null
+    isNot?: VehicleWhereInput | null
+  }
+
+  export type DriverDocumentNullableScalarRelationFilter = {
+    is?: DriverDocumentWhereInput | null
+    isNot?: DriverDocumentWhereInput | null
+  }
+
   export type DriverCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -6544,6 +10220,7 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    onboardingStatus?: SortOrder
     isOnline?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6561,6 +10238,7 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    onboardingStatus?: SortOrder
     isOnline?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6573,6 +10251,7 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    onboardingStatus?: SortOrder
     isOnline?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6613,6 +10292,168 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type EnumOnboardingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingStatus | EnumOnboardingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingStatusWithAggregatesFilter<$PrismaModel> | $Enums.OnboardingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOnboardingStatusFilter<$PrismaModel>
+    _max?: NestedEnumOnboardingStatusFilter<$PrismaModel>
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type EnumDocumentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentStatus | EnumDocumentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentStatusFilter<$PrismaModel> | $Enums.DocumentStatus
+  }
+
+  export type DriverScalarRelationFilter = {
+    is?: DriverWhereInput
+    isNot?: DriverWhereInput
+  }
+
+  export type DriverDocumentCountOrderByAggregateInput = {
+    id?: SortOrder
+    driverId?: SortOrder
+    identityImages?: SortOrder
+    identityStatus?: SortOrder
+    identityRejectionReason?: SortOrder
+    identityUploadAttempts?: SortOrder
+    drivingLicenseImages?: SortOrder
+    drivingLicenseStatus?: SortOrder
+    drivingLicenseRejectionReason?: SortOrder
+    drivingLicenseUploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DriverDocumentAvgOrderByAggregateInput = {
+    identityUploadAttempts?: SortOrder
+    drivingLicenseUploadAttempts?: SortOrder
+  }
+
+  export type DriverDocumentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    driverId?: SortOrder
+    identityStatus?: SortOrder
+    identityRejectionReason?: SortOrder
+    identityUploadAttempts?: SortOrder
+    drivingLicenseStatus?: SortOrder
+    drivingLicenseRejectionReason?: SortOrder
+    drivingLicenseUploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DriverDocumentMinOrderByAggregateInput = {
+    id?: SortOrder
+    driverId?: SortOrder
+    identityStatus?: SortOrder
+    identityRejectionReason?: SortOrder
+    identityUploadAttempts?: SortOrder
+    drivingLicenseStatus?: SortOrder
+    drivingLicenseRejectionReason?: SortOrder
+    drivingLicenseUploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DriverDocumentSumOrderByAggregateInput = {
+    identityUploadAttempts?: SortOrder
+    drivingLicenseUploadAttempts?: SortOrder
+  }
+
+  export type EnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentStatus | EnumDocumentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDocumentStatusFilter<$PrismaModel>
+    _max?: NestedEnumDocumentStatusFilter<$PrismaModel>
+  }
+
+  export type DriverListRelationFilter = {
+    every?: DriverWhereInput
+    some?: DriverWhereInput
+    none?: DriverWhereInput
+  }
+
+  export type DriverOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type VehicleCountOrderByAggregateInput = {
+    id?: SortOrder
+    make?: SortOrder
+    model?: SortOrder
+    year?: SortOrder
+    color?: SortOrder
+    plateNumber?: SortOrder
+    carImage?: SortOrder
+    carLicenseImage?: SortOrder
+    carLicenseText?: SortOrder
+    status?: SortOrder
+    rejectionReason?: SortOrder
+    uploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleAvgOrderByAggregateInput = {
+    year?: SortOrder
+    uploadAttempts?: SortOrder
+  }
+
+  export type VehicleMaxOrderByAggregateInput = {
+    id?: SortOrder
+    make?: SortOrder
+    model?: SortOrder
+    year?: SortOrder
+    color?: SortOrder
+    plateNumber?: SortOrder
+    carImage?: SortOrder
+    carLicenseImage?: SortOrder
+    carLicenseText?: SortOrder
+    status?: SortOrder
+    rejectionReason?: SortOrder
+    uploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleMinOrderByAggregateInput = {
+    id?: SortOrder
+    make?: SortOrder
+    model?: SortOrder
+    year?: SortOrder
+    color?: SortOrder
+    plateNumber?: SortOrder
+    carImage?: SortOrder
+    carLicenseImage?: SortOrder
+    carLicenseText?: SortOrder
+    status?: SortOrder
+    rejectionReason?: SortOrder
+    uploadAttempts?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleSumOrderByAggregateInput = {
+    year?: SortOrder
+    uploadAttempts?: SortOrder
   }
 
   export type RiderCountOrderByAggregateInput = {
@@ -6659,11 +10500,35 @@ export namespace Prisma {
     connect?: RefreshTokenWhereUniqueInput | RefreshTokenWhereUniqueInput[]
   }
 
+  export type DriverCreateNestedOneWithoutUserInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    connect?: DriverWhereUniqueInput
+  }
+
+  export type RiderCreateNestedOneWithoutUserInput = {
+    create?: XOR<RiderCreateWithoutUserInput, RiderUncheckedCreateWithoutUserInput>
+    connectOrCreate?: RiderCreateOrConnectWithoutUserInput
+    connect?: RiderWhereUniqueInput
+  }
+
   export type RefreshTokenUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<RefreshTokenCreateWithoutUserInput, RefreshTokenUncheckedCreateWithoutUserInput> | RefreshTokenCreateWithoutUserInput[] | RefreshTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: RefreshTokenCreateOrConnectWithoutUserInput | RefreshTokenCreateOrConnectWithoutUserInput[]
     createMany?: RefreshTokenCreateManyUserInputEnvelope
     connect?: RefreshTokenWhereUniqueInput | RefreshTokenWhereUniqueInput[]
+  }
+
+  export type DriverUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    connect?: DriverWhereUniqueInput
+  }
+
+  export type RiderUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<RiderCreateWithoutUserInput, RiderUncheckedCreateWithoutUserInput>
+    connectOrCreate?: RiderCreateOrConnectWithoutUserInput
+    connect?: RiderWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -6672,6 +10537,10 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -6692,6 +10561,26 @@ export namespace Prisma {
     deleteMany?: RefreshTokenScalarWhereInput | RefreshTokenScalarWhereInput[]
   }
 
+  export type DriverUpdateOneWithoutUserNestedInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    upsert?: DriverUpsertWithoutUserInput
+    disconnect?: DriverWhereInput | boolean
+    delete?: DriverWhereInput | boolean
+    connect?: DriverWhereUniqueInput
+    update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutUserInput, DriverUpdateWithoutUserInput>, DriverUncheckedUpdateWithoutUserInput>
+  }
+
+  export type RiderUpdateOneWithoutUserNestedInput = {
+    create?: XOR<RiderCreateWithoutUserInput, RiderUncheckedCreateWithoutUserInput>
+    connectOrCreate?: RiderCreateOrConnectWithoutUserInput
+    upsert?: RiderUpsertWithoutUserInput
+    disconnect?: RiderWhereInput | boolean
+    delete?: RiderWhereInput | boolean
+    connect?: RiderWhereUniqueInput
+    update?: XOR<XOR<RiderUpdateToOneWithWhereWithoutUserInput, RiderUpdateWithoutUserInput>, RiderUncheckedUpdateWithoutUserInput>
+  }
+
   export type RefreshTokenUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<RefreshTokenCreateWithoutUserInput, RefreshTokenUncheckedCreateWithoutUserInput> | RefreshTokenCreateWithoutUserInput[] | RefreshTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: RefreshTokenCreateOrConnectWithoutUserInput | RefreshTokenCreateOrConnectWithoutUserInput[]
@@ -6704,6 +10593,26 @@ export namespace Prisma {
     update?: RefreshTokenUpdateWithWhereUniqueWithoutUserInput | RefreshTokenUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: RefreshTokenUpdateManyWithWhereWithoutUserInput | RefreshTokenUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: RefreshTokenScalarWhereInput | RefreshTokenScalarWhereInput[]
+  }
+
+  export type DriverUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    upsert?: DriverUpsertWithoutUserInput
+    disconnect?: DriverWhereInput | boolean
+    delete?: DriverWhereInput | boolean
+    connect?: DriverWhereUniqueInput
+    update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutUserInput, DriverUpdateWithoutUserInput>, DriverUncheckedUpdateWithoutUserInput>
+  }
+
+  export type RiderUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<RiderCreateWithoutUserInput, RiderUncheckedCreateWithoutUserInput>
+    connectOrCreate?: RiderCreateOrConnectWithoutUserInput
+    upsert?: RiderUpsertWithoutUserInput
+    disconnect?: RiderWhereInput | boolean
+    delete?: RiderWhereInput | boolean
+    connect?: RiderWhereUniqueInput
+    update?: XOR<XOR<RiderUpdateToOneWithWhereWithoutUserInput, RiderUpdateWithoutUserInput>, RiderUncheckedUpdateWithoutUserInput>
   }
 
   export type UserCreateNestedOneWithoutRefreshTokensInput = {
@@ -6724,6 +10633,30 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRefreshTokensInput, UserUpdateWithoutRefreshTokensInput>, UserUncheckedUpdateWithoutRefreshTokensInput>
   }
 
+  export type UserCreateNestedOneWithoutDriverInput = {
+    create?: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDriverInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type VehicleCreateNestedOneWithoutDriversInput = {
+    create?: XOR<VehicleCreateWithoutDriversInput, VehicleUncheckedCreateWithoutDriversInput>
+    connectOrCreate?: VehicleCreateOrConnectWithoutDriversInput
+    connect?: VehicleWhereUniqueInput
+  }
+
+  export type DriverDocumentCreateNestedOneWithoutDriverInput = {
+    create?: XOR<DriverDocumentCreateWithoutDriverInput, DriverDocumentUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: DriverDocumentCreateOrConnectWithoutDriverInput
+    connect?: DriverDocumentWhereUniqueInput
+  }
+
+  export type DriverDocumentUncheckedCreateNestedOneWithoutDriverInput = {
+    create?: XOR<DriverDocumentCreateWithoutDriverInput, DriverDocumentUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: DriverDocumentCreateOrConnectWithoutDriverInput
+    connect?: DriverDocumentWhereUniqueInput
+  }
+
   export type FloatFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -6738,6 +10671,140 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type EnumOnboardingStatusFieldUpdateOperationsInput = {
+    set?: $Enums.OnboardingStatus
+  }
+
+  export type UserUpdateOneRequiredWithoutDriverNestedInput = {
+    create?: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDriverInput
+    upsert?: UserUpsertWithoutDriverInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDriverInput, UserUpdateWithoutDriverInput>, UserUncheckedUpdateWithoutDriverInput>
+  }
+
+  export type VehicleUpdateOneWithoutDriversNestedInput = {
+    create?: XOR<VehicleCreateWithoutDriversInput, VehicleUncheckedCreateWithoutDriversInput>
+    connectOrCreate?: VehicleCreateOrConnectWithoutDriversInput
+    upsert?: VehicleUpsertWithoutDriversInput
+    disconnect?: VehicleWhereInput | boolean
+    delete?: VehicleWhereInput | boolean
+    connect?: VehicleWhereUniqueInput
+    update?: XOR<XOR<VehicleUpdateToOneWithWhereWithoutDriversInput, VehicleUpdateWithoutDriversInput>, VehicleUncheckedUpdateWithoutDriversInput>
+  }
+
+  export type DriverDocumentUpdateOneWithoutDriverNestedInput = {
+    create?: XOR<DriverDocumentCreateWithoutDriverInput, DriverDocumentUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: DriverDocumentCreateOrConnectWithoutDriverInput
+    upsert?: DriverDocumentUpsertWithoutDriverInput
+    disconnect?: DriverDocumentWhereInput | boolean
+    delete?: DriverDocumentWhereInput | boolean
+    connect?: DriverDocumentWhereUniqueInput
+    update?: XOR<XOR<DriverDocumentUpdateToOneWithWhereWithoutDriverInput, DriverDocumentUpdateWithoutDriverInput>, DriverDocumentUncheckedUpdateWithoutDriverInput>
+  }
+
+  export type DriverDocumentUncheckedUpdateOneWithoutDriverNestedInput = {
+    create?: XOR<DriverDocumentCreateWithoutDriverInput, DriverDocumentUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: DriverDocumentCreateOrConnectWithoutDriverInput
+    upsert?: DriverDocumentUpsertWithoutDriverInput
+    disconnect?: DriverDocumentWhereInput | boolean
+    delete?: DriverDocumentWhereInput | boolean
+    connect?: DriverDocumentWhereUniqueInput
+    update?: XOR<XOR<DriverDocumentUpdateToOneWithWhereWithoutDriverInput, DriverDocumentUpdateWithoutDriverInput>, DriverDocumentUncheckedUpdateWithoutDriverInput>
+  }
+
+  export type DriverDocumentCreateidentityImagesInput = {
+    set: string[]
+  }
+
+  export type DriverDocumentCreatedrivingLicenseImagesInput = {
+    set: string[]
+  }
+
+  export type DriverCreateNestedOneWithoutDocumentInput = {
+    create?: XOR<DriverCreateWithoutDocumentInput, DriverUncheckedCreateWithoutDocumentInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutDocumentInput
+    connect?: DriverWhereUniqueInput
+  }
+
+  export type DriverDocumentUpdateidentityImagesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type EnumDocumentStatusFieldUpdateOperationsInput = {
+    set?: $Enums.DocumentStatus
+  }
+
+  export type DriverDocumentUpdatedrivingLicenseImagesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type DriverUpdateOneRequiredWithoutDocumentNestedInput = {
+    create?: XOR<DriverCreateWithoutDocumentInput, DriverUncheckedCreateWithoutDocumentInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutDocumentInput
+    upsert?: DriverUpsertWithoutDocumentInput
+    connect?: DriverWhereUniqueInput
+    update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutDocumentInput, DriverUpdateWithoutDocumentInput>, DriverUncheckedUpdateWithoutDocumentInput>
+  }
+
+  export type DriverCreateNestedManyWithoutVehicleInput = {
+    create?: XOR<DriverCreateWithoutVehicleInput, DriverUncheckedCreateWithoutVehicleInput> | DriverCreateWithoutVehicleInput[] | DriverUncheckedCreateWithoutVehicleInput[]
+    connectOrCreate?: DriverCreateOrConnectWithoutVehicleInput | DriverCreateOrConnectWithoutVehicleInput[]
+    createMany?: DriverCreateManyVehicleInputEnvelope
+    connect?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+  }
+
+  export type DriverUncheckedCreateNestedManyWithoutVehicleInput = {
+    create?: XOR<DriverCreateWithoutVehicleInput, DriverUncheckedCreateWithoutVehicleInput> | DriverCreateWithoutVehicleInput[] | DriverUncheckedCreateWithoutVehicleInput[]
+    connectOrCreate?: DriverCreateOrConnectWithoutVehicleInput | DriverCreateOrConnectWithoutVehicleInput[]
+    createMany?: DriverCreateManyVehicleInputEnvelope
+    connect?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+  }
+
+  export type DriverUpdateManyWithoutVehicleNestedInput = {
+    create?: XOR<DriverCreateWithoutVehicleInput, DriverUncheckedCreateWithoutVehicleInput> | DriverCreateWithoutVehicleInput[] | DriverUncheckedCreateWithoutVehicleInput[]
+    connectOrCreate?: DriverCreateOrConnectWithoutVehicleInput | DriverCreateOrConnectWithoutVehicleInput[]
+    upsert?: DriverUpsertWithWhereUniqueWithoutVehicleInput | DriverUpsertWithWhereUniqueWithoutVehicleInput[]
+    createMany?: DriverCreateManyVehicleInputEnvelope
+    set?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    disconnect?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    delete?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    connect?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    update?: DriverUpdateWithWhereUniqueWithoutVehicleInput | DriverUpdateWithWhereUniqueWithoutVehicleInput[]
+    updateMany?: DriverUpdateManyWithWhereWithoutVehicleInput | DriverUpdateManyWithWhereWithoutVehicleInput[]
+    deleteMany?: DriverScalarWhereInput | DriverScalarWhereInput[]
+  }
+
+  export type DriverUncheckedUpdateManyWithoutVehicleNestedInput = {
+    create?: XOR<DriverCreateWithoutVehicleInput, DriverUncheckedCreateWithoutVehicleInput> | DriverCreateWithoutVehicleInput[] | DriverUncheckedCreateWithoutVehicleInput[]
+    connectOrCreate?: DriverCreateOrConnectWithoutVehicleInput | DriverCreateOrConnectWithoutVehicleInput[]
+    upsert?: DriverUpsertWithWhereUniqueWithoutVehicleInput | DriverUpsertWithWhereUniqueWithoutVehicleInput[]
+    createMany?: DriverCreateManyVehicleInputEnvelope
+    set?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    disconnect?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    delete?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    connect?: DriverWhereUniqueInput | DriverWhereUniqueInput[]
+    update?: DriverUpdateWithWhereUniqueWithoutVehicleInput | DriverUpdateWithWhereUniqueWithoutVehicleInput[]
+    updateMany?: DriverUpdateManyWithWhereWithoutVehicleInput | DriverUpdateManyWithWhereWithoutVehicleInput[]
+    deleteMany?: DriverScalarWhereInput | DriverScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutRiderInput = {
+    create?: XOR<UserCreateWithoutRiderInput, UserUncheckedCreateWithoutRiderInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRiderInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutRiderNestedInput = {
+    create?: XOR<UserCreateWithoutRiderInput, UserUncheckedCreateWithoutRiderInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRiderInput
+    upsert?: UserUpsertWithoutRiderInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRiderInput, UserUpdateWithoutRiderInput>, UserUncheckedUpdateWithoutRiderInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -6766,6 +10833,17 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -6835,6 +10913,20 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -6873,6 +10965,13 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedEnumOnboardingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingStatus | EnumOnboardingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingStatusFilter<$PrismaModel> | $Enums.OnboardingStatus
+  }
+
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -6905,6 +11004,33 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
+  export type NestedEnumOnboardingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingStatus | EnumOnboardingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingStatus[] | ListEnumOnboardingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingStatusWithAggregatesFilter<$PrismaModel> | $Enums.OnboardingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOnboardingStatusFilter<$PrismaModel>
+    _max?: NestedEnumOnboardingStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDocumentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentStatus | EnumDocumentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentStatusFilter<$PrismaModel> | $Enums.DocumentStatus
+  }
+
+  export type NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentStatus | EnumDocumentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentStatus[] | ListEnumDocumentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDocumentStatusFilter<$PrismaModel>
+    _max?: NestedEnumDocumentStatusFilter<$PrismaModel>
+  }
+
   export type RefreshTokenCreateWithoutUserInput = {
     id?: string
     tokenHash: string
@@ -6931,6 +11057,58 @@ export namespace Prisma {
   export type RefreshTokenCreateManyUserInputEnvelope = {
     data: RefreshTokenCreateManyUserInput | RefreshTokenCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type DriverCreateWithoutUserInput = {
+    id?: string
+    licenseNumber: string
+    rating?: number
+    totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
+    isOnline?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vehicle?: VehicleCreateNestedOneWithoutDriversInput
+    document?: DriverDocumentCreateNestedOneWithoutDriverInput
+  }
+
+  export type DriverUncheckedCreateWithoutUserInput = {
+    id?: string
+    vehicleId?: string | null
+    licenseNumber: string
+    rating?: number
+    totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
+    isOnline?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    document?: DriverDocumentUncheckedCreateNestedOneWithoutDriverInput
+  }
+
+  export type DriverCreateOrConnectWithoutUserInput = {
+    where: DriverWhereUniqueInput
+    create: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+  }
+
+  export type RiderCreateWithoutUserInput = {
+    id?: string
+    rating?: number
+    totalTrips?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RiderUncheckedCreateWithoutUserInput = {
+    id?: string
+    rating?: number
+    totalTrips?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RiderCreateOrConnectWithoutUserInput = {
+    where: RiderWhereUniqueInput
+    create: XOR<RiderCreateWithoutUserInput, RiderUncheckedCreateWithoutUserInput>
   }
 
   export type RefreshTokenUpsertWithWhereUniqueWithoutUserInput = {
@@ -6962,6 +11140,70 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"RefreshToken"> | Date | string
   }
 
+  export type DriverUpsertWithoutUserInput = {
+    update: XOR<DriverUpdateWithoutUserInput, DriverUncheckedUpdateWithoutUserInput>
+    create: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    where?: DriverWhereInput
+  }
+
+  export type DriverUpdateToOneWithWhereWithoutUserInput = {
+    where?: DriverWhereInput
+    data: XOR<DriverUpdateWithoutUserInput, DriverUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DriverUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vehicle?: VehicleUpdateOneWithoutDriversNestedInput
+    document?: DriverDocumentUpdateOneWithoutDriverNestedInput
+  }
+
+  export type DriverUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    document?: DriverDocumentUncheckedUpdateOneWithoutDriverNestedInput
+  }
+
+  export type RiderUpsertWithoutUserInput = {
+    update: XOR<RiderUpdateWithoutUserInput, RiderUncheckedUpdateWithoutUserInput>
+    create: XOR<RiderCreateWithoutUserInput, RiderUncheckedCreateWithoutUserInput>
+    where?: RiderWhereInput
+  }
+
+  export type RiderUpdateToOneWithWhereWithoutUserInput = {
+    where?: RiderWhereInput
+    data: XOR<RiderUpdateWithoutUserInput, RiderUncheckedUpdateWithoutUserInput>
+  }
+
+  export type RiderUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RiderUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserCreateWithoutRefreshTokensInput = {
     id?: string
     email: string
@@ -6972,8 +11214,17 @@ export namespace Prisma {
     role: string
     status?: string
     profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    driver?: DriverCreateNestedOneWithoutUserInput
+    rider?: RiderCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -6986,8 +11237,17 @@ export namespace Prisma {
     role: string
     status?: string
     profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    driver?: DriverUncheckedCreateNestedOneWithoutUserInput
+    rider?: RiderUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -7016,8 +11276,17 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    driver?: DriverUpdateOneWithoutUserNestedInput
+    rider?: RiderUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -7030,8 +11299,525 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    driver?: DriverUncheckedUpdateOneWithoutUserNestedInput
+    rider?: RiderUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutDriverInput = {
+    id?: string
+    email: string
+    phoneNumber: string
+    passwordHash: string
+    firstName: string
+    lastName: string
+    role: string
+    status?: string
+    profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    rider?: RiderCreateNestedOneWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDriverInput = {
+    id?: string
+    email: string
+    phoneNumber: string
+    passwordHash: string
+    firstName: string
+    lastName: string
+    role: string
+    status?: string
+    profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    rider?: RiderUncheckedCreateNestedOneWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDriverInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+  }
+
+  export type VehicleCreateWithoutDriversInput = {
+    id?: string
+    make: string
+    model: string
+    year: number
+    color: string
+    plateNumber: string
+    carImage: string
+    carLicenseImage: string
+    carLicenseText?: string | null
+    status?: $Enums.DocumentStatus
+    rejectionReason?: string | null
+    uploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleUncheckedCreateWithoutDriversInput = {
+    id?: string
+    make: string
+    model: string
+    year: number
+    color: string
+    plateNumber: string
+    carImage: string
+    carLicenseImage: string
+    carLicenseText?: string | null
+    status?: $Enums.DocumentStatus
+    rejectionReason?: string | null
+    uploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleCreateOrConnectWithoutDriversInput = {
+    where: VehicleWhereUniqueInput
+    create: XOR<VehicleCreateWithoutDriversInput, VehicleUncheckedCreateWithoutDriversInput>
+  }
+
+  export type DriverDocumentCreateWithoutDriverInput = {
+    id?: string
+    identityImages?: DriverDocumentCreateidentityImagesInput | string[]
+    identityStatus?: $Enums.DocumentStatus
+    identityRejectionReason?: string | null
+    identityUploadAttempts?: number
+    drivingLicenseImages?: DriverDocumentCreatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: string | null
+    drivingLicenseUploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DriverDocumentUncheckedCreateWithoutDriverInput = {
+    id?: string
+    identityImages?: DriverDocumentCreateidentityImagesInput | string[]
+    identityStatus?: $Enums.DocumentStatus
+    identityRejectionReason?: string | null
+    identityUploadAttempts?: number
+    drivingLicenseImages?: DriverDocumentCreatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: string | null
+    drivingLicenseUploadAttempts?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DriverDocumentCreateOrConnectWithoutDriverInput = {
+    where: DriverDocumentWhereUniqueInput
+    create: XOR<DriverDocumentCreateWithoutDriverInput, DriverDocumentUncheckedCreateWithoutDriverInput>
+  }
+
+  export type UserUpsertWithoutDriverInput = {
+    update: XOR<UserUpdateWithoutDriverInput, UserUncheckedUpdateWithoutDriverInput>
+    create: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDriverInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDriverInput, UserUncheckedUpdateWithoutDriverInput>
+  }
+
+  export type UserUpdateWithoutDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    rider?: RiderUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    rider?: RiderUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type VehicleUpsertWithoutDriversInput = {
+    update: XOR<VehicleUpdateWithoutDriversInput, VehicleUncheckedUpdateWithoutDriversInput>
+    create: XOR<VehicleCreateWithoutDriversInput, VehicleUncheckedCreateWithoutDriversInput>
+    where?: VehicleWhereInput
+  }
+
+  export type VehicleUpdateToOneWithWhereWithoutDriversInput = {
+    where?: VehicleWhereInput
+    data: XOR<VehicleUpdateWithoutDriversInput, VehicleUncheckedUpdateWithoutDriversInput>
+  }
+
+  export type VehicleUpdateWithoutDriversInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    make?: StringFieldUpdateOperationsInput | string
+    model?: StringFieldUpdateOperationsInput | string
+    year?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
+    plateNumber?: StringFieldUpdateOperationsInput | string
+    carImage?: StringFieldUpdateOperationsInput | string
+    carLicenseImage?: StringFieldUpdateOperationsInput | string
+    carLicenseText?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    rejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleUncheckedUpdateWithoutDriversInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    make?: StringFieldUpdateOperationsInput | string
+    model?: StringFieldUpdateOperationsInput | string
+    year?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
+    plateNumber?: StringFieldUpdateOperationsInput | string
+    carImage?: StringFieldUpdateOperationsInput | string
+    carLicenseImage?: StringFieldUpdateOperationsInput | string
+    carLicenseText?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    rejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverDocumentUpsertWithoutDriverInput = {
+    update: XOR<DriverDocumentUpdateWithoutDriverInput, DriverDocumentUncheckedUpdateWithoutDriverInput>
+    create: XOR<DriverDocumentCreateWithoutDriverInput, DriverDocumentUncheckedCreateWithoutDriverInput>
+    where?: DriverDocumentWhereInput
+  }
+
+  export type DriverDocumentUpdateToOneWithWhereWithoutDriverInput = {
+    where?: DriverDocumentWhereInput
+    data: XOR<DriverDocumentUpdateWithoutDriverInput, DriverDocumentUncheckedUpdateWithoutDriverInput>
+  }
+
+  export type DriverDocumentUpdateWithoutDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityImages?: DriverDocumentUpdateidentityImagesInput | string[]
+    identityStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    identityRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    identityUploadAttempts?: IntFieldUpdateOperationsInput | number
+    drivingLicenseImages?: DriverDocumentUpdatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    drivingLicenseUploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverDocumentUncheckedUpdateWithoutDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityImages?: DriverDocumentUpdateidentityImagesInput | string[]
+    identityStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    identityRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    identityUploadAttempts?: IntFieldUpdateOperationsInput | number
+    drivingLicenseImages?: DriverDocumentUpdatedrivingLicenseImagesInput | string[]
+    drivingLicenseStatus?: EnumDocumentStatusFieldUpdateOperationsInput | $Enums.DocumentStatus
+    drivingLicenseRejectionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    drivingLicenseUploadAttempts?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverCreateWithoutDocumentInput = {
+    id?: string
+    licenseNumber: string
+    rating?: number
+    totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
+    isOnline?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDriverInput
+    vehicle?: VehicleCreateNestedOneWithoutDriversInput
+  }
+
+  export type DriverUncheckedCreateWithoutDocumentInput = {
+    id?: string
+    userId: string
+    vehicleId?: string | null
+    licenseNumber: string
+    rating?: number
+    totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
+    isOnline?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DriverCreateOrConnectWithoutDocumentInput = {
+    where: DriverWhereUniqueInput
+    create: XOR<DriverCreateWithoutDocumentInput, DriverUncheckedCreateWithoutDocumentInput>
+  }
+
+  export type DriverUpsertWithoutDocumentInput = {
+    update: XOR<DriverUpdateWithoutDocumentInput, DriverUncheckedUpdateWithoutDocumentInput>
+    create: XOR<DriverCreateWithoutDocumentInput, DriverUncheckedCreateWithoutDocumentInput>
+    where?: DriverWhereInput
+  }
+
+  export type DriverUpdateToOneWithWhereWithoutDocumentInput = {
+    where?: DriverWhereInput
+    data: XOR<DriverUpdateWithoutDocumentInput, DriverUncheckedUpdateWithoutDocumentInput>
+  }
+
+  export type DriverUpdateWithoutDocumentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDriverNestedInput
+    vehicle?: VehicleUpdateOneWithoutDriversNestedInput
+  }
+
+  export type DriverUncheckedUpdateWithoutDocumentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverCreateWithoutVehicleInput = {
+    id?: string
+    licenseNumber: string
+    rating?: number
+    totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
+    isOnline?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDriverInput
+    document?: DriverDocumentCreateNestedOneWithoutDriverInput
+  }
+
+  export type DriverUncheckedCreateWithoutVehicleInput = {
+    id?: string
+    userId: string
+    licenseNumber: string
+    rating?: number
+    totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
+    isOnline?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    document?: DriverDocumentUncheckedCreateNestedOneWithoutDriverInput
+  }
+
+  export type DriverCreateOrConnectWithoutVehicleInput = {
+    where: DriverWhereUniqueInput
+    create: XOR<DriverCreateWithoutVehicleInput, DriverUncheckedCreateWithoutVehicleInput>
+  }
+
+  export type DriverCreateManyVehicleInputEnvelope = {
+    data: DriverCreateManyVehicleInput | DriverCreateManyVehicleInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DriverUpsertWithWhereUniqueWithoutVehicleInput = {
+    where: DriverWhereUniqueInput
+    update: XOR<DriverUpdateWithoutVehicleInput, DriverUncheckedUpdateWithoutVehicleInput>
+    create: XOR<DriverCreateWithoutVehicleInput, DriverUncheckedCreateWithoutVehicleInput>
+  }
+
+  export type DriverUpdateWithWhereUniqueWithoutVehicleInput = {
+    where: DriverWhereUniqueInput
+    data: XOR<DriverUpdateWithoutVehicleInput, DriverUncheckedUpdateWithoutVehicleInput>
+  }
+
+  export type DriverUpdateManyWithWhereWithoutVehicleInput = {
+    where: DriverScalarWhereInput
+    data: XOR<DriverUpdateManyMutationInput, DriverUncheckedUpdateManyWithoutVehicleInput>
+  }
+
+  export type DriverScalarWhereInput = {
+    AND?: DriverScalarWhereInput | DriverScalarWhereInput[]
+    OR?: DriverScalarWhereInput[]
+    NOT?: DriverScalarWhereInput | DriverScalarWhereInput[]
+    id?: StringFilter<"Driver"> | string
+    userId?: StringFilter<"Driver"> | string
+    vehicleId?: StringNullableFilter<"Driver"> | string | null
+    licenseNumber?: StringFilter<"Driver"> | string
+    rating?: FloatFilter<"Driver"> | number
+    totalTrips?: IntFilter<"Driver"> | number
+    onboardingStatus?: EnumOnboardingStatusFilter<"Driver"> | $Enums.OnboardingStatus
+    isOnline?: BoolFilter<"Driver"> | boolean
+    createdAt?: DateTimeFilter<"Driver"> | Date | string
+    updatedAt?: DateTimeFilter<"Driver"> | Date | string
+  }
+
+  export type UserCreateWithoutRiderInput = {
+    id?: string
+    email: string
+    phoneNumber: string
+    passwordHash: string
+    firstName: string
+    lastName: string
+    role: string
+    status?: string
+    profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    driver?: DriverCreateNestedOneWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutRiderInput = {
+    id?: string
+    email: string
+    phoneNumber: string
+    passwordHash: string
+    firstName: string
+    lastName: string
+    role: string
+    status?: string
+    profileImage?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    dateOfBirth?: Date | string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    driver?: DriverUncheckedCreateNestedOneWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutRiderInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutRiderInput, UserUncheckedCreateWithoutRiderInput>
+  }
+
+  export type UserUpsertWithoutRiderInput = {
+    update: XOR<UserUpdateWithoutRiderInput, UserUncheckedUpdateWithoutRiderInput>
+    create: XOR<UserCreateWithoutRiderInput, UserUncheckedCreateWithoutRiderInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutRiderInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutRiderInput, UserUncheckedUpdateWithoutRiderInput>
+  }
+
+  export type UserUpdateWithoutRiderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    driver?: DriverUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutRiderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    driver?: DriverUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type RefreshTokenCreateManyUserInput = {
@@ -7068,6 +11854,56 @@ export namespace Prisma {
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revoked?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DriverCreateManyVehicleInput = {
+    id?: string
+    userId: string
+    licenseNumber: string
+    rating?: number
+    totalTrips?: number
+    onboardingStatus?: $Enums.OnboardingStatus
+    isOnline?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DriverUpdateWithoutVehicleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDriverNestedInput
+    document?: DriverDocumentUpdateOneWithoutDriverNestedInput
+  }
+
+  export type DriverUncheckedUpdateWithoutVehicleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    document?: DriverDocumentUncheckedUpdateOneWithoutDriverNestedInput
+  }
+
+  export type DriverUncheckedUpdateManyWithoutVehicleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    rating?: FloatFieldUpdateOperationsInput | number
+    totalTrips?: IntFieldUpdateOperationsInput | number
+    onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+    isOnline?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

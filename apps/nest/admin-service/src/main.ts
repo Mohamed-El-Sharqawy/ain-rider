@@ -1,11 +1,14 @@
-import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
-import { TraceInterceptor } from './shared/interceptors/trace.interceptor';
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from "@nestjs/platform-fastify";
+import { ValidationPipe } from "@nestjs/common";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { AppModule } from "./app.module";
+import { GlobalExceptionFilter } from "./shared/filters/global-exception.filter";
+import { TraceInterceptor } from "./shared/interceptors/trace.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,7 +19,11 @@ async function bootstrap() {
   app.enableCors();
 
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
   );
 
   // Global error handling
@@ -26,27 +33,30 @@ async function bootstrap() {
   // Swagger UI requires @fastify/static — only register in development.
   // In production the /api/docs-json endpoint is still available for external
   // tools (Postman, ingress-hosted Swagger UI, etc.) without serving static assets.
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== "production") {
     const config = new DocumentBuilder()
-      .setTitle('Admin Service API')
-      .setDescription('Ain Rider Admin Service — internal API documentation')
-      .setVersion('1.0')
+      .setTitle("Admin Service API")
+      .setDescription("Ain Rider Admin Service — internal API documentation")
+      .setVersion("1.0")
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+    SwaggerModule.setup("api/docs", app, document);
   }
 
-  const port = parseInt(process.env.ADMIN_SERVICE_PORT ?? '4003', 10);
-  await app.listen(port, '0.0.0.0');
+  const port = parseInt(process.env.ADMIN_SERVICE_PORT ?? "4003", 10);
+  await app.listen(port, "0.0.0.0");
 
   console.log(
     JSON.stringify({
-      level: 'info',
-      service: 'admin-service',
-      message: 'Service started',
+      level: "info",
+      service: "admin-service",
+      message: "Service started",
       port,
-      swagger: process.env.NODE_ENV !== 'production' ? `http://localhost:${port}/api/docs` : 'disabled',
+      swagger:
+        process.env.NODE_ENV !== "production"
+          ? `http://localhost:${port}/api/docs`
+          : "disabled",
       timestamp: new Date().toISOString(),
     }),
   );

@@ -10,6 +10,8 @@
     "build:apps": "node scripts/build.mjs",
     "test": "pnpm --recursive test",
     "lint": "pnpm --recursive lint",
+    "install-all": "pnpm install",
+    "postinstall": "pnpm prisma:generate",
     "clean": "node scripts/clean.mjs",
     "clean:all": "node scripts/clean.mjs",
     "docker:infra:up": "docker-compose up -d",

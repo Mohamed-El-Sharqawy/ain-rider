@@ -6,9 +6,17 @@ const run = (cmd, cwd) => {
 };
 
 // 1. Build packages in dependency order
-run('pnpm --filter @ain-rider/shared-types build');
-run('pnpm --filter @ain-rider/nats-client build');
-run('pnpm --filter @ain-rider/redis-client build');
+const packages = [
+  'error-handling',
+  'shared-types',
+  'nats-client',
+  'redis-client',
+  'minio-client',
+];
+
+for (const pkg of packages) {
+  run(`pnpm --filter @ain-rider/${pkg} build`);
+}
 
 // 2. Build all NestJS apps
 const nestApps = [
@@ -24,6 +32,7 @@ for (const app of nestApps) {
 
 // 3. Build all Elysia apps
 const elysiaApps = [
+  'api-gateway',
   'location-service',
   'match-service',
   'websocket-server',

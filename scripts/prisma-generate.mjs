@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 /**
  * Generate Prisma clients for all services.
- *
- * Usage:
- *   node scripts/prisma-generate.mjs          # all services
- *   node scripts/prisma-generate.mjs admin     # only admin-service
+ * 
+ * Includes multi-schema generation for services like admin-service.
  */
 
 import { execSync } from 'child_process';
@@ -15,10 +13,30 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 
 const services = [
-  { name: '@ain-rider/auth-service',    dir: 'apps/nest/auth-service' },
-  { name: '@ain-rider/admin-service',   dir: 'apps/nest/admin-service' },
-  { name: '@ain-rider/trip-service',    dir: 'apps/nest/trip-service' },
-  { name: '@ain-rider/payment-service', dir: 'apps/nest/payment-service' },
+  { 
+    name: '@ain-rider/auth-service',    
+    dir: 'apps/nest/auth-service',
+    commands: ['npx prisma generate']
+  },
+  { 
+    name: '@ain-rider/admin-service',   
+    dir: 'apps/nest/admin-service',
+    commands: [
+      'npx prisma generate',
+      'npx prisma generate --schema=prisma/trip-schema.prisma',
+      'npx prisma generate --schema=prisma/auth-schema.prisma'
+    ]
+  },
+  { 
+    name: '@ain-rider/trip-service',    
+    dir: 'apps/nest/trip-service',
+    commands: ['npx prisma generate']
+  },
+  { 
+    name: '@ain-rider/payment-service', 
+    dir: 'apps/nest/payment-service',
+    commands: ['npx prisma generate']
+  },
 ];
 
 const filter = process.argv[2];
@@ -37,16 +55,18 @@ let hasError = false;
 
 for (const svc of targets) {
   console.log(`⚙️  Generating for ${svc.name}...`);
-  try {
-    execSync('npx prisma generate', {
-      cwd: path.join(root, svc.dir),
-      stdio: 'inherit',
-    });
-    console.log(`✅ ${svc.name} — done\n`);
-  } catch {
-    console.error(`❌ ${svc.name} — failed\n`);
-    hasError = true;
+  for (const cmd of svc.commands) {
+    try {
+      execSync(cmd, {
+        cwd: path.join(root, svc.dir),
+        stdio: 'inherit',
+      });
+    } catch {
+      console.error(`❌ ${svc.name} — failed on command: ${cmd}\n`);
+      hasError = true;
+    }
   }
+  if (!hasError) console.log(`✅ ${svc.name} — done\n`);
 }
 
 if (hasError) process.exit(1);

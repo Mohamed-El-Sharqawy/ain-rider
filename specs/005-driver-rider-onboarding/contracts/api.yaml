@@ -1,0 +1,677 @@
+openapi: 3.0.3
+info:
+  title: Driver & Rider Onboarding API
+  description: API endpoints for driver document upload, vehicle registration, and rider profile management
+  version: 1.0.0
+  contact:
+    name: Ain Rider Backend Team
+
+servers:
+  - url: /api
+    description: API Gateway (all requests through gateway)
+
+tags:
+  - name: Driver Onboarding
+    description: Driver profile and document management
+  - name: Rider Profile
+    description: Rider profile image management
+
+paths:
+  /auth/driver/profile:
+    patch:
+      tags:
+        - Driver Onboarding
+      summary: Update driver profile fields
+      description: |
+        Allows authenticated drivers to update non-critical profile fields.
+        Critical fields (phone, email) are restricted and require separate verification.
+      operationId: updateDriverProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDriverProfileRequest"
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriverProfileResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /auth/driver/documents/identity:
+    post:
+      tags:
+        - Driver Onboarding
+      summary: Upload identity verification documents
+      description: |
+        Upload exactly 3 identity verification images (front of ID, back of ID, selfie with ID).
+        Images are stored in MinIO and keys are saved to DriverDocument model.
+        Returns presigned URLs valid for 1 hour.
+      operationId: uploadIdentityDocuments
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/IdentityDocumentsUpload"
+      responses:
+        "200":
+          description: Identity documents uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityDocumentsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Documents already exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: File too large (max 10MB)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Retry limit exceeded (3 attempts)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/driver/documents/driving-license:
+    post:
+      tags:
+        - Driver Onboarding
+      summary: Upload driving license documents
+      description: |
+        Upload exactly 2 driving license images (front and back).
+        Images are stored in MinIO and keys are saved to DriverDocument model.
+        Returns presigned URLs valid for 1 hour.
+      operationId: uploadDrivingLicenseDocuments
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/DrivingLicenseUpload"
+      responses:
+        "200":
+          description: Driving license documents uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DrivingLicenseResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Documents already exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: File too large (max 10MB)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Retry limit exceeded (3 attempts)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/driver/vehicle:
+    post:
+      tags:
+        - Driver Onboarding
+      summary: Register or update vehicle
+      description: |
+        Register a vehicle with details and images.
+        Creates a Vehicle record linked to the driver.
+        If driver already has a vehicle, updates the existing record.
+      operationId: registerVehicle
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/VehicleRegistrationUpload"
+      responses:
+        "200":
+          description: Vehicle registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "413":
+          description: File too large (max 10MB)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Retry limit exceeded (3 attempts)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/driver/onboarding-status:
+    get:
+      tags:
+        - Driver Onboarding
+      summary: Get driver onboarding status
+      description: |
+        Returns the current onboarding status and completion state for each document type.
+        Includes presigned URLs for viewing uploaded documents.
+      operationId: getOnboardingStatus
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Onboarding status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingStatusResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /auth/rider/profile/image:
+    patch:
+      tags:
+        - Rider Profile
+      summary: Upload rider profile image
+      description: |
+        Upload a profile image for the authenticated rider.
+        Previous profile image is deleted if it exists.
+      operationId: uploadRiderProfileImage
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/RiderProfileImageUpload"
+      responses:
+        "200":
+          description: Profile image uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiderProfileImageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "413":
+          description: File too large (max 10MB)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UpdateDriverProfileRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          maxLength: 255
+          example: "123 Main St, City, Country"
+        emergencyContactName:
+          type: string
+          maxLength: 100
+          example: "John Doe"
+        emergencyContactPhone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          example: "+1234567890"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1990-01-15"
+        city:
+          type: string
+          maxLength: 100
+          example: "New York"
+        state:
+          type: string
+          maxLength: 100
+          example: "NY"
+        country:
+          type: string
+          maxLength: 100
+          example: "USA"
+
+    DriverProfileResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            userId:
+              type: string
+              format: uuid
+            licenseNumber:
+              type: string
+            onboardingStatus:
+              $ref: "#/components/schemas/OnboardingStatus"
+            rating:
+              type: number
+              format: float
+            totalTrips:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    IdentityDocumentsUpload:
+      type: object
+      required:
+        - files
+      properties:
+        files:
+          type: array
+          minItems: 3
+          maxItems: 3
+          description: Exactly 3 image files (front of ID, back of ID, selfie with ID)
+          items:
+            type: string
+            format: binary
+
+    DrivingLicenseUpload:
+      type: object
+      required:
+        - files
+      properties:
+        files:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: Exactly 2 image files (front and back of driving license)
+          items:
+            type: string
+            format: binary
+
+    VehicleRegistrationUpload:
+      type: object
+      required:
+        - make
+        - model
+        - year
+        - color
+        - plateNumber
+        - carImage
+        - carLicenseImage
+      properties:
+        make:
+          type: string
+          maxLength: 50
+          example: "Toyota"
+        model:
+          type: string
+          maxLength: 50
+          example: "Camry"
+        year:
+          type: integer
+          minimum: 2006
+          maximum: 2027
+          example: 2022
+        color:
+          type: string
+          maxLength: 30
+          example: "White"
+        plateNumber:
+          type: string
+          maxLength: 20
+          example: "ABC-1234"
+        carImage:
+          type: string
+          format: binary
+          description: Photo of the vehicle
+        carLicenseImage:
+          type: string
+          format: binary
+          description: Photo of vehicle registration/license document
+        carLicenseText:
+          type: string
+          description: Optional OCR-extracted text from license
+
+    RiderProfileImageUpload:
+      type: object
+      required:
+        - image
+      properties:
+        image:
+          type: string
+          format: binary
+          description: Profile image file
+
+    PresignedUrl:
+      type: object
+      required:
+        - url
+        - expiresAt
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Presigned URL valid for 1 hour
+        expiresAt:
+          type: string
+          format: date-time
+          description: URL expiration timestamp
+
+    DocumentStatus:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - REJECTED
+
+    OnboardingStatus:
+      type: string
+      enum:
+        - PENDING_DOCUMENTS
+        - UNDER_REVIEW
+        - APPROVED
+        - REJECTED
+
+    IdentityDocumentsResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            identityImages:
+              type: array
+              items:
+                $ref: "#/components/schemas/PresignedUrl"
+            status:
+              $ref: "#/components/schemas/DocumentStatus"
+            uploadAttempts:
+              type: integer
+            onboardingStatus:
+              $ref: "#/components/schemas/OnboardingStatus"
+
+    DrivingLicenseResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            drivingLicenseImages:
+              type: array
+              items:
+                $ref: "#/components/schemas/PresignedUrl"
+            status:
+              $ref: "#/components/schemas/DocumentStatus"
+            uploadAttempts:
+              type: integer
+            onboardingStatus:
+              $ref: "#/components/schemas/OnboardingStatus"
+
+    VehicleResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            make:
+              type: string
+            model:
+              type: string
+            year:
+              type: integer
+            color:
+              type: string
+            plateNumber:
+              type: string
+            carImage:
+              $ref: "#/components/schemas/PresignedUrl"
+            carLicenseImage:
+              $ref: "#/components/schemas/PresignedUrl"
+            status:
+              $ref: "#/components/schemas/DocumentStatus"
+            uploadAttempts:
+              type: integer
+            onboardingStatus:
+              $ref: "#/components/schemas/OnboardingStatus"
+
+    OnboardingStatusResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - onboardingStatus
+            - documents
+          properties:
+            onboardingStatus:
+              $ref: "#/components/schemas/OnboardingStatus"
+            approvedAt:
+              type: string
+              format: date-time
+              nullable: true
+              description: Set when status is APPROVED
+            documents:
+              type: object
+              properties:
+                identity:
+                  type: object
+                  properties:
+                    completed:
+                      type: boolean
+                    status:
+                      $ref: "#/components/schemas/DocumentStatus"
+                    images:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/PresignedUrl"
+                    rejectionReason:
+                      type: string
+                      nullable: true
+                    uploadAttempts:
+                      type: integer
+                drivingLicense:
+                  type: object
+                  properties:
+                    completed:
+                      type: boolean
+                    status:
+                      $ref: "#/components/schemas/DocumentStatus"
+                    images:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/PresignedUrl"
+                    rejectionReason:
+                      type: string
+                      nullable: true
+                    uploadAttempts:
+                      type: integer
+                vehicle:
+                  type: object
+                  properties:
+                    completed:
+                      type: boolean
+                    status:
+                      $ref: "#/components/schemas/DocumentStatus"
+                    carImage:
+                      $ref: "#/components/schemas/PresignedUrl"
+                    carLicenseImage:
+                      $ref: "#/components/schemas/PresignedUrl"
+                    rejectionReason:
+                      type: string
+                      nullable: true
+                    uploadAttempts:
+                      type: integer
+
+    RiderProfileImageResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            profileImage:
+              $ref: "#/components/schemas/PresignedUrl"
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_ERROR
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - NOT_FOUND
+                - CONFLICT
+                - PAYLOAD_TOO_LARGE
+                - TOO_MANY_REQUESTS
+                - INTERNAL_ERROR
+            message:
+              type: string
+              example: "Invalid request parameters"
+
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: "Invalid request parameters"
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: "Authentication required"
+
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error:
+              code: FORBIDDEN
+              message: "Driver access required"

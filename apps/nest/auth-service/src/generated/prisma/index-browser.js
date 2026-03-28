@@ -130,6 +130,13 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   status: 'status',
   profileImage: 'profileImage',
+  address: 'address',
+  city: 'city',
+  state: 'state',
+  country: 'country',
+  dateOfBirth: 'dateOfBirth',
+  emergencyContactName: 'emergencyContactName',
+  emergencyContactPhone: 'emergencyContactPhone',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -151,7 +158,40 @@ exports.Prisma.DriverScalarFieldEnum = {
   licenseNumber: 'licenseNumber',
   rating: 'rating',
   totalTrips: 'totalTrips',
+  onboardingStatus: 'onboardingStatus',
   isOnline: 'isOnline',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DriverDocumentScalarFieldEnum = {
+  id: 'id',
+  driverId: 'driverId',
+  identityImages: 'identityImages',
+  identityStatus: 'identityStatus',
+  identityRejectionReason: 'identityRejectionReason',
+  identityUploadAttempts: 'identityUploadAttempts',
+  drivingLicenseImages: 'drivingLicenseImages',
+  drivingLicenseStatus: 'drivingLicenseStatus',
+  drivingLicenseRejectionReason: 'drivingLicenseRejectionReason',
+  drivingLicenseUploadAttempts: 'drivingLicenseUploadAttempts',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VehicleScalarFieldEnum = {
+  id: 'id',
+  make: 'make',
+  model: 'model',
+  year: 'year',
+  color: 'color',
+  plateNumber: 'plateNumber',
+  carImage: 'carImage',
+  carLicenseImage: 'carLicenseImage',
+  carLicenseText: 'carLicenseText',
+  status: 'status',
+  rejectionReason: 'rejectionReason',
+  uploadAttempts: 'uploadAttempts',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -179,12 +219,25 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.OnboardingStatus = exports.$Enums.OnboardingStatus = {
+  PENDING_DOCUMENTS: 'PENDING_DOCUMENTS',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
 
+exports.DocumentStatus = exports.$Enums.DocumentStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
   RefreshToken: 'RefreshToken',
   Driver: 'Driver',
+  DriverDocument: 'DriverDocument',
+  Vehicle: 'Vehicle',
   Rider: 'Rider'
 };
 

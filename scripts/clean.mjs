@@ -20,12 +20,20 @@ const rmDir = (p) => {
   }
 };
 
-// Clean all package dists
-run('pnpm --filter @ain-rider/shared-types clean');
-run('pnpm --filter @ain-rider/nats-client clean');
-run('pnpm --filter @ain-rider/redis-client clean');
+// 1. Clean all package dists
+const packages = [
+  'error-handling',
+  'shared-types',
+  'nats-client',
+  'redis-client',
+  'minio-client',
+];
 
-// Clean all NestJS app dists and generated prisma clients
+for (const pkg of packages) {
+  run(`pnpm --filter @ain-rider/${pkg} clean`);
+}
+
+// 2. Clean all NestJS apps (dist and prisma generated)
 const nestApps = [
   'auth-service',
   'trip-service',
@@ -36,6 +44,18 @@ const nestApps = [
 for (const app of nestApps) {
   rmDir(`apps/nest/${app}/dist`);
   rmDir(`apps/nest/${app}/src/generated`);
+}
+
+// 3. Clean all Elysia apps
+const elysiaApps = [
+  'api-gateway',
+  'location-service',
+  'match-service',
+  'websocket-server',
+];
+
+for (const app of elysiaApps) {
+  run(`pnpm --filter @ain-rider/${app} clean`);
 }
 
 console.log('\n✅ Clean complete.');
