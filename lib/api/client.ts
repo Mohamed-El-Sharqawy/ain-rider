@@ -156,9 +156,16 @@ export const ApiClient = {
     return this.request<T>(endpoint, { method: 'GET' });
   },
 
+  async patch<T>(endpoint: string, body?: any): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  },
+
   async uploadFiles<T>(
     endpoint: string,
-    files: Array<{ fieldname: string; uri: string; type: string; name: string }>,
+    files: Array<{ fieldname: string; uri?: string; type?: string; name?: string; value?: string }>,
     method: 'POST' | 'PATCH' = 'POST'
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -166,11 +173,15 @@ export const ApiClient = {
 
     const formData = new FormData();
     files.forEach((file) => {
-      formData.append(file.fieldname, {
-        uri: file.uri,
-        type: file.type,
-        name: file.name,
-      } as any);
+      if (file.uri) {
+        formData.append(file.fieldname, {
+          uri: file.uri,
+          type: file.type,
+          name: file.name,
+        } as any);
+      } else if (file.value !== undefined) {
+        formData.append(file.fieldname, file.value);
+      }
     });
 
     const headers: Record<string, string> = {

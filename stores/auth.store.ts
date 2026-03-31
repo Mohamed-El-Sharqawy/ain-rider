@@ -8,9 +8,9 @@ interface AuthState {
   role: UserRole | null;
   isOnboarding: boolean;
   setAuth: (isAuthenticated: boolean, role: UserRole | null) => void;
-  logout: () => void;
   registerUser: (data: RegisterPayload) => Promise<void>;
   completeOnboarding: () => void;
+  setOnboardingStatus: (isOnboarding: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -32,5 +32,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error('Registration failed');
     }
   },
-  completeOnboarding: () => set({ isOnboarding: false })
+  completeOnboarding: () => set({ isOnboarding: false }),
+  setOnboardingStatus: (isOnboarding) => set({ isOnboarding })
 }));

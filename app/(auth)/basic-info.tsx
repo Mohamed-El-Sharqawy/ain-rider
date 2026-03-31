@@ -33,7 +33,7 @@ export default function BasicInfoScreen() {
       });
 
       if (role === 'DRIVER') {
-        router.push('/(auth)/vehicle-info');
+        router.push('/(auth)/driver-profile-extra');
       } else {
         router.replace('/(auth)/documents');
       }

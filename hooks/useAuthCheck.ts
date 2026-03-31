@@ -48,11 +48,13 @@ export function useAuthCheck() {
       
     } catch (e) {
       // Corrupt token or decode failed
+      console.error('[AuthDebug] Auth check failed:', e);
       await SecureStore.deleteItemAsync('accessToken');
       await SecureStore.deleteItemAsync('refreshToken');
       setAuth(false, null);
     } finally {
       setIsReady(true);
+      console.log('[AuthDebug] Auth ready. Ready:', true);
     }
   }, [setAuth]);
 

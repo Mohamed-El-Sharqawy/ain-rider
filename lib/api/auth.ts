@@ -1,5 +1,5 @@
 import { ApiClient } from './client';
-import { OtpRequestPayload, OtpVerifyPayload, PhoneVerificationResult, RegisterPayload, RegisterResponse, IdentityUploadResponse, LoginPayload, LoginResponse, ProfileImageResponse, MeResponse } from './types';
+import { OtpRequestPayload, OtpVerifyPayload, PhoneVerificationResult, RegisterPayload, RegisterResponse, IdentityUploadResponse, LoginPayload, LoginResponse, ProfileImageResponse, MeResponse, OnboardingStatusResponse } from './types';
 
 export const AuthApi = {
   async login(email: string, password: string): Promise<LoginResponse> {
@@ -43,5 +43,9 @@ export const AuthApi = {
       { fieldname: 'identityFront', uri: frontUri, type: frontType, name: 'front.jpg' },
       { fieldname: 'identityBack', uri: backUri, type: backType, name: 'back.jpg' },
     ]);
+  },
+
+  async getOnboardingStatus(): Promise<OnboardingStatusResponse> {
+    return ApiClient.get<OnboardingStatusResponse>('/auth/driver/onboarding-status');
   }
 };

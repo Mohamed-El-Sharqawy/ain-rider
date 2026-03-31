@@ -2,6 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, AppState } 
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { useOnboardingStore } from '../../stores/onboarding.store';
+import { useAuthStore } from '../../stores/auth.store';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { AuthApi } from '../../lib/api/auth';
 import { ApiError } from '../../lib/api/client';
@@ -19,6 +20,7 @@ export default function VerifyOtpScreen() {
   const [isExpired, setIsExpired] = useState(false);
 
   const { phone } = useOnboardingStore();
+  const { setAuth, setOnboardingStatus } = useAuthStore();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -90,10 +92,30 @@ export default function VerifyOtpScreen() {
       if (result.isRegistered && result.accessToken && result.refreshToken) {
         // Existing user: Persist tokens and go home
         await SecureStorage.saveTokens(result.accessToken, result.refreshToken);
-        
-        // Fix SecureStore error by ensuring tokens are strings (redundant but safe)
-        const targetPath = result.user?.role === 'DRIVER' ? '/(driver)/(tabs)/home' : '/(rider)/(tabs)/home';
-        router.replace(targetPath as any);
+
+        console.log('[AuthDebug] Login result user:', result.user);
+
+        const isDriverOnboarding = 
+          result.user?.role === 'DRIVER' && 
+          (result.user?.status === 'PENDING_DOCUMENTS' || 
+           result.user?.status === 'UNDER_REVIEW' || 
+           result.user?.status === 'REJECTED' ||
+           result.user?.status === 'PENDING'); // Add PENDING just in case
+
+        console.log('[AuthDebug] isDriverOnboarding:', isDriverOnboarding, 'status:', result.user?.status);
+
+        setAuth(true, result.user?.role || null);
+        setOnboardingStatus(isDriverOnboarding);
+
+        if (isDriverOnboarding) {
+          // If they are in onboarding, route them to a safe onboarding screen 
+          // to trigger the layout's smart redirection or stay on onboarding flow.
+          router.replace('/(auth)/vehicle-info');
+        } else {
+          // Fix SecureStore error by ensuring tokens are strings (redundant but safe)
+          const targetPath = result.user?.role === 'DRIVER' ? '/(driver)/(tabs)/home' : '/(rider)/(tabs)/home';
+          router.replace(targetPath as any);
+        }
       } else {
         // New user: Go to basic info
         router.replace('/(auth)/basic-info');
