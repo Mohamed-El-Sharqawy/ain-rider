@@ -16,7 +16,10 @@ export const tripKeys = {
 export const useGetAllTrips = (filters: TripFilters) => {
   return useQuery({
     queryKey: tripKeys.list(filters),
-    queryFn: () => tripsApi.getAll(filters).then((r) => transformPaginatedTrips(r.data)),
+    queryFn: () =>
+      tripsApi.getAll(filters).then((r) =>
+        transformPaginatedTrips(r.data, { page: filters.page, limit: filters.limit }),
+      ),
     placeholderData: keepPreviousData,
   })
 }
@@ -33,6 +36,10 @@ export const useGetTripStats = () => {
   return useQuery({
     queryKey: tripKeys.stats(),
     queryFn: () => tripsApi.getStats().then((r) => transformTripStats(r.data)),
-    staleTime: 60_000,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   })
 }

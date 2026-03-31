@@ -1,4 +1,4 @@
-import type { UserDTO, UserStatsDTO, PaginatedUsersDTO } from './dto';
+import type { UserDTO, UserStatsDTO, PaginatedUsersDTO, LegacyPaginatedUsersDTO } from './dto';
 
 export interface User {
   id: string;
@@ -86,9 +86,34 @@ export function transformUserStats(dto: UserStatsDTO): UserStats {
   };
 }
 
-export function transformPaginatedUsers(dto: PaginatedUsersDTO): PaginatedUsers {
+function isLegacyPaginatedUsers(
+  dto: PaginatedUsersDTO | LegacyPaginatedUsersDTO,
+): dto is LegacyPaginatedUsersDTO {
+  return Array.isArray((dto as LegacyPaginatedUsersDTO).data) && (dto as LegacyPaginatedUsersDTO).meta != null;
+}
+
+export function transformPaginatedUsers(
+  dto: PaginatedUsersDTO | LegacyPaginatedUsersDTO,
+  filters?: { page?: number; limit?: number },
+): PaginatedUsers {
+  if (isLegacyPaginatedUsers(dto)) {
+    return {
+      data: dto.data.map(transformUser),
+      meta: dto.meta,
+    };
+  }
+
+  const page = dto.page ?? filters?.page ?? 1;
+  const limit = dto.limit ?? filters?.limit ?? 20;
+  const totalPages = Math.max(1, Math.ceil(dto.total / limit));
+
   return {
-    data: dto.data.map(transformUser),
-    meta: dto.meta,
+    data: dto.users.map(transformUser),
+    meta: {
+      total: dto.total,
+      page,
+      limit,
+      totalPages,
+    },
   };
 }

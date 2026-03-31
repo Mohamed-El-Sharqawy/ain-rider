@@ -1,7 +1,7 @@
 // ─── Trips Transformers ──────────────────────────────────────────────────────
 // Transforms raw backend DTOs into clean app models.
 
-import type { TripDTO, TripStatsDTO, PaginatedTripsDTO } from './dto'
+import type { TripDTO, TripStatsDTO, PaginatedTripsDTO, LegacyPaginatedTripsDTO } from './dto'
 
 export interface Trip {
   id: string
@@ -105,12 +105,38 @@ export function transformTripStats(dto: TripStatsDTO): TripStats {
   return dto
 }
 
-export function transformPaginatedTrips(dto: PaginatedTripsDTO): PaginatedTrips {
+function isLegacyPaginatedTrips(
+  dto: PaginatedTripsDTO | LegacyPaginatedTripsDTO,
+): dto is LegacyPaginatedTripsDTO {
+  return (
+    Array.isArray((dto as LegacyPaginatedTripsDTO).data) &&
+    (dto as LegacyPaginatedTripsDTO).meta != null
+  )
+}
+
+export function transformPaginatedTrips(
+  dto: PaginatedTripsDTO | LegacyPaginatedTripsDTO,
+  filters?: { page?: number; limit?: number },
+): PaginatedTrips {
+  if (isLegacyPaginatedTrips(dto)) {
+    return {
+      data: dto.data.map(transformTrip),
+      total: dto.meta.total,
+      page: dto.meta.page,
+      limit: dto.meta.limit,
+      totalPages: dto.meta.totalPages,
+    }
+  }
+
+  const page = dto.page ?? filters?.page ?? 1
+  const limit = dto.limit ?? filters?.limit ?? 20
+  const totalPages = Math.max(1, Math.ceil(dto.total / limit))
+
   return {
-    data: dto.data.map(transformTrip),
-    total: dto.meta.total,
-    page: dto.meta.page,
-    limit: dto.meta.limit,
-    totalPages: dto.meta.totalPages,
+    data: dto.trips.map(transformTrip),
+    total: dto.total,
+    page,
+    limit,
+    totalPages,
   }
 }

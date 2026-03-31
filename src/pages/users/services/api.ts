@@ -1,5 +1,12 @@
 import { api } from '@/api/client';
-import type { UserDTO, UserStatsDTO, PaginatedUsersDTO, UpdateUserStatusDTO, CreateUserDTO } from './dto';
+import type {
+  UserDTO,
+  UserStatsDTO,
+  PaginatedUsersDTO,
+  LegacyPaginatedUsersDTO,
+  UpdateUserStatusDTO,
+  CreateUserDTO,
+} from './dto';
 
 export interface UserFilters {
   search?: string;
@@ -11,7 +18,7 @@ export interface UserFilters {
 
 export const usersApi = {
   getAll: (filters: UserFilters) =>
-    api.get<PaginatedUsersDTO>('/admin/users', { params: filters }),
+    api.get<PaginatedUsersDTO | LegacyPaginatedUsersDTO>('/admin/users', { params: filters }),
 
   getById: (id: string) =>
     api.get<UserDTO>(`/admin/users/${id}`),

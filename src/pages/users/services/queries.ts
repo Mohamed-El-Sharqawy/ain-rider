@@ -14,7 +14,7 @@ export const useGetAllUsers = (filters: UserFilters) => {
     queryKey: userKeys.list(filters),
     queryFn: async () => {
       const { data } = await usersApi.getAll(filters);
-      return transformPaginatedUsers(data);
+      return transformPaginatedUsers(data, { page: filters.page, limit: filters.limit });
     },
   });
 };
@@ -37,5 +37,10 @@ export const useGetUserStats = () => {
       const { data } = await usersApi.getStats();
       return transformUserStats(data);
     },
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 };

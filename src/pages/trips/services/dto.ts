@@ -43,7 +43,16 @@ export interface TripStatsDTO {
   collectedPayments: number
 }
 
+/** Gateway list shape: `{ trips, total }` (+ optional page/limit). */
 export interface PaginatedTripsDTO {
+  trips: TripDTO[]
+  total: number
+  page?: number
+  limit?: number
+}
+
+/** Alternate shape — normalized in `transformPaginatedTrips`. */
+export interface LegacyPaginatedTripsDTO {
   data: TripDTO[]
   meta: {
     total: number

@@ -2,7 +2,7 @@
 // Raw HTTP calls for the trips domain.
 
 import { api } from '@/api/client'
-import type { TripDTO, TripStatsDTO, PaginatedTripsDTO } from './dto'
+import type { TripDTO, TripStatsDTO, PaginatedTripsDTO, LegacyPaginatedTripsDTO } from './dto'
 
 export interface TripFilters {
   status?: string
@@ -15,7 +15,7 @@ export interface TripFilters {
 
 export const tripsApi = {
   getAll: (params: TripFilters) =>
-    api.get<PaginatedTripsDTO>('/admin/trips', { params }),
+    api.get<PaginatedTripsDTO | LegacyPaginatedTripsDTO>('/admin/trips', { params }),
 
   getById: (id: string) => api.get<TripDTO>(`/admin/trips/${id}`),
 

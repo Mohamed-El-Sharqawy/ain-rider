@@ -6,10 +6,17 @@ export interface UserDTO {
   lastName: string;
   role: 'RIDER' | 'DRIVER' | 'ADMIN' | 'SUPPORT';
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'BANNED';
-  profileImage?: string;
+  profileImage?: string | null;
   createdAt: string;
   updatedAt: string;
   roleData?: DriverData | RiderData;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  dateOfBirth?: string | null;
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
 }
 
 export interface DriverData {
@@ -40,7 +47,16 @@ export interface UserStatsDTO {
   onlineDrivers: number;
 }
 
+/** Gateway list shape: `{ users, total }` (+ optional page/limit). */
 export interface PaginatedUsersDTO {
+  users: UserDTO[];
+  total: number;
+  page?: number;
+  limit?: number;
+}
+
+/** Alternate shape some gateways use — normalized in `transformPaginatedUsers`. */
+export interface LegacyPaginatedUsersDTO {
   data: UserDTO[];
   meta: {
     total: number;
