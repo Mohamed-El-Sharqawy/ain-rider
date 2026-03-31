@@ -35,7 +35,7 @@ export default function BasicInfoScreen() {
       if (role === 'DRIVER') {
         router.push('/(auth)/vehicle-info');
       } else {
-        router.replace('/(rider)/(tabs)/home');
+        router.replace('/(auth)/documents');
       }
     } catch (err: any) {
       alert(err.message || 'Registration failed');

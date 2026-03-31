@@ -54,3 +54,44 @@ export interface RegisterResponse {
   accessToken: string;
   refreshToken: string;
 }
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface ProfileImageResponse {
+  success: boolean;
+  data: {
+    profileImage: PresignedUrlResult;
+  };
+}
+
+export interface UserImages {
+  profileImage?: PresignedUrlResult | null;
+  identityFront?: PresignedUrlResult | null;
+  identityBack?: PresignedUrlResult | null;
+}
+
+export interface MeResponse extends User {
+  images: UserImages;
+}
+
+export interface PresignedUrlResult {
+  url: string;
+  expiresAt: string;
+}
+
+export interface IdentityUploadResponse {
+  success: boolean;
+  data: {
+    identityFront: PresignedUrlResult;
+    identityBack: PresignedUrlResult;
+  };
+}
