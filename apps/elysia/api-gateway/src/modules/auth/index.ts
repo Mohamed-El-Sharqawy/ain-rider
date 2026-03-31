@@ -455,4 +455,224 @@ export const auth = new Elysia({ prefix: "/auth" })
 
       return res.json();
     }
+  )
+  // Driver routes
+  .get(
+    "/driver/onboarding-status",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      const res = await AuthProxyService.proxyDriverGet(token, "onboarding-status");
+      console.log('[Gateway] Driver onboarding-status proxy:', res.status);
+
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
+  )
+  .patch(
+    "/driver/profile",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      const body = await request.json();
+      const res = await AuthProxyService.proxyDriverPatch(token, "profile", body);
+
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
+  )
+  .patch(
+    "/driver/status",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      const body = await request.json();
+      const res = await AuthProxyService.proxyDriverPatch(token, "status", body);
+
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
+  )
+  .post(
+    "/driver/documents/identity",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      const contentLength = parseInt(request.headers.get("content-length") || "0");
+      if (contentLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+
+      const rawBody = await request.arrayBuffer();
+      const contentType = request.headers.get("content-type");
+
+      console.log('[Gateway] Forwarding driver identity upload, Content-Type:', contentType, 'Body size:', rawBody.byteLength);
+
+      const res = await AuthProxyService.proxyDriverMultipart(token, "documents/identity", contentType || 'multipart/form-data', rawBody);
+
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
+  )
+  .post(
+    "/driver/documents/driving-license",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      const contentLength = parseInt(request.headers.get("content-length") || "0");
+      if (contentLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+
+      const rawBody = await request.arrayBuffer();
+      const contentType = request.headers.get("content-type");
+
+      console.log('[Gateway] Forwarding driver driving-license upload, Content-Type:', contentType, 'Body size:', rawBody.byteLength);
+
+      const res = await AuthProxyService.proxyDriverMultipart(token, "documents/driving-license", contentType || 'multipart/form-data', rawBody);
+
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
+  )
+  .post(
+    "/driver/vehicle",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      const contentLength = parseInt(request.headers.get("content-length") || "0");
+      if (contentLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+
+      const rawBody = await request.arrayBuffer();
+      const contentType = request.headers.get("content-type");
+
+      console.log('[Gateway] Forwarding driver vehicle registration, Content-Type:', contentType, 'Body size:', rawBody.byteLength);
+
+      const res = await AuthProxyService.proxyDriverMultipart(token, "vehicle", contentType || 'multipart/form-data', rawBody);
+
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
   );

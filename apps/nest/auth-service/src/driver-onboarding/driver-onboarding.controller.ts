@@ -102,11 +102,14 @@ export class DriverOnboardingController {
   @ApiOperation({ summary: "Upload driving license (2 images required)" })
   async uploadDrivingLicense(@Request() req: FastifyRequest) {
     const files: FastifyFile[] = [];
+    const fields: Record<string, string> = {};
     const parts = req.parts();
 
     for await (const part of parts) {
       if (part.type === "file") {
         files.push(part as FastifyFile);
+      } else if (part.type === "field") {
+        fields[(part as any).fieldname] = (part as any).value;
       }
     }
 
@@ -114,6 +117,11 @@ export class DriverOnboardingController {
       throw new BadRequestException(
         "Exactly 2 driving license images are required",
       );
+    }
+
+    const licenseNumber = fields["licenseNumber"];
+    if (!licenseNumber || licenseNumber.trim() === "") {
+      throw new BadRequestException("License number is required");
     }
 
     const processedFiles = await Promise.all(
@@ -129,6 +137,7 @@ export class DriverOnboardingController {
     const result = await (this.service as any).uploadDrivingLicense(
       (req as any).user.sub,
       processedFiles,
+      licenseNumber,
     );
     return { success: true, data: result };
   }

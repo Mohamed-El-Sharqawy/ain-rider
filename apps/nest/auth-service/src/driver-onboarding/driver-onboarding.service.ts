@@ -6,6 +6,7 @@ import {
   UnsupportedMediaTypeException,
   HttpStatus,
   HttpException,
+  ConflictException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { StorageService } from "../shared/storage/storage.service";
@@ -247,6 +248,7 @@ export class DriverOnboardingService {
   async uploadDrivingLicense(
     userId: string,
     files: UploadedFile[],
+    licenseNumber: string,
   ): Promise<{
     drivingLicenseImages: PresignedUrlResult[];
     status: DocumentStatus;
@@ -262,6 +264,19 @@ export class DriverOnboardingService {
 
     if (!driver) {
       throw new NotFoundException("Driver not found");
+    }
+
+    // Check for duplicate license number
+    const existingDriverWithLicense = await this.prisma.driver.findFirst({
+      where: {
+        licenseNumber,
+        NOT: { id: driver.id },
+      },
+    });
+    if (existingDriverWithLicense) {
+      throw new ConflictException(
+        "This license number is already registered to another driver",
+      );
     }
 
     const existingDoc = driver.document;
@@ -308,6 +323,12 @@ export class DriverOnboardingService {
         drivingLicenseStatus: DocumentStatus.PENDING,
         drivingLicenseUploadAttempts: { increment: 1 },
       },
+    });
+
+    // Save license number to Driver record
+    await this.prisma.driver.update({
+      where: { id: driver.id },
+      data: { licenseNumber },
     });
 
     const onboardingStatus = await this.checkAndTransitionToUnderReview(

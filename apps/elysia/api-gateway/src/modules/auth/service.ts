@@ -151,4 +151,82 @@ export abstract class AuthProxyService {
       throw error;
     }
   }
+
+  static async proxyDriverGet(token: string, path: string): Promise<Response> {
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/driver/${path}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service proxyDriverGet failed', { error: String(error) });
+      throw error;
+    }
+  }
+
+  static async proxyDriverPatch(token: string, path: string, body: unknown): Promise<Response> {
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/driver/${path}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service proxyDriverPatch failed', { error: String(error) });
+      throw error;
+    }
+  }
+
+  static async proxyDriverMultipart(token: string, path: string, contentType: string, rawBody: ArrayBuffer): Promise<Response> {
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/driver/${path}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': contentType,
+        },
+        body: rawBody,
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service proxyDriverMultipart failed', { error: String(error) });
+      throw error;
+    }
+  }
+
+  static async proxyDriverPatchMultipart(token: string, path: string, contentType: string, rawBody: ArrayBuffer): Promise<Response> {
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/driver/${path}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': contentType,
+        },
+        body: rawBody,
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service proxyDriverPatchMultipart failed', { error: String(error) });
+      throw error;
+    }
+  }
 }
