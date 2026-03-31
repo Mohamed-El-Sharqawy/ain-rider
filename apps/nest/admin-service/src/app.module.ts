@@ -14,6 +14,8 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { SettingsModule } from './settings/settings.module';
 import { ProfileModule } from './profile/profile.module';
+import { AuditModule } from './shared/audit/audit.module';
+import { InternalApiModule } from './shared/internal-api/internal-api.module';
 import { HealthController } from './health/health.controller';
 
 @Module({
@@ -21,6 +23,8 @@ import { HealthController } from './health/health.controller';
     ConfigModule.forRoot({ isGlobal: true }),
     TerminusModule,
     PrismaModule,
+    AuditModule,
+    InternalApiModule,
     NatsModule,
     StorageModule,
     AuthModule,

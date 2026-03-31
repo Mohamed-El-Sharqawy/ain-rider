@@ -556,4 +556,19 @@ export class DriverOnboardingService {
       },
     };
   }
+
+  async approveDriver(userId: string) {
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+    });
+
+    if (!driver) {
+      throw new NotFoundException("Driver not found");
+    }
+
+    return this.prisma.driver.update({
+      where: { userId },
+      data: { onboardingStatus: OnboardingStatus.APPROVED },
+    });
+  }
 }

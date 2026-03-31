@@ -15,6 +15,7 @@ import {
   logError,
   createLogger,
   ValidationError,
+  InternalError,
   NotFoundError,
   UnauthorizedError,
   ForbiddenError,
@@ -74,7 +75,7 @@ new Elysia()
           appError = new NotFoundError(message);
           break;
         case 429:
-          appError = new ValidationError("RATE_LIMIT_EXCEEDED: " + message, {
+          appError = new InternalError("RATE_LIMIT_EXCEEDED: " + message, {
             status: errorCode,
           });
           break;
@@ -124,7 +125,7 @@ new Elysia()
   .use(
     rateLimit({
       duration: 60_000,
-      max: 100,
+      max: 200, // Increased for dashboard usage
       generator: (req) =>
         req.headers.get("x-forwarded-for") ||
         req.headers.get("x-real-ip") ||

@@ -5,12 +5,12 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "postinstall": "prisma generate && prisma generate --schema=prisma/trip-schema.prisma && prisma generate --schema=prisma/auth-schema.prisma",
+    "postinstall": "prisma generate",
     "start": "nest start",
     "dev": "nest start --watch",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "prisma:generate": "prisma generate && prisma generate --schema=prisma/trip-schema.prisma && prisma generate --schema=prisma/auth-schema.prisma",
+    "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy"

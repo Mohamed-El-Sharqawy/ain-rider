@@ -18,11 +18,17 @@ import { RequestOtpDto } from "./dto/request-otp.dto";
 import { VerifyOtpDto } from "./dto/verify-otp.dto";
 import { UserRole } from "@ain-rider/shared-types";
 import { generateTraceId } from "@ain-rider/nats-client";
+import { StorageService } from "../shared/storage/storage.service";
+import { PrismaService } from "../prisma/prisma.service";
 
 @ApiTags("Authentication")
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private storageService: StorageService,
+    private prismaService: PrismaService,
+  ) {}
 
   @Post("register")
   @ApiOperation({ summary: "Register a new user (RIDER or DRIVER only)" })
@@ -50,10 +56,50 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get("me")
-  @ApiOperation({ summary: "Get current user profile" })
-  me(@Request() req: any) {
+  @ApiOperation({ summary: "Get current user profile with images" })
+  async me(@Request() req: any) {
     const { passwordHash, ...user } = req.user;
-    return user;
+    
+    // Get presigned URLs for images
+    const imageUrls: Record<string, any> = {};
+    
+    // Profile image
+    if (user.profileImage) {
+      try {
+        imageUrls.profileImage = await this.storageService.getPresignedGetUrl(user.profileImage, 3600);
+      } catch {
+        imageUrls.profileImage = null;
+      }
+    }
+    
+    // For riders, get identity document URLs
+    if (user.role === UserRole.RIDER) {
+      const rider = await this.prismaService.rider.findUnique({
+        where: { userId: user.id },
+      });
+      
+      if (rider) {
+        if (rider.identityFront) {
+          try {
+            imageUrls.identityFront = await this.storageService.getPresignedGetUrl(rider.identityFront, 3600);
+          } catch {
+            imageUrls.identityFront = null;
+          }
+        }
+        if (rider.identityBack) {
+          try {
+            imageUrls.identityBack = await this.storageService.getPresignedGetUrl(rider.identityBack, 3600);
+          } catch {
+            imageUrls.identityBack = null;
+          }
+        }
+      }
+    }
+    
+    return {
+      ...user,
+      images: imageUrls,
+    };
   }
 
   @Post("refresh")

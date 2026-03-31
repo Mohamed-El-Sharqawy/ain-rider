@@ -1,4 +1,4 @@
-import { Elysia, status } from "elysia";
+import { Elysia, status, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { AuthProxyService } from "./service";
 import { AuthModel } from "./model";
@@ -12,22 +12,15 @@ const isMobileClient = (headers: Headers): boolean => {
   return headers.get("x-client-type") === "mobile";
 };
 
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:4000';
-
-console.log("[Auth Module] Configuration:", {
-  isProduction,
-  sameSite: SAME_SITE,
-  secure: isProduction,
-});
-
 export const auth = new Elysia({ prefix: "/auth" })
   .onRequest(({ request }) => {
     console.log(`[Gateway] [${request.method}] ${request.url}`);
   })
   .post(
     "/login",
-    async ({ body, cookie: { accessToken, refreshToken }, set, request }) => {
+    async ({ body, set, request }) => {
       const res = await AuthProxyService.login(body);
+
       if (!res.ok) {
         try {
           const errorBody = await res.json();
@@ -51,19 +44,25 @@ export const auth = new Elysia({ prefix: "/auth" })
         refreshToken: string;
       };
 
-      accessToken.value = data.accessToken;
-      accessToken.httpOnly = true;
-      accessToken.secure = isProduction;
-      accessToken.sameSite = SAME_SITE;
-      accessToken.maxAge = ACCESS_TOKEN_MAX_AGE;
-      accessToken.path = "/";
-
-      refreshToken.value = data.refreshToken;
-      refreshToken.httpOnly = true;
-      refreshToken.secure = isProduction;
-      refreshToken.sameSite = SAME_SITE;
-      refreshToken.maxAge = REFRESH_TOKEN_MAX_AGE;
-      refreshToken.path = "/";
+      // ✅ THIS is the important fix
+      set.cookie = {
+        accessToken: {
+          value: data.accessToken,
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: SAME_SITE, // "lax" in dev
+          maxAge: ACCESS_TOKEN_MAX_AGE,
+          path: "/",
+        },
+        refreshToken: {
+          value: data.refreshToken,
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: SAME_SITE,
+          maxAge: REFRESH_TOKEN_MAX_AGE,
+          path: "/",
+        },
+      };
 
       const responseBody: Record<string, unknown> = {
         user: data.user,
@@ -82,8 +81,9 @@ export const auth = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/register",
-    async ({ body, cookie: { accessToken, refreshToken }, set, request }) => {
+    async ({ body, set, request }) => {
       const res = await AuthProxyService.register(body);
+
       if (!res.ok) {
         try {
           const errorBody = await res.json();
@@ -107,26 +107,31 @@ export const auth = new Elysia({ prefix: "/auth" })
         refreshToken: string;
       };
 
-      accessToken.value = data.accessToken;
-      accessToken.httpOnly = true;
-      accessToken.secure = isProduction;
-      accessToken.sameSite = SAME_SITE;
-      accessToken.maxAge = ACCESS_TOKEN_MAX_AGE;
-      accessToken.path = "/";
-
-      refreshToken.value = data.refreshToken;
-      refreshToken.httpOnly = true;
-      refreshToken.secure = isProduction;
-      refreshToken.sameSite = SAME_SITE;
-      refreshToken.maxAge = REFRESH_TOKEN_MAX_AGE;
-      refreshToken.path = "/";
+      // ✅ FIX: set cookies properly
+      set.cookie = {
+        accessToken: {
+          value: data.accessToken,
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: SAME_SITE,
+          maxAge: ACCESS_TOKEN_MAX_AGE,
+          path: "/",
+        },
+        refreshToken: {
+          value: data.refreshToken,
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: SAME_SITE,
+          maxAge: REFRESH_TOKEN_MAX_AGE,
+          path: "/",
+        },
+      };
 
       const responseBody: Record<string, unknown> = {
         user: data.user,
         success: true,
       };
 
-      // Mobile clients need tokens in body
       if (isMobileClient(request.headers)) {
         responseBody.accessToken = data.accessToken;
         responseBody.refreshToken = data.refreshToken;
@@ -138,26 +143,37 @@ export const auth = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/refresh",
-    async ({ cookie: { accessToken, refreshToken }, set, request }) => {
-      // Resolve token: Bearer header first, then cookie fallback
+    async ({ cookie, set, request }) => {
       const authHeader = request.headers.get("authorization");
       let token: string;
 
       if (authHeader?.startsWith("Bearer ")) {
         token = authHeader.slice(7);
-      } else if (refreshToken.value) {
-        token = refreshToken.value as string;
+      } else if (cookie.refreshToken?.value) {
+        token = cookie.refreshToken.value as string;
       } else {
         throw status(401, "No refresh token");
       }
 
       const res = await AuthProxyService.refresh(token);
+
       if (!res.ok) {
-        refreshToken.remove();
-        accessToken.remove();
-        const errorBody = await res.text();
+        // ✅ Properly clear cookies
+        set.cookie = {
+          accessToken: {
+            value: "",
+            path: "/",
+            maxAge: 0,
+          },
+          refreshToken: {
+            value: "",
+            path: "/",
+            maxAge: 0,
+          },
+        };
+
         set.status = res.status;
-        return errorBody;
+        return await res.text();
       }
 
       const data = (await res.json()) as {
@@ -165,18 +181,32 @@ export const auth = new Elysia({ prefix: "/auth" })
         refreshToken?: string;
       };
 
-      accessToken.value = data.accessToken;
-      accessToken.httpOnly = true;
-      accessToken.secure = isProduction;
-      accessToken.sameSite = "strict";
-      accessToken.maxAge = ACCESS_TOKEN_MAX_AGE;
-      accessToken.path = "/";
+      // ✅ FIX: use set.cookie
+      set.cookie = {
+        accessToken: {
+          value: data.accessToken,
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: SAME_SITE, // ✅ FIXED (no more "strict")
+          maxAge: ACCESS_TOKEN_MAX_AGE,
+          path: "/",
+        },
+        ...(data.refreshToken && {
+          refreshToken: {
+            value: data.refreshToken,
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: SAME_SITE,
+            maxAge: REFRESH_TOKEN_MAX_AGE,
+            path: "/",
+          },
+        }),
+      };
 
       const responseBody: Record<string, unknown> = {
         success: true,
       };
 
-      // Mobile clients need new tokens in body
       if (isMobileClient(request.headers)) {
         responseBody.accessToken = data.accessToken;
         if (data.refreshToken) {
@@ -186,87 +216,24 @@ export const auth = new Elysia({ prefix: "/auth" })
 
       return responseBody;
     },
+    {
+      body: t.Optional(t.Any()),
+    }
   )
-  /**
-   * POST /auth/verify-otp
-   *
-   * Verifies a Firebase Phone Auth ID token and returns verified phone number.
-   * On success, publishes `ain_rider.otp_verified` NATS event for downstream services.
-   *
-   * Rate Limiting (FR-007):
-   * - Global: 100 req/min per IP (configured in index.ts rateLimit middleware)
-   * - OTP-specific: 10 req/min per IP, 5 req/hour per IP
-   * - On limit exceeded: Returns HTTP 429 with Retry-After header
-   *
-   * Responses:
-   * - 200: { success: true, phoneNumber: string, uid: string }
-   * - 400: { success: false, error: { code: "VALIDATION_ERROR", message: string } }
-   * - 401: { success: false, error: { code: "UNAUTHORIZED", message: string } }
-   * - 429: { success: false, error: { code: "RATE_LIMIT_EXCEEDED", message: string } }
-   * - 503: { success: false, error: { code: "SERVICE_UNAVAILABLE", message: string } }
-   */
-  .use(
-    rateLimit({
-      duration: 60_000,
-      max: 10,
-      generator: (req) =>
-        req.headers.get("x-forwarded-for") ||
-        req.headers.get("x-real-ip") ||
-        "anonymous",
-    }),
-  )
-  .post(
-    "/request-otp",
-    async ({ body, set }) => {
-      const res = await AuthProxyService.requestOtp(body);
-      if (!res.ok) {
-        try {
-          const errorBody = await res.json();
-          set.status = res.status;
-          return errorBody;
-        } catch {
-          set.status = res.status;
-          return {
-            success: false,
-            error: {
-              code: "INTERNAL_ERROR",
-              message: "Failed to parse error response",
-            },
-          };
-        }
-      }
-      return res.json();
-    },
-    { body: AuthModel.requestOtpBody },
-  )
-  .post(
-    "/verify-otp",
-    async ({ body, set }) => {
-      const res = await AuthProxyService.verifyOtp(body);
-      if (!res.ok) {
-        try {
-          const errorBody = await res.json();
-          set.status = res.status;
-          return errorBody;
-        } catch {
-          set.status = res.status;
-          return {
-            success: false,
-            error: {
-              code: "INTERNAL_ERROR",
-              message: "Failed to parse error response",
-            },
-          };
-        }
-      }
+  .post("/logout", async ({ set }) => {
+    set.cookie = {
+      accessToken: {
+        value: "",
+        path: "/",
+        maxAge: 0,
+      },
+      refreshToken: {
+        value: "",
+        path: "/",
+        maxAge: 0,
+      },
+    };
 
-      return res.json();
-    },
-    { body: AuthModel.verifyOtpBody },
-  )
-  .post("/logout", async ({ cookie: { accessToken, refreshToken } }) => {
-    accessToken.remove();
-    refreshToken.remove();
     return { success: true };
   })
   .get("/me", async ({ cookie: { accessToken }, request, set }) => {
@@ -279,15 +246,6 @@ export const auth = new Elysia({ prefix: "/auth" })
     } else if (accessToken?.value) {
       token = accessToken.value as string;
     }
-
-    console.log("[/auth/me] Token resolution:", {
-      source: authHeader?.startsWith("Bearer ")
-        ? "bearer"
-        : token
-          ? "cookie"
-          : "none",
-      hasToken: !!token,
-    });
 
     if (!token) {
       throw status(401, "Not authenticated");
@@ -344,4 +302,157 @@ export const auth = new Elysia({ prefix: "/auth" })
       return res.json();
     },
     { body: AuthModel.adminCreateUserBody },
+  )
+  // FIXED: Scoped OTP rate limit with an empty prefix group to keep the original endpoints /auth/request-otp, etc.
+  .group("", (app) =>
+    app
+      .use(rateLimit({
+        duration: 60_000,
+        max: 15,
+        generator: (req) =>
+          req.headers.get("x-forwarded-for") ||
+          req.headers.get("x-real-ip") ||
+          "anonymous",
+      }))
+      .post(
+        "/request-otp",
+        async ({ body, set }) => {
+          const res = await AuthProxyService.requestOtp(body);
+          if (!res.ok) {
+            try {
+              const errorBody = await res.json();
+              set.status = res.status;
+              return errorBody;
+            } catch {
+              set.status = res.status;
+              return {
+                success: false,
+                error: {
+                  code: "INTERNAL_ERROR",
+                  message: "Failed to parse error response",
+                },
+              };
+            }
+          }
+          return res.json();
+        },
+        { body: AuthModel.requestOtpBody },
+      )
+      .post(
+        "/verify-otp",
+        async ({ body, set }) => {
+          const res = await AuthProxyService.verifyOtp(body);
+          if (!res.ok) {
+            try {
+              const errorBody = await res.json();
+              set.status = res.status;
+              return errorBody;
+            } catch {
+              set.status = res.status;
+              return {
+                success: false,
+                error: {
+                  code: "INTERNAL_ERROR",
+                  message: "Failed to parse error response",
+                },
+              };
+            }
+          }
+
+          return res.json();
+        },
+        { body: AuthModel.verifyOtpBody },
+      )
+  )
+  .post(
+    "/rider/documents/identity",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      // Forward raw request with body
+      const contentType = request.headers.get("content-type");
+      const body = await request.arrayBuffer();
+      
+      console.log(`[Gateway] Forwarding identity upload, Content-Type: ${contentType}, Body size: ${body.byteLength}`);
+      
+      const res = await fetch(`${process.env.AUTH_SERVICE_URL || 'http://localhost:4000'}/auth/rider/documents/identity`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': contentType || 'multipart/form-data',
+        },
+        body: body,
+      });
+      
+      console.log(`[Gateway] Auth service response: ${res.status}`);
+      
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
+  )
+  .patch(
+    "/rider/profile/image",
+    async ({ request, set }) => {
+      const authHeader = request.headers.get("authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        throw status(401, "Not authenticated");
+      }
+      const token = authHeader.slice(7);
+
+      // Forward raw request with body
+      const contentType = request.headers.get("content-type");
+      const body = await request.arrayBuffer();
+      
+      console.log(`[Gateway] Forwarding profile image upload, Content-Type: ${contentType}, Body size: ${body.byteLength}`);
+      
+      const res = await fetch(`${process.env.AUTH_SERVICE_URL || 'http://localhost:4000'}/auth/rider/profile/image`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': contentType || 'multipart/form-data',
+        },
+        body: body,
+      });
+      
+      console.log(`[Gateway] Auth service response: ${res.status}`);
+      
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
   );

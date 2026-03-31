@@ -23,8 +23,8 @@ const services = [
     dir: 'apps/nest/admin-service',
     commands: [
       'npx prisma generate',
-      'npx prisma generate --schema=prisma/trip-schema.prisma',
-      'npx prisma generate --schema=prisma/auth-schema.prisma'
+      // 'npx prisma generate --schema=prisma/trip-schema.prisma',
+      // 'npx prisma generate --schema=prisma/auth-schema.prisma'
     ]
   },
   { 

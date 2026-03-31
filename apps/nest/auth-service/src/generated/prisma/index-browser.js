@@ -201,6 +201,8 @@ exports.Prisma.RiderScalarFieldEnum = {
   userId: 'userId',
   rating: 'rating',
   totalTrips: 'totalTrips',
+  identityFront: 'identityFront',
+  identityBack: 'identityBack',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

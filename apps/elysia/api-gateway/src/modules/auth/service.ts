@@ -49,6 +49,7 @@ export abstract class AuthProxyService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({}),
       });
       proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
       return res;
@@ -128,6 +129,25 @@ export abstract class AuthProxyService {
     } catch (error) {
       proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
       log('error', 'Auth service adminCreateUser proxy failed', { error: String(error) });
+      throw error;
+    }
+  }
+
+  static async uploadRiderIdentity(token: string, formData: FormData): Promise<Response> {
+    proxyRequestsTotal.inc({ service: 'auth-service', status: 'attempt' });
+    try {
+      const res = await fetch(`${AUTH_SERVICE_URL}/auth/rider/documents/identity`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      proxyRequestsTotal.inc({ service: 'auth-service', status: res.ok ? 'success' : 'error' });
+      return res;
+    } catch (error) {
+      proxyRequestsTotal.inc({ service: 'auth-service', status: 'failed' });
+      log('error', 'Auth service uploadRiderIdentity proxy failed', { error: String(error) });
       throw error;
     }
   }

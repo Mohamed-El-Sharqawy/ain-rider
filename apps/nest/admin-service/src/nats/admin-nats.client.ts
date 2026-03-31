@@ -58,7 +58,7 @@ export interface RefundResponse {
 export class AdminNatsClient {
   private _requestClient: NatsRequestClient | null = null;
 
-  constructor(private natsService: NatsService) {}
+  constructor(private natsService: NatsService) { }
 
   private get requestClient(): NatsRequestClient {
     if (!this._requestClient) {
@@ -79,9 +79,9 @@ export class AdminNatsClient {
     adminId: string,
     traceId?: string
   ): Promise<SuspendUserResponse> {
-    return this.requestClient.request<SuspendUserRequest, SuspendUserResponse>(
-      'user.suspend.request',
-      { userId, reason, suspendedBy: adminId },
+    return this.requestClient.request<any, any>(
+      'admin.command.suspend_user',
+      { userId, reason, adminId },
       { traceId, requestedBy: adminId }
     );
   }
@@ -94,9 +94,41 @@ export class AdminNatsClient {
     adminId: string,
     traceId?: string
   ): Promise<ActivateUserResponse> {
-    return this.requestClient.request<ActivateUserRequest, ActivateUserResponse>(
-      'user.activate.request',
-      { userId, activatedBy: adminId },
+    return this.requestClient.request<any, any>(
+      'admin.command.activate_user',
+      { userId, adminId },
+      { traceId, requestedBy: adminId }
+    );
+  }
+
+  /**
+   * Approve a driver via auth-service
+   */
+  async approveDriver(
+    userId: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<any> {
+    return this.requestClient.request<any, any>(
+      'admin.command.approve_driver',
+      { userId, adminId },
+      { traceId, requestedBy: adminId }
+    );
+  }
+
+  /**
+   * Update user status generically via auth-service
+   */
+  async updateUserStatus(
+    userId: string,
+    status: string,
+    adminId: string,
+    reason?: string,
+    traceId?: string
+  ): Promise<any> {
+    return this.requestClient.request<any, any>(
+      'admin.command.update_user_status',
+      { userId, status, adminId, reason },
       { traceId, requestedBy: adminId }
     );
   }

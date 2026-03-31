@@ -1,11 +1,8 @@
-// ─── Trips Module ────────────────────────────────────────────────────────────
-
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TripsController } from './trips.controller';
 import { TripsService } from './trips.service';
-import { TripDbService } from '../prisma/trip-db.service';
 import { NatsModule } from '../shared/nats/nats.module';
 import { AdminNatsClient } from '../nats/admin-nats.client';
 
@@ -21,7 +18,7 @@ import { AdminNatsClient } from '../nats/admin-nats.client';
     }),
   ],
   controllers: [TripsController],
-  providers: [TripsService, TripDbService, AdminNatsClient],
+  providers: [TripsService, AdminNatsClient],
   exports: [TripsService],
 })
 export class TripsModule {}

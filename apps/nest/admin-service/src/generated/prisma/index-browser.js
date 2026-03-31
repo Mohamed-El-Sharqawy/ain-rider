@@ -340,6 +340,20 @@ exports.Prisma.BookingScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AdminAuditLogScalarFieldEnum = {
+  id: 'id',
+  adminId: 'adminId',
+  action: 'action',
+  targetType: 'targetType',
+  targetId: 'targetId',
+  previousState: 'previousState',
+  newState: 'newState',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  reason: 'reason',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -386,7 +400,8 @@ exports.Prisma.ModelName = {
   Complaint: 'Complaint',
   ComplaintComment: 'ComplaintComment',
   Setting: 'Setting',
-  Booking: 'Booking'
+  Booking: 'Booking',
+  AdminAuditLog: 'AdminAuditLog'
 };
 
 /**

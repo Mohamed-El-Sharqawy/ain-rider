@@ -290,3 +290,22 @@ model Booking {
   @@index([status])
   @@map("bookings")
 }
+
+model AdminAuditLog {
+  id             String   @id @default(uuid())
+  adminId        String
+  action         String
+  targetType     String   // e.g., "USER", "TRIP", "SETTING"
+  targetId       String
+  previousState  Json?
+  newState       Json?
+  ipAddress      String?
+  userAgent      String?
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  @@index([adminId])
+  @@index([targetType, targetId])
+  @@index([action])
+  @@map("admin_audit_logs")
+}

@@ -7450,6 +7450,8 @@ export namespace Prisma {
     userId: string | null
     rating: number | null
     totalTrips: number | null
+    identityFront: string | null
+    identityBack: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7459,6 +7461,8 @@ export namespace Prisma {
     userId: string | null
     rating: number | null
     totalTrips: number | null
+    identityFront: string | null
+    identityBack: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7468,6 +7472,8 @@ export namespace Prisma {
     userId: number
     rating: number
     totalTrips: number
+    identityFront: number
+    identityBack: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -7489,6 +7495,8 @@ export namespace Prisma {
     userId?: true
     rating?: true
     totalTrips?: true
+    identityFront?: true
+    identityBack?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7498,6 +7506,8 @@ export namespace Prisma {
     userId?: true
     rating?: true
     totalTrips?: true
+    identityFront?: true
+    identityBack?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7507,6 +7517,8 @@ export namespace Prisma {
     userId?: true
     rating?: true
     totalTrips?: true
+    identityFront?: true
+    identityBack?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -7603,6 +7615,8 @@ export namespace Prisma {
     userId: string
     rating: number
     totalTrips: number
+    identityFront: string | null
+    identityBack: string | null
     createdAt: Date
     updatedAt: Date
     _count: RiderCountAggregateOutputType | null
@@ -7631,6 +7645,8 @@ export namespace Prisma {
     userId?: boolean
     rating?: boolean
     totalTrips?: boolean
+    identityFront?: boolean
+    identityBack?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -7641,6 +7657,8 @@ export namespace Prisma {
     userId?: boolean
     rating?: boolean
     totalTrips?: boolean
+    identityFront?: boolean
+    identityBack?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -7651,6 +7669,8 @@ export namespace Prisma {
     userId?: boolean
     rating?: boolean
     totalTrips?: boolean
+    identityFront?: boolean
+    identityBack?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -7661,11 +7681,13 @@ export namespace Prisma {
     userId?: boolean
     rating?: boolean
     totalTrips?: boolean
+    identityFront?: boolean
+    identityBack?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RiderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "rating" | "totalTrips" | "createdAt" | "updatedAt", ExtArgs["result"]["rider"]>
+  export type RiderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "rating" | "totalTrips" | "identityFront" | "identityBack" | "createdAt" | "updatedAt", ExtArgs["result"]["rider"]>
   export type RiderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -7686,6 +7708,8 @@ export namespace Prisma {
       userId: string
       rating: number
       totalTrips: number
+      identityFront: string | null
+      identityBack: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["rider"]>
@@ -8116,6 +8140,8 @@ export namespace Prisma {
     readonly userId: FieldRef<"Rider", 'String'>
     readonly rating: FieldRef<"Rider", 'Float'>
     readonly totalTrips: FieldRef<"Rider", 'Int'>
+    readonly identityFront: FieldRef<"Rider", 'String'>
+    readonly identityBack: FieldRef<"Rider", 'String'>
     readonly createdAt: FieldRef<"Rider", 'DateTime'>
     readonly updatedAt: FieldRef<"Rider", 'DateTime'>
   }
@@ -8647,6 +8673,8 @@ export namespace Prisma {
     userId: 'userId',
     rating: 'rating',
     totalTrips: 'totalTrips',
+    identityFront: 'identityFront',
+    identityBack: 'identityBack',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -9258,6 +9286,8 @@ export namespace Prisma {
     userId?: StringFilter<"Rider"> | string
     rating?: FloatFilter<"Rider"> | number
     totalTrips?: IntFilter<"Rider"> | number
+    identityFront?: StringNullableFilter<"Rider"> | string | null
+    identityBack?: StringNullableFilter<"Rider"> | string | null
     createdAt?: DateTimeFilter<"Rider"> | Date | string
     updatedAt?: DateTimeFilter<"Rider"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9268,6 +9298,8 @@ export namespace Prisma {
     userId?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    identityFront?: SortOrderInput | SortOrder
+    identityBack?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -9281,6 +9313,8 @@ export namespace Prisma {
     NOT?: RiderWhereInput | RiderWhereInput[]
     rating?: FloatFilter<"Rider"> | number
     totalTrips?: IntFilter<"Rider"> | number
+    identityFront?: StringNullableFilter<"Rider"> | string | null
+    identityBack?: StringNullableFilter<"Rider"> | string | null
     createdAt?: DateTimeFilter<"Rider"> | Date | string
     updatedAt?: DateTimeFilter<"Rider"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9291,6 +9325,8 @@ export namespace Prisma {
     userId?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    identityFront?: SortOrderInput | SortOrder
+    identityBack?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RiderCountOrderByAggregateInput
@@ -9308,6 +9344,8 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Rider"> | string
     rating?: FloatWithAggregatesFilter<"Rider"> | number
     totalTrips?: IntWithAggregatesFilter<"Rider"> | number
+    identityFront?: StringNullableWithAggregatesFilter<"Rider"> | string | null
+    identityBack?: StringNullableWithAggregatesFilter<"Rider"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Rider"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Rider"> | Date | string
   }
@@ -9864,6 +9902,8 @@ export namespace Prisma {
     id?: string
     rating?: number
     totalTrips?: number
+    identityFront?: string | null
+    identityBack?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutRiderInput
@@ -9874,6 +9914,8 @@ export namespace Prisma {
     userId: string
     rating?: number
     totalTrips?: number
+    identityFront?: string | null
+    identityBack?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9882,6 +9924,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    identityFront?: NullableStringFieldUpdateOperationsInput | string | null
+    identityBack?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutRiderNestedInput
@@ -9892,6 +9936,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    identityFront?: NullableStringFieldUpdateOperationsInput | string | null
+    identityBack?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9901,6 +9947,8 @@ export namespace Prisma {
     userId: string
     rating?: number
     totalTrips?: number
+    identityFront?: string | null
+    identityBack?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9909,6 +9957,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    identityFront?: NullableStringFieldUpdateOperationsInput | string | null
+    identityBack?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9918,6 +9968,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    identityFront?: NullableStringFieldUpdateOperationsInput | string | null
+    identityBack?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10461,6 +10513,8 @@ export namespace Prisma {
     userId?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    identityFront?: SortOrder
+    identityBack?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10475,6 +10529,8 @@ export namespace Prisma {
     userId?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    identityFront?: SortOrder
+    identityBack?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10484,6 +10540,8 @@ export namespace Prisma {
     userId?: SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
+    identityFront?: SortOrder
+    identityBack?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11094,6 +11152,8 @@ export namespace Prisma {
     id?: string
     rating?: number
     totalTrips?: number
+    identityFront?: string | null
+    identityBack?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11102,6 +11162,8 @@ export namespace Prisma {
     id?: string
     rating?: number
     totalTrips?: number
+    identityFront?: string | null
+    identityBack?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11192,6 +11254,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    identityFront?: NullableStringFieldUpdateOperationsInput | string | null
+    identityBack?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11200,6 +11264,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
+    identityFront?: NullableStringFieldUpdateOperationsInput | string | null
+    identityBack?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

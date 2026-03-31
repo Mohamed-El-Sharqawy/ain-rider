@@ -3,12 +3,12 @@ import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
 import { StorageModule } from '../shared/storage/storage.module';
 import { AuthModule } from '../auth/auth.module';
-import { AuthDbService } from '../prisma/auth-db.service';
+import { InternalApiModule } from '../shared/internal-api/internal-api.module';
 
 @Module({
-  imports: [StorageModule, AuthModule],
+  imports: [StorageModule, AuthModule, InternalApiModule],
   controllers: [ProfileController],
-  providers: [ProfileService, AuthDbService],
+  providers: [ProfileService],
   exports: [ProfileService],
 })
 export class ProfileModule {}

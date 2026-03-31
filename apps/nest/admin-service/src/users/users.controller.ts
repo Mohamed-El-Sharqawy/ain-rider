@@ -10,13 +10,14 @@ import { Roles } from '../auth/roles.decorator';
 import { CurrentUser, type CurrentUserPayload } from '../auth/current-user.decorator';
 import { UsersService } from './users.service';
 import { UserFiltersDto } from './dto/user-filters.dto';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 
 @ApiTags('Admin - Users')
 @ApiBearerAuth()
 @UseGuards(AdminGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all users with filters and pagination' })
@@ -58,5 +59,28 @@ export class UsersController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.usersService.activateUser(id, user.sub);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update user status generically' })
+  @ApiParam({ name: 'id', type: String })
+  updateUserStatus(
+    @Param('id') id: string,
+    @Body() body: UpdateUserStatusDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.usersService.updateStatus(id, body.status, user.sub, body.reason);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id/approve-driver')
+  @ApiOperation({ summary: 'Approve a driver' })
+  @ApiParam({ name: 'id', type: String })
+  approveDriver(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.usersService.approveDriver(id, user.sub);
   }
 }

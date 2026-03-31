@@ -28,19 +28,39 @@ export class NatsResponder {
 
     (async () => {
       for await (const msg of sub) {
+        let traceId = 'unknown';
         try {
-          const request = JSON.parse(
-            new TextDecoder().decode(msg.data),
-          ) as TRequest;
+          const payload = new TextDecoder().decode(msg.data);
+          const rawRequest = JSON.parse(payload);
+          
+          let requestPayload: any;
+          // Support both wrapped NatsRequest and raw data
+          if (rawRequest && typeof rawRequest === 'object' && 'data' in rawRequest && 'traceId' in rawRequest) {
+             requestPayload = rawRequest.data;
+             traceId = rawRequest.traceId || traceId;
+          } else {
+             requestPayload = rawRequest;
+          }
 
-          const result = await handler(request);
+          const result = await handler(requestPayload);
 
-          const response = JSON.stringify({ data: result, error: null });
+          const response = JSON.stringify({ 
+            success: true,
+            data: result, 
+            error: null,
+            traceId
+          });
           msg.respond(new TextEncoder().encode(response));
         } catch (error: any) {
+          console.error(`[LegacyNatsResponder] Error on ${subject}:`, error);
           const errorResponse = JSON.stringify({
+            success: false,
             data: null,
-            error: error.message || 'Unknown error',
+            error: {
+              code: error.code || 'INTERNAL_ERROR',
+              message: error.message || 'Unknown error',
+            },
+            traceId
           });
           msg.respond(new TextEncoder().encode(errorResponse));
         }

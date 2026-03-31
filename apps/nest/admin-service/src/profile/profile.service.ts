@@ -1,74 +1,28 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { AuthDbService } from '../prisma/auth-db.service';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InternalApiClient } from '../shared/internal-api/internal-api.client';
 import { StorageService } from '../shared/storage/storage.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ProfileService {
+  private readonly authUrl: string;
+
   constructor(
-    private authDb: AuthDbService,
+    private configService: ConfigService,
+    private internalApi: InternalApiClient,
     private storage: StorageService,
-  ) {}
+  ) {
+    this.authUrl = this.configService.get<string>('AUTH_SERVICE_URL') || 'http://localhost:4000';
+  }
 
   async getProfile(userId: string) {
-    const user = await this.authDb.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        phoneNumber: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        status: true,
-        profileImage: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
+    return this.internalApi.fetchInternal(`${this.authUrl}/auth/admin/users/${userId}`);
   }
 
   async updateProfile(userId: string, data: UpdateProfileDto) {
-    const user = await this.authDb.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    // Note: Profile updates should go through auth-service via NATS
-    // For now, we directly update the auth database (read-write for profile updates)
-    return this.authDb.user.update({
-      where: { id: userId },
-      data: {
-        ...(data.firstName && { firstName: data.firstName }),
-        ...(data.lastName && { lastName: data.lastName }),
-        ...(data.email && { email: data.email }),
-        ...(data.phoneNumber && { phoneNumber: data.phoneNumber }),
-        ...(data.profileImage && { profileImage: data.profileImage }),
-        updatedAt: new Date(),
-      },
-      select: {
-        id: true,
-        email: true,
-        phoneNumber: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        status: true,
-        profileImage: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    return this.internalApi.fetchInternal(`${this.authUrl}/auth/admin/users/${userId}`, 'PATCH', data);
   }
 
   async generateUploadUrl(userId: string, fileName: string, _contentType: string) {
@@ -86,24 +40,18 @@ export class ProfileService {
   }
 
   async deleteProfileImage(userId: string) {
-    const user = await this.authDb.user.findUnique({
-      where: { id: userId },
-      select: { profileImage: true },
-    });
+    const user = await this.getProfile(userId);
 
-    if (!user || !user.profileImage) {
+    if (!user || !(user as any).profileImage) {
       return;
     }
 
-    const objectName = this.extractObjectNameFromUrl(user.profileImage);
+    const objectName = this.extractObjectNameFromUrl((user as any).profileImage);
     if (objectName) {
       await this.storage.delete(objectName);
     }
 
-    await this.authDb.user.update({
-      where: { id: userId },
-      data: { profileImage: null, updatedAt: new Date() },
-    });
+    await this.updateProfile(userId, { profileImage: null } as any);
   }
 
   private buildPublicUrl(objectName: string): string {

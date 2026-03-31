@@ -214,4 +214,42 @@ export class TripsService {
 
     return sos;
   }
+
+  async findAllTrips(params: { skip?: number; take?: number; status?: TripStatus }) {
+    const where = params.status ? { status: params.status } : {};
+    const [trips, total] = await Promise.all([
+      this.prisma.trip.findMany({
+        where,
+        skip: params.skip,
+        take: params.take,
+        orderBy: { requestedAt: 'desc' },
+      }),
+      this.prisma.trip.count({ where }),
+    ]);
+
+    return {
+      trips,
+      total,
+    };
+  }
+
+  async getTripStats() {
+    const [total, requested, matched, inProgress, completed, cancelled] = await Promise.all([
+      this.prisma.trip.count(),
+      this.prisma.trip.count({ where: { status: TripStatus.REQUESTED } }),
+      this.prisma.trip.count({ where: { status: TripStatus.MATCHED } }),
+      this.prisma.trip.count({ where: { status: TripStatus.IN_PROGRESS } }),
+      this.prisma.trip.count({ where: { status: TripStatus.COMPLETED } }),
+      this.prisma.trip.count({ where: { status: TripStatus.CANCELLED } }),
+    ]);
+
+    return {
+      total,
+      requested,
+      matched,
+      inProgress,
+      completed,
+      cancelled,
+    };
+  }
 }

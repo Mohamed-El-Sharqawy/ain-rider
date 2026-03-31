@@ -376,4 +376,61 @@ export class AuthService {
       uid: decodedToken.uid,
     };
   }
+
+  async findAllUsers(params: { skip?: number; take?: number; role?: string }) {
+    const where = params.role ? { role: params.role } : {};
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip: params.skip,
+        take: params.take,
+        orderBy: { createdAt: "desc" },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      users: users.map((u) => this.sanitize(u)),
+      total,
+    };
+  }
+
+  async updateUser(id: string, data: any) {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+    return this.sanitize(user);
+  }
+
+  async findUserById(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        driver: true,
+        rider: true,
+      },
+    });
+    if (!user) return null;
+    return this.sanitize(user);
+  }
+
+  async getUserStats() {
+    const [total, active, drivers, riders] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { status: "ACTIVE" } }),
+      this.prisma.user.count({ where: { role: UserRole.DRIVER } }),
+      this.prisma.user.count({ where: { role: UserRole.RIDER } }),
+    ]);
+
+    return {
+      total,
+      active,
+      drivers,
+      riders,
+    };
+  }
 }

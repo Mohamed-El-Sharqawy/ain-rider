@@ -13,7 +13,7 @@ export const authGuard = new Elysia({ name: "Auth.Guard" })
   .use(
     jwt({
       name: "jwt",
-      secret: process.env.JWT_SECRET || "local_dev_secret_change_in_production",
+      secret: process.env.JWT_SECRET || "change-me-in-production",
     }),
   )
   .use(cookie())
@@ -46,7 +46,12 @@ export const authGuard = new Elysia({ name: "Auth.Guard" })
     try {
       const payload = (await jwt.verify(
         token as string,
-      )) as unknown as JwtPayload;
+      )) as unknown as JwtPayload | false;
+
+      if (!payload) {
+        console.error("[AuthGuard] JWT verification failed (signature or expiry)");
+        throw new UnauthorizedError("Invalid or expired access token");
+      }
 
       return {
         accessToken: token,
@@ -56,7 +61,9 @@ export const authGuard = new Elysia({ name: "Auth.Guard" })
           role: payload.role,
         },
       };
-    } catch {
-      throw new UnauthorizedError("Invalid or expired access token");
+    } catch (err) {
+      if (err instanceof UnauthorizedError) throw err;
+      console.error("[AuthGuard] Unexpected error during verification:", err);
+      throw new UnauthorizedError("Authentication failed");
     }
   });
