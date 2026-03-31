@@ -17,11 +17,13 @@ export class AdminController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('status') status?: TripStatus,
+    @Query('search') search?: string,
   ) {
     return this.tripsService.findAllTrips({
       skip: skip ? parseInt(skip) : undefined,
       take: take ? parseInt(take) : undefined,
       status,
+      search,
     });
   }
 

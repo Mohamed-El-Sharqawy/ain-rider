@@ -25,9 +25,8 @@ model UserShadow {
   @@map("shadow_users")
 }
 
-
 model VehicleType {
-  id            String    @id @default(uuid())
+  id            String         @id @default(uuid())
   name          String
   type          String
   baseFare      Float
@@ -36,12 +35,40 @@ model VehicleType {
   minFare       Float
   maxPassengers Int
   imageUrl      String?
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   vehicles      Vehicle[]
+  models        VehicleModel[]
 
   @@map("vehicle_types")
+}
+
+model VehicleMake {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  isActive  Boolean        @default(true)
+  models    VehicleModel[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("vehicle_makes")
+}
+
+model VehicleModel {
+  id            String   @id @default(uuid())
+  makeId        String
+  name          String
+  vehicleTypeId String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  make        VehicleMake  @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  vehicleType VehicleType? @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
+
+  @@unique([makeId, name])
+  @@map("vehicle_models")
 }
 
 model Vehicle {
@@ -66,12 +93,12 @@ model Vehicle {
 }
 
 model Wallet {
-  id           String               @id @default(uuid())
-  userId       String               @unique
-  balance      Float                @default(0)
-  currency     String               @default("IQD")
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
+  id           String              @id @default(uuid())
+  userId       String              @unique
+  balance      Float               @default(0)
+  currency     String              @default("IQD")
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
   transactions WalletTransaction[]
   withdrawals  Withdrawal[]
 
@@ -292,17 +319,17 @@ model Booking {
 }
 
 model AdminAuditLog {
-  id             String   @id @default(uuid())
-  adminId        String
-  action         String
-  targetType     String   // e.g., "USER", "TRIP", "SETTING"
-  targetId       String
-  previousState  Json?
-  newState       Json?
-  ipAddress      String?
-  userAgent      String?
-  reason         String?
-  createdAt      DateTime @default(now())
+  id            String   @id @default(uuid())
+  adminId       String
+  action        String
+  targetType    String // e.g., "USER", "TRIP", "SETTING"
+  targetId      String
+  previousState Json?
+  newState      Json?
+  ipAddress     String?
+  userAgent     String?
+  reason        String?
+  createdAt     DateTime @default(now())
 
   @@index([adminId])
   @@index([targetType, targetId])

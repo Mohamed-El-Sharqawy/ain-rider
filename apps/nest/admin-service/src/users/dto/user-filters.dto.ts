@@ -14,10 +14,10 @@ export class UserFiltersDto {
   @IsEnum(['RIDER', 'DRIVER', 'ADMIN', 'SUPPORT'])
   role?: string;
 
-  @ApiPropertyOptional({ enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BANNED'] })
+  @ApiPropertyOptional({ enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BANNED', 'UNDER_REVIEW', 'PENDING_DOCUMENTS'] })
   @IsOptional()
   @IsString()
-  @IsEnum(['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BANNED'])
+  @IsEnum(['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BANNED', 'UNDER_REVIEW', 'PENDING_DOCUMENTS'])
   status?: string;
 
   @ApiPropertyOptional({ default: 1 })

@@ -27,6 +27,7 @@ export class TripsService {
     queryParams.append('skip', skip.toString());
     queryParams.append('take', take.toString());
     if (filters.status) queryParams.append('status', filters.status);
+    if (filters.search) queryParams.append('search', filters.search);
 
     return this.internalApi.fetchInternal(`${this.tripUrl}/trips/admin/trips?${queryParams.toString()}`);
   }

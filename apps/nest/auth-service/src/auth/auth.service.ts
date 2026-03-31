@@ -157,6 +157,23 @@ export class AuthService {
       data: { status, updatedAt: new Date() },
     });
 
+    // Sync onboarding status if it's a driver
+    if (user.role === UserRole.DRIVER) {
+      let onboardingStatus: any;
+      if (status === "ACTIVE") onboardingStatus = "APPROVED";
+      else if (status === "PENDING_DOCUMENTS")
+        onboardingStatus = "PENDING_DOCUMENTS";
+      else if (status === "UNDER_REVIEW") onboardingStatus = "UNDER_REVIEW";
+      else if (status === "REJECTED") onboardingStatus = "REJECTED";
+
+      if (onboardingStatus) {
+        await this.prisma.driver.updateMany({
+          where: { userId: user.id },
+          data: { onboardingStatus },
+        });
+      }
+    }
+
     // Publish user_status_changed event
     const traceId = generateTraceId();
     await this.userEventPublisher.publishUserStatusChanged(
@@ -377,8 +394,19 @@ export class AuthService {
     };
   }
 
-  async findAllUsers(params: { skip?: number; take?: number; role?: string }) {
-    const where = params.role ? { role: params.role } : {};
+  async findAllUsers(params: { skip?: number; take?: number; role?: string; status?: string; search?: string }) {
+    const where: any = {};
+    if (params.role) where.role = params.role;
+    if (params.status) where.status = params.status;
+    if (params.search) {
+      where.OR = [
+        { firstName: { contains: params.search, mode: 'insensitive' } },
+        { lastName: { contains: params.search, mode: 'insensitive' } },
+        { email: { contains: params.search, mode: 'insensitive' } },
+        { phoneNumber: { contains: params.search, mode: 'insensitive' } },
+      ];
+    }
+
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         where,

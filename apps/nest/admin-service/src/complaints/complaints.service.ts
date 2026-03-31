@@ -11,8 +11,9 @@ export class ComplaintsService {
   ) {}
 
   findAll(status?: string) {
+    const where = status && status !== 'all' ? { status } : {};
     return this.prisma.complaint.findMany({
-      where: status ? { status } : undefined,
+      where,
       include: { comments: true },
       orderBy: { createdAt: 'desc' },
     });

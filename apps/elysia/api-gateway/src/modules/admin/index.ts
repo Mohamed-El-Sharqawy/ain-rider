@@ -22,7 +22,7 @@ export const admin = new Elysia({ prefix: '/admin' })
 
     // 1. Determine target service and path
     const targetUrl = ADMIN_SERVICE_URL;
-    const targetPath = path.replace('/admin', '');
+    const targetPath = path.replace('/admin', '') + url.search;
 
     // 2. Generate internal service token (api-gateway -> backend-service)
     // Ensure payload is a clean POJO with user info for authorization
@@ -39,22 +39,21 @@ export const admin = new Elysia({ prefix: '/admin' })
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       try {
         const contentType = request.headers.get('content-type');
-        const contentLength = parseInt(request.headers.get('content-length') || '0');
-
-        // Only try to parse JSON if content-type is json AND there is actually data
-        if (contentType?.includes('application/json') && contentLength > 0) {
-          body = await request.json();
-        } else if (contentType?.includes('application/json')) {
-          // Some clients send application/json even for empty PATCH/POST
-          // We'll leave body as undefined instead of failing
-          body = undefined;
+        const text = await request.text();
+        
+        if (text && text.trim().length > 0) {
+          if (contentType?.includes('application/json')) {
+            try {
+              body = JSON.parse(text);
+            } catch {
+              body = text; // Fallback to raw text if not JSON
+            }
+          } else {
+            body = text;
+          }
         }
       } catch (err) {
-        // Log but don't fail for empty body errors that are common in some clients
-        const msg = err instanceof Error ? err.message : String(err);
-        if (!msg.includes('Body cannot be empty')) {
-          console.error('[AdminProxy] Failed to parse request body:', err);
-        }
+        console.error('[AdminProxy] Failed to read request body:', err);
       }
     }
 

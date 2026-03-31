@@ -30,6 +30,8 @@ export class UsersService {
     queryParams.append('skip', skip.toString());
     queryParams.append('take', take.toString());
     if (filters.role) queryParams.append('role', filters.role);
+    if (filters.status) queryParams.append('status', filters.status);
+    if (filters.search) queryParams.append('search', filters.search);
 
     return this.internalApi.fetchInternal(`${this.authUrl}/auth/admin/users?${queryParams.toString()}`);
   }
@@ -122,5 +124,45 @@ export class UsersService {
     });
 
     return { success: true, message: 'Driver approved', ...result };
+  }
+
+  async rejectDriverDocument(userId: string, stage: 'identity' | 'license' | 'vehicle', reason: string, adminId: string) {
+    // 1. Get previous state
+    const previousUser = await this.findById(userId);
+
+    // 2. Publish NATS command
+    const result = await this.adminNats.rejectDriverDocument(userId, stage, reason, adminId);
+
+    // 3. Log to local audit
+    await this.auditLogger.log({
+      adminId,
+      action: 'DRIVER_REJECT_DOCUMENT',
+      targetType: 'USER',
+      targetId: userId,
+      previousState: previousUser,
+      newState: { ...(previousUser as any), onboardingStatus: 'PENDING_DOCUMENTS', rejectionStage: stage, reason },
+    });
+
+    return { success: true, message: `Driver ${stage} rejected`, ...result };
+  }
+
+  async resetUploadAttempts(userId: string, adminId: string) {
+    // 1. Get previous state
+    const previousUser = await this.findById(userId);
+
+    // 2. Call auth-service via internal API
+    const result = await this.internalApi.fetchInternal(`${this.authUrl}/auth/driver/${userId}/reset-attempts`, 'PATCH');
+
+    // 3. Log to local audit
+    await this.auditLogger.log({
+      adminId,
+      action: 'RESET_UPLOAD_ATTEMPTS',
+      targetType: 'USER',
+      targetId: userId,
+      previousState: previousUser,
+      newState: previousUser, // Attempts reset but user object essentially same
+    });
+
+    return { success: true, message: 'Upload attempts reset', ...(result as any) };
   }
 }

@@ -83,4 +83,28 @@ export class UsersController {
   ) {
     return this.usersService.approveDriver(id, user.sub);
   }
+
+  @Roles('ADMIN')
+  @Patch(':id/reject-document')
+  @ApiOperation({ summary: 'Reject a driver document stage' })
+  @ApiParam({ name: 'id', type: String })
+  rejectDocument(
+    @Param('id') id: string,
+    @Body('stage') stage: 'identity' | 'license' | 'vehicle',
+    @Body('reason') reason: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.usersService.rejectDriverDocument(id, stage, reason, user.sub);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id/reset-attempts')
+  @ApiOperation({ summary: 'Reset driver document upload attempts' })
+  @ApiParam({ name: 'id', type: String })
+  resetUploadAttempts(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.usersService.resetUploadAttempts(id, user.sub);
+  }
 }

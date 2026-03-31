@@ -149,6 +149,24 @@ exports.Prisma.VehicleTypeScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.VehicleMakeScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VehicleModelScalarFieldEnum = {
+  id: 'id',
+  makeId: 'makeId',
+  name: 'name',
+  vehicleTypeId: 'vehicleTypeId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.VehicleScalarFieldEnum = {
   id: 'id',
   driverId: 'driverId',
@@ -388,6 +406,8 @@ exports.Prisma.JsonNullValueFilter = {
 exports.Prisma.ModelName = {
   UserShadow: 'UserShadow',
   VehicleType: 'VehicleType',
+  VehicleMake: 'VehicleMake',
+  VehicleModel: 'VehicleModel',
   Vehicle: 'Vehicle',
   Wallet: 'Wallet',
   WalletTransaction: 'WalletTransaction',

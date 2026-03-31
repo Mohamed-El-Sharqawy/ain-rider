@@ -459,12 +459,20 @@ export const auth = new Elysia({ prefix: "/auth" })
   // Driver routes
   .get(
     "/driver/onboarding-status",
-    async ({ request, set }) => {
+    async ({ cookie: { accessToken }, request, set }) => {
+      // Resolve token: Bearer header first, then cookie fallback
       const authHeader = request.headers.get("authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
+      let token: string | undefined;
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+      } else if (accessToken?.value) {
+        token = accessToken.value as string;
+      }
+
+      if (!token) {
         throw status(401, "Not authenticated");
       }
-      const token = authHeader.slice(7);
 
       const res = await AuthProxyService.proxyDriverGet(token, "onboarding-status");
       console.log('[Gateway] Driver onboarding-status proxy:', res.status);
@@ -489,14 +497,62 @@ export const auth = new Elysia({ prefix: "/auth" })
       return res.json();
     }
   )
-  .patch(
-    "/driver/profile",
-    async ({ request, set }) => {
+  .get(
+    "/driver/:id/onboarding-status",
+    async ({ params: { id }, cookie: { accessToken }, request, set }) => {
+      // Resolve token: Bearer header first, then cookie fallback
       const authHeader = request.headers.get("authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
+      let token: string | undefined;
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+      } else if (accessToken?.value) {
+        token = accessToken.value as string;
+      }
+
+      if (!token) {
         throw status(401, "Not authenticated");
       }
-      const token = authHeader.slice(7);
+
+      const res = await AuthProxyService.proxyDriverGet(token, `${id}/onboarding-status`);
+      console.log(`[Gateway] Admin get driver ${id} onboarding-status proxy:`, res.status);
+
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return {
+            success: false,
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "Failed to parse error response",
+            },
+          };
+        }
+      }
+
+      return res.json();
+    }
+  )
+  .patch(
+    "/driver/profile",
+    async ({ cookie: { accessToken }, request, set }) => {
+      // Resolve token: Bearer header first, then cookie fallback
+      const authHeader = request.headers.get("authorization");
+      let token: string | undefined;
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+      } else if (accessToken?.value) {
+        token = accessToken.value as string;
+      }
+
+      if (!token) {
+        throw status(401, "Not authenticated");
+      }
 
       const body = await request.json();
       const res = await AuthProxyService.proxyDriverPatch(token, "profile", body);
@@ -523,12 +579,20 @@ export const auth = new Elysia({ prefix: "/auth" })
   )
   .patch(
     "/driver/status",
-    async ({ request, set }) => {
+    async ({ cookie: { accessToken }, request, set }) => {
+      // Resolve token: Bearer header first, then cookie fallback
       const authHeader = request.headers.get("authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
+      let token: string | undefined;
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+      } else if (accessToken?.value) {
+        token = accessToken.value as string;
+      }
+
+      if (!token) {
         throw status(401, "Not authenticated");
       }
-      const token = authHeader.slice(7);
 
       const body = await request.json();
       const res = await AuthProxyService.proxyDriverPatch(token, "status", body);
@@ -555,12 +619,20 @@ export const auth = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/driver/documents/identity",
-    async ({ request, set }) => {
+    async ({ cookie: { accessToken }, request, set }) => {
+      // Resolve token: Bearer header first, then cookie fallback
       const authHeader = request.headers.get("authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
+      let token: string | undefined;
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+      } else if (accessToken?.value) {
+        token = accessToken.value as string;
+      }
+
+      if (!token) {
         throw status(401, "Not authenticated");
       }
-      const token = authHeader.slice(7);
 
       const contentLength = parseInt(request.headers.get("content-length") || "0");
       if (contentLength > 10 * 1024 * 1024) {
@@ -596,12 +668,20 @@ export const auth = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/driver/documents/driving-license",
-    async ({ request, set }) => {
+    async ({ cookie: { accessToken }, request, set }) => {
+      // Resolve token: Bearer header first, then cookie fallback
       const authHeader = request.headers.get("authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
+      let token: string | undefined;
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+      } else if (accessToken?.value) {
+        token = accessToken.value as string;
+      }
+
+      if (!token) {
         throw status(401, "Not authenticated");
       }
-      const token = authHeader.slice(7);
 
       const contentLength = parseInt(request.headers.get("content-length") || "0");
       if (contentLength > 10 * 1024 * 1024) {
@@ -637,12 +717,20 @@ export const auth = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/driver/vehicle",
-    async ({ request, set }) => {
+    async ({ cookie: { accessToken }, request, set }) => {
+      // Resolve token: Bearer header first, then cookie fallback
       const authHeader = request.headers.get("authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
+      let token: string | undefined;
+
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+      } else if (accessToken?.value) {
+        token = accessToken.value as string;
+      }
+
+      if (!token) {
         throw status(401, "Not authenticated");
       }
-      const token = authHeader.slice(7);
 
       const contentLength = parseInt(request.headers.get("content-length") || "0");
       if (contentLength > 10 * 1024 * 1024) {

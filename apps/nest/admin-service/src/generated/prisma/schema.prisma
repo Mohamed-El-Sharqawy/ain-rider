@@ -26,7 +26,7 @@ model UserShadow {
 }
 
 model VehicleType {
-  id            String    @id @default(uuid())
+  id            String         @id @default(uuid())
   name          String
   type          String
   baseFare      Float
@@ -35,12 +35,40 @@ model VehicleType {
   minFare       Float
   maxPassengers Int
   imageUrl      String?
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   vehicles      Vehicle[]
+  models        VehicleModel[]
 
   @@map("vehicle_types")
+}
+
+model VehicleMake {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  isActive  Boolean        @default(true)
+  models    VehicleModel[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("vehicle_makes")
+}
+
+model VehicleModel {
+  id            String   @id @default(uuid())
+  makeId        String
+  name          String
+  vehicleTypeId String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  make        VehicleMake  @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  vehicleType VehicleType? @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
+
+  @@unique([makeId, name])
+  @@map("vehicle_models")
 }
 
 model Vehicle {

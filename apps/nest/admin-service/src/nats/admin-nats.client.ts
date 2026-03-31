@@ -117,6 +117,23 @@ export class AdminNatsClient {
   }
 
   /**
+   * Reject a driver document stage via auth-service
+   */
+  async rejectDriverDocument(
+    userId: string,
+    stage: "identity" | "license" | "vehicle",
+    reason: string,
+    adminId: string,
+    traceId?: string,
+  ): Promise<any> {
+    return this.requestClient.request<any, any>(
+      "admin.command.reject_driver_document",
+      { userId, stage, reason, adminId },
+      { traceId, requestedBy: adminId },
+    );
+  }
+
+  /**
    * Update user status generically via auth-service
    */
   async updateUserStatus(

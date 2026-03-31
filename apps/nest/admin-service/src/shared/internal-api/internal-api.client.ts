@@ -26,12 +26,17 @@ export class InternalApiClient {
       { secret, expiresIn: '60s' }
     );
 
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${token}`,
+    };
+
+    if (body) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(url, {
       method,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: body ? JSON.stringify(body) : undefined,
     });
 

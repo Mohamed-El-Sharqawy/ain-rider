@@ -157,10 +157,16 @@ export class DriverOnboardingService {
     const hasVehicle = driver.vehicleId !== null;
 
     if (hasIdentityDocs && hasLicenseDocs && hasVehicle) {
-      await this.prisma.driver.update({
-        where: { id: driverId },
-        data: { onboardingStatus: OnboardingStatus.UNDER_REVIEW },
-      });
+      await this.prisma.$transaction([
+        this.prisma.driver.update({
+          where: { id: driverId },
+          data: { onboardingStatus: OnboardingStatus.UNDER_REVIEW },
+        }),
+        this.prisma.user.update({
+          where: { id: driver.userId },
+          data: { status: "UNDER_REVIEW" },
+        }),
+      ]);
       return OnboardingStatus.UNDER_REVIEW;
     }
 
@@ -375,12 +381,14 @@ export class DriverOnboardingService {
       );
     }
 
-    const plateRegex = /^[A-Z]{2,3}-[0-9]{4}$/;
-    if (!plateRegex.test(data.plateNumber)) {
+    const normalizedPlate = data.plateNumber.toUpperCase().replace(/\s+/g, "");
+    const plateRegex = /^[A-Z0-9-]{4,12}$/;
+    if (!plateRegex.test(normalizedPlate)) {
       throw new BadRequestException(
-        "Invalid plate number format. Expected: AB-1234 or ABC-1234",
+        "Invalid plate number format. Use 4-12 alphanumeric characters (e.g., ABC-1234 or ABC123)",
       );
     }
+    data.plateNumber = normalizedPlate;
 
     const driver = await this.prisma.driver.findUnique({
       where: { userId },
@@ -509,14 +517,22 @@ export class DriverOnboardingService {
         rejectionReason?: string;
         images: PresignedUrlResult[];
       };
-      vehicle: {
-        status: DocumentStatus;
-        uploadAttempts: number;
-        rejectionReason?: string;
-        carImage?: PresignedUrlResult;
-        carLicenseImage?: PresignedUrlResult;
+        vehicle: {
+          status: DocumentStatus;
+          uploadAttempts: number;
+          rejectionReason?: string;
+          carImage?: PresignedUrlResult;
+          carLicenseImage?: PresignedUrlResult;
+          details?: {
+            id: string;
+            make: string;
+            model: string;
+            year: number;
+            color: string;
+            plateNumber: string;
+          };
+        };
       };
-    };
   }> {
     const driver = await this.prisma.driver.findUnique({
       where: { userId },
@@ -573,9 +589,57 @@ export class DriverOnboardingService {
           rejectionReason: vehicle?.rejectionReason ?? undefined,
           carImage: carImagePresigned,
           carLicenseImage: carLicensePresigned,
+          details: vehicle
+            ? {
+                id: vehicle.id,
+                make: vehicle.make,
+                model: vehicle.model,
+                year: vehicle.year,
+                color: vehicle.color,
+                plateNumber: vehicle.plateNumber,
+              }
+            : undefined,
         },
       },
     };
+  }
+
+  async resetUploadAttempts(userId: string): Promise<void> {
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+      include: { document: true, vehicle: true },
+    });
+
+    if (!driver) {
+      throw new NotFoundException("Driver not found");
+    }
+
+    const updates: Promise<any>[] = [];
+
+    if (driver.document) {
+      updates.push(
+        this.prisma.driverDocument.update({
+          where: { id: driver.document.id },
+          data: {
+            identityUploadAttempts: 0,
+            drivingLicenseUploadAttempts: 0,
+          },
+        }),
+      );
+    }
+
+    if (driver.vehicleId) {
+      updates.push(
+        this.prisma.vehicle.update({
+          where: { id: driver.vehicleId },
+          data: { uploadAttempts: 0 },
+        }),
+      );
+    }
+
+    if (updates.length > 0) {
+      await Promise.all(updates);
+    }
   }
 
   async approveDriver(userId: string) {
@@ -587,9 +651,81 @@ export class DriverOnboardingService {
       throw new NotFoundException("Driver not found");
     }
 
-    return this.prisma.driver.update({
+    return this.prisma.$transaction([
+      this.prisma.driver.update({
+        where: { userId },
+        data: { onboardingStatus: OnboardingStatus.APPROVED },
+      }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { status: "ACTIVE" },
+      }),
+    ]);
+  }
+
+  async rejectDocument(
+    userId: string,
+    stage: "identity" | "license" | "vehicle",
+    reason: string,
+  ) {
+    const driver = await this.prisma.driver.findUnique({
       where: { userId },
-      data: { onboardingStatus: OnboardingStatus.APPROVED },
+      include: { document: true, vehicle: true },
     });
+
+    if (!driver) {
+      throw new NotFoundException("Driver not found");
+    }
+
+    const updates: any[] = [];
+
+    if (stage === "identity" && driver.document) {
+      updates.push(
+        this.prisma.driverDocument.update({
+          where: { id: driver.document.id },
+          data: {
+            identityStatus: DocumentStatus.REJECTED,
+            identityRejectionReason: reason,
+          },
+        }),
+      );
+    } else if (stage === "license" && driver.document) {
+      updates.push(
+        this.prisma.driverDocument.update({
+          where: { id: driver.document.id },
+          data: {
+            drivingLicenseStatus: DocumentStatus.REJECTED,
+            drivingLicenseRejectionReason: reason,
+          },
+        }),
+      );
+    } else if (stage === "vehicle" && driver.vehicleId) {
+      updates.push(
+        this.prisma.vehicle.update({
+          where: { id: driver.vehicleId },
+          data: {
+            status: DocumentStatus.REJECTED,
+            rejectionReason: reason,
+          },
+        }),
+      );
+    }
+
+    // Set overall status to PENDING_DOCUMENTS
+    updates.push(
+      this.prisma.driver.update({
+        where: { userId },
+        data: { onboardingStatus: OnboardingStatus.PENDING_DOCUMENTS },
+      }),
+    );
+
+    updates.push(
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { status: "PENDING_DOCUMENTS" },
+      }),
+    );
+
+    return this.prisma.$transaction(updates);
   }
 }

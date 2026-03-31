@@ -16,11 +16,15 @@ export class AdminController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('role') role?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
   ) {
     return this.authService.findAllUsers({
       skip: skip ? parseInt(skip) : undefined,
       take: take ? parseInt(take) : undefined,
       role,
+      status,
+      search,
     });
   }
 

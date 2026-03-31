@@ -30,6 +30,7 @@ export class RiderProfileController {
   @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: "Upload rider profile image" })
   async uploadProfileImage(@Request() req: FastifyRequest) {
+    console.log("[RiderProfile] uploadProfileImage called");
     let imageFile: FastifyFile | null = null;
     const parts = req.parts();
 
@@ -47,11 +48,14 @@ export class RiderProfileController {
       };
     }
 
+    const buffer = await imageFile.toBuffer();
+    console.log(`[RiderProfile] Image processed, size: ${buffer.length}`);
+
     const file = {
-      buffer: await imageFile.toBuffer(),
+      buffer: buffer,
       originalname: imageFile.filename,
       mimetype: imageFile.mimetype,
-      size: (await imageFile.toBuffer()).length,
+      size: buffer.length,
     };
 
     const result = await this.service.uploadProfileImage(

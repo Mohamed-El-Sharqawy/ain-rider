@@ -215,8 +215,17 @@ export class TripsService {
     return sos;
   }
 
-  async findAllTrips(params: { skip?: number; take?: number; status?: TripStatus }) {
-    const where = params.status ? { status: params.status } : {};
+  async findAllTrips(params: { skip?: number; take?: number; status?: TripStatus; search?: string }) {
+    const where: any = {};
+    if (params.status) where.status = params.status;
+    if (params.search) {
+      where.OR = [
+        { id: { contains: params.search, mode: 'insensitive' } },
+        { riderId: { contains: params.search, mode: 'insensitive' } },
+        { driverId: { contains: params.search, mode: 'insensitive' } },
+      ];
+    }
+
     const [trips, total] = await Promise.all([
       this.prisma.trip.findMany({
         where,

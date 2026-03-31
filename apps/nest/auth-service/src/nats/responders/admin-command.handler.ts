@@ -50,6 +50,13 @@ export class AdminCommandHandler implements OnModuleInit, OnModuleDestroy {
       return { success: true };
     });
 
+    // Reject driver document
+    await this.responder.respond("admin.command.reject_driver_document", async (data: { userId: string, stage: "identity" | "license" | "vehicle", reason: string, adminId: string }) => {
+      console.log(`[AdminCommandHandler] Rejecting driver ${data.stage} for user: ${data.userId}`);
+      await this.driverOnboardingService.rejectDocument(data.userId, data.stage, data.reason);
+      return { success: true };
+    });
+
     // Update user status (generic)
     await this.responder.respond('admin.command.update_user_status', async (data: { userId: string, status: string, adminId: string, reason?: string }) => {
       console.log(`[AdminCommandHandler] Updating user status: ${data.userId} to ${data.status}`);

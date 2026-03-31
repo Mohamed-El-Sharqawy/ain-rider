@@ -24,6 +24,16 @@ export type UserShadow = $Result.DefaultSelection<Prisma.$UserShadowPayload>
  */
 export type VehicleType = $Result.DefaultSelection<Prisma.$VehicleTypePayload>
 /**
+ * Model VehicleMake
+ * 
+ */
+export type VehicleMake = $Result.DefaultSelection<Prisma.$VehicleMakePayload>
+/**
+ * Model VehicleModel
+ * 
+ */
+export type VehicleModel = $Result.DefaultSelection<Prisma.$VehicleModelPayload>
+/**
  * Model Vehicle
  * 
  */
@@ -234,6 +244,26 @@ export class PrismaClient<
     * ```
     */
   get vehicleType(): Prisma.VehicleTypeDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.vehicleMake`: Exposes CRUD operations for the **VehicleMake** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VehicleMakes
+    * const vehicleMakes = await prisma.vehicleMake.findMany()
+    * ```
+    */
+  get vehicleMake(): Prisma.VehicleMakeDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.vehicleModel`: Exposes CRUD operations for the **VehicleModel** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VehicleModels
+    * const vehicleModels = await prisma.vehicleModel.findMany()
+    * ```
+    */
+  get vehicleModel(): Prisma.VehicleModelDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.vehicle`: Exposes CRUD operations for the **Vehicle** model.
@@ -810,6 +840,8 @@ export namespace Prisma {
   export const ModelName: {
     UserShadow: 'UserShadow',
     VehicleType: 'VehicleType',
+    VehicleMake: 'VehicleMake',
+    VehicleModel: 'VehicleModel',
     Vehicle: 'Vehicle',
     Wallet: 'Wallet',
     WalletTransaction: 'WalletTransaction',
@@ -839,7 +871,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "userShadow" | "vehicleType" | "vehicle" | "wallet" | "walletTransaction" | "withdrawal" | "promo" | "promoUsage" | "notification" | "notificationRead" | "sOS" | "complaint" | "complaintComment" | "setting" | "booking" | "adminAuditLog"
+      modelProps: "userShadow" | "vehicleType" | "vehicleMake" | "vehicleModel" | "vehicle" | "wallet" | "walletTransaction" | "withdrawal" | "promo" | "promoUsage" | "notification" | "notificationRead" | "sOS" | "complaint" | "complaintComment" | "setting" | "booking" | "adminAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -988,6 +1020,154 @@ export namespace Prisma {
           count: {
             args: Prisma.VehicleTypeCountArgs<ExtArgs>
             result: $Utils.Optional<VehicleTypeCountAggregateOutputType> | number
+          }
+        }
+      }
+      VehicleMake: {
+        payload: Prisma.$VehicleMakePayload<ExtArgs>
+        fields: Prisma.VehicleMakeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VehicleMakeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VehicleMakeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>
+          }
+          findFirst: {
+            args: Prisma.VehicleMakeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VehicleMakeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>
+          }
+          findMany: {
+            args: Prisma.VehicleMakeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>[]
+          }
+          create: {
+            args: Prisma.VehicleMakeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>
+          }
+          createMany: {
+            args: Prisma.VehicleMakeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VehicleMakeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>[]
+          }
+          delete: {
+            args: Prisma.VehicleMakeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>
+          }
+          update: {
+            args: Prisma.VehicleMakeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>
+          }
+          deleteMany: {
+            args: Prisma.VehicleMakeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VehicleMakeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VehicleMakeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>[]
+          }
+          upsert: {
+            args: Prisma.VehicleMakeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleMakePayload>
+          }
+          aggregate: {
+            args: Prisma.VehicleMakeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVehicleMake>
+          }
+          groupBy: {
+            args: Prisma.VehicleMakeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VehicleMakeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VehicleMakeCountArgs<ExtArgs>
+            result: $Utils.Optional<VehicleMakeCountAggregateOutputType> | number
+          }
+        }
+      }
+      VehicleModel: {
+        payload: Prisma.$VehicleModelPayload<ExtArgs>
+        fields: Prisma.VehicleModelFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VehicleModelFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VehicleModelFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>
+          }
+          findFirst: {
+            args: Prisma.VehicleModelFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VehicleModelFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>
+          }
+          findMany: {
+            args: Prisma.VehicleModelFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>[]
+          }
+          create: {
+            args: Prisma.VehicleModelCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>
+          }
+          createMany: {
+            args: Prisma.VehicleModelCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VehicleModelCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>[]
+          }
+          delete: {
+            args: Prisma.VehicleModelDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>
+          }
+          update: {
+            args: Prisma.VehicleModelUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>
+          }
+          deleteMany: {
+            args: Prisma.VehicleModelDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VehicleModelUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VehicleModelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>[]
+          }
+          upsert: {
+            args: Prisma.VehicleModelUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleModelPayload>
+          }
+          aggregate: {
+            args: Prisma.VehicleModelAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVehicleModel>
+          }
+          groupBy: {
+            args: Prisma.VehicleModelGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VehicleModelGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VehicleModelCountArgs<ExtArgs>
+            result: $Utils.Optional<VehicleModelCountAggregateOutputType> | number
           }
         }
       }
@@ -2137,6 +2317,8 @@ export namespace Prisma {
   export type GlobalOmitConfig = {
     userShadow?: UserShadowOmit
     vehicleType?: VehicleTypeOmit
+    vehicleMake?: VehicleMakeOmit
+    vehicleModel?: VehicleModelOmit
     vehicle?: VehicleOmit
     wallet?: WalletOmit
     walletTransaction?: WalletTransactionOmit
@@ -2232,10 +2414,12 @@ export namespace Prisma {
 
   export type VehicleTypeCountOutputType = {
     vehicles: number
+    models: number
   }
 
   export type VehicleTypeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     vehicles?: boolean | VehicleTypeCountOutputTypeCountVehiclesArgs
+    models?: boolean | VehicleTypeCountOutputTypeCountModelsArgs
   }
 
   // Custom InputTypes
@@ -2254,6 +2438,44 @@ export namespace Prisma {
    */
   export type VehicleTypeCountOutputTypeCountVehiclesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: VehicleWhereInput
+  }
+
+  /**
+   * VehicleTypeCountOutputType without action
+   */
+  export type VehicleTypeCountOutputTypeCountModelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VehicleModelWhereInput
+  }
+
+
+  /**
+   * Count Type VehicleMakeCountOutputType
+   */
+
+  export type VehicleMakeCountOutputType = {
+    models: number
+  }
+
+  export type VehicleMakeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    models?: boolean | VehicleMakeCountOutputTypeCountModelsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * VehicleMakeCountOutputType without action
+   */
+  export type VehicleMakeCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMakeCountOutputType
+     */
+    select?: VehicleMakeCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * VehicleMakeCountOutputType without action
+   */
+  export type VehicleMakeCountOutputTypeCountModelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VehicleModelWhereInput
   }
 
 
@@ -3743,6 +3965,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     vehicles?: boolean | VehicleType$vehiclesArgs<ExtArgs>
+    models?: boolean | VehicleType$modelsArgs<ExtArgs>
     _count?: boolean | VehicleTypeCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vehicleType"]>
 
@@ -3794,6 +4017,7 @@ export namespace Prisma {
   export type VehicleTypeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "baseFare" | "perKmRate" | "perMinuteRate" | "minFare" | "maxPassengers" | "imageUrl" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicleType"]>
   export type VehicleTypeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     vehicles?: boolean | VehicleType$vehiclesArgs<ExtArgs>
+    models?: boolean | VehicleType$modelsArgs<ExtArgs>
     _count?: boolean | VehicleTypeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type VehicleTypeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3803,6 +4027,7 @@ export namespace Prisma {
     name: "VehicleType"
     objects: {
       vehicles: Prisma.$VehiclePayload<ExtArgs>[]
+      models: Prisma.$VehicleModelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4212,6 +4437,7 @@ export namespace Prisma {
   export interface Prisma__VehicleTypeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     vehicles<T extends VehicleType$vehiclesArgs<ExtArgs> = {}>(args?: Subset<T, VehicleType$vehiclesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehiclePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    models<T extends VehicleType$modelsArgs<ExtArgs> = {}>(args?: Subset<T, VehicleType$modelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4670,6 +4896,30 @@ export namespace Prisma {
   }
 
   /**
+   * VehicleType.models
+   */
+  export type VehicleType$modelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    where?: VehicleModelWhereInput
+    orderBy?: VehicleModelOrderByWithRelationInput | VehicleModelOrderByWithRelationInput[]
+    cursor?: VehicleModelWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VehicleModelScalarFieldEnum | VehicleModelScalarFieldEnum[]
+  }
+
+  /**
    * VehicleType without action
    */
   export type VehicleTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4685,6 +4935,2197 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: VehicleTypeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model VehicleMake
+   */
+
+  export type AggregateVehicleMake = {
+    _count: VehicleMakeCountAggregateOutputType | null
+    _min: VehicleMakeMinAggregateOutputType | null
+    _max: VehicleMakeMaxAggregateOutputType | null
+  }
+
+  export type VehicleMakeMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleMakeMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleMakeCountAggregateOutputType = {
+    id: number
+    name: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type VehicleMakeMinAggregateInputType = {
+    id?: true
+    name?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleMakeMaxAggregateInputType = {
+    id?: true
+    name?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleMakeCountAggregateInputType = {
+    id?: true
+    name?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type VehicleMakeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VehicleMake to aggregate.
+     */
+    where?: VehicleMakeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleMakes to fetch.
+     */
+    orderBy?: VehicleMakeOrderByWithRelationInput | VehicleMakeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VehicleMakeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleMakes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleMakes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VehicleMakes
+    **/
+    _count?: true | VehicleMakeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VehicleMakeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VehicleMakeMaxAggregateInputType
+  }
+
+  export type GetVehicleMakeAggregateType<T extends VehicleMakeAggregateArgs> = {
+        [P in keyof T & keyof AggregateVehicleMake]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVehicleMake[P]>
+      : GetScalarType<T[P], AggregateVehicleMake[P]>
+  }
+
+
+
+
+  export type VehicleMakeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VehicleMakeWhereInput
+    orderBy?: VehicleMakeOrderByWithAggregationInput | VehicleMakeOrderByWithAggregationInput[]
+    by: VehicleMakeScalarFieldEnum[] | VehicleMakeScalarFieldEnum
+    having?: VehicleMakeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VehicleMakeCountAggregateInputType | true
+    _min?: VehicleMakeMinAggregateInputType
+    _max?: VehicleMakeMaxAggregateInputType
+  }
+
+  export type VehicleMakeGroupByOutputType = {
+    id: string
+    name: string
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: VehicleMakeCountAggregateOutputType | null
+    _min: VehicleMakeMinAggregateOutputType | null
+    _max: VehicleMakeMaxAggregateOutputType | null
+  }
+
+  type GetVehicleMakeGroupByPayload<T extends VehicleMakeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VehicleMakeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VehicleMakeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VehicleMakeGroupByOutputType[P]>
+            : GetScalarType<T[P], VehicleMakeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VehicleMakeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    models?: boolean | VehicleMake$modelsArgs<ExtArgs>
+    _count?: boolean | VehicleMakeCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vehicleMake"]>
+
+  export type VehicleMakeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["vehicleMake"]>
+
+  export type VehicleMakeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["vehicleMake"]>
+
+  export type VehicleMakeSelectScalar = {
+    id?: boolean
+    name?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type VehicleMakeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicleMake"]>
+  export type VehicleMakeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    models?: boolean | VehicleMake$modelsArgs<ExtArgs>
+    _count?: boolean | VehicleMakeCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type VehicleMakeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type VehicleMakeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $VehicleMakePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VehicleMake"
+    objects: {
+      models: Prisma.$VehicleModelPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["vehicleMake"]>
+    composites: {}
+  }
+
+  type VehicleMakeGetPayload<S extends boolean | null | undefined | VehicleMakeDefaultArgs> = $Result.GetResult<Prisma.$VehicleMakePayload, S>
+
+  type VehicleMakeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VehicleMakeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VehicleMakeCountAggregateInputType | true
+    }
+
+  export interface VehicleMakeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VehicleMake'], meta: { name: 'VehicleMake' } }
+    /**
+     * Find zero or one VehicleMake that matches the filter.
+     * @param {VehicleMakeFindUniqueArgs} args - Arguments to find a VehicleMake
+     * @example
+     * // Get one VehicleMake
+     * const vehicleMake = await prisma.vehicleMake.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VehicleMakeFindUniqueArgs>(args: SelectSubset<T, VehicleMakeFindUniqueArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one VehicleMake that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VehicleMakeFindUniqueOrThrowArgs} args - Arguments to find a VehicleMake
+     * @example
+     * // Get one VehicleMake
+     * const vehicleMake = await prisma.vehicleMake.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VehicleMakeFindUniqueOrThrowArgs>(args: SelectSubset<T, VehicleMakeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VehicleMake that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleMakeFindFirstArgs} args - Arguments to find a VehicleMake
+     * @example
+     * // Get one VehicleMake
+     * const vehicleMake = await prisma.vehicleMake.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VehicleMakeFindFirstArgs>(args?: SelectSubset<T, VehicleMakeFindFirstArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VehicleMake that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleMakeFindFirstOrThrowArgs} args - Arguments to find a VehicleMake
+     * @example
+     * // Get one VehicleMake
+     * const vehicleMake = await prisma.vehicleMake.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VehicleMakeFindFirstOrThrowArgs>(args?: SelectSubset<T, VehicleMakeFindFirstOrThrowArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more VehicleMakes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleMakeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VehicleMakes
+     * const vehicleMakes = await prisma.vehicleMake.findMany()
+     * 
+     * // Get first 10 VehicleMakes
+     * const vehicleMakes = await prisma.vehicleMake.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const vehicleMakeWithIdOnly = await prisma.vehicleMake.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VehicleMakeFindManyArgs>(args?: SelectSubset<T, VehicleMakeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a VehicleMake.
+     * @param {VehicleMakeCreateArgs} args - Arguments to create a VehicleMake.
+     * @example
+     * // Create one VehicleMake
+     * const VehicleMake = await prisma.vehicleMake.create({
+     *   data: {
+     *     // ... data to create a VehicleMake
+     *   }
+     * })
+     * 
+     */
+    create<T extends VehicleMakeCreateArgs>(args: SelectSubset<T, VehicleMakeCreateArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many VehicleMakes.
+     * @param {VehicleMakeCreateManyArgs} args - Arguments to create many VehicleMakes.
+     * @example
+     * // Create many VehicleMakes
+     * const vehicleMake = await prisma.vehicleMake.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VehicleMakeCreateManyArgs>(args?: SelectSubset<T, VehicleMakeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VehicleMakes and returns the data saved in the database.
+     * @param {VehicleMakeCreateManyAndReturnArgs} args - Arguments to create many VehicleMakes.
+     * @example
+     * // Create many VehicleMakes
+     * const vehicleMake = await prisma.vehicleMake.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VehicleMakes and only return the `id`
+     * const vehicleMakeWithIdOnly = await prisma.vehicleMake.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VehicleMakeCreateManyAndReturnArgs>(args?: SelectSubset<T, VehicleMakeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a VehicleMake.
+     * @param {VehicleMakeDeleteArgs} args - Arguments to delete one VehicleMake.
+     * @example
+     * // Delete one VehicleMake
+     * const VehicleMake = await prisma.vehicleMake.delete({
+     *   where: {
+     *     // ... filter to delete one VehicleMake
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VehicleMakeDeleteArgs>(args: SelectSubset<T, VehicleMakeDeleteArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one VehicleMake.
+     * @param {VehicleMakeUpdateArgs} args - Arguments to update one VehicleMake.
+     * @example
+     * // Update one VehicleMake
+     * const vehicleMake = await prisma.vehicleMake.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VehicleMakeUpdateArgs>(args: SelectSubset<T, VehicleMakeUpdateArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more VehicleMakes.
+     * @param {VehicleMakeDeleteManyArgs} args - Arguments to filter VehicleMakes to delete.
+     * @example
+     * // Delete a few VehicleMakes
+     * const { count } = await prisma.vehicleMake.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VehicleMakeDeleteManyArgs>(args?: SelectSubset<T, VehicleMakeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VehicleMakes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleMakeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VehicleMakes
+     * const vehicleMake = await prisma.vehicleMake.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VehicleMakeUpdateManyArgs>(args: SelectSubset<T, VehicleMakeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VehicleMakes and returns the data updated in the database.
+     * @param {VehicleMakeUpdateManyAndReturnArgs} args - Arguments to update many VehicleMakes.
+     * @example
+     * // Update many VehicleMakes
+     * const vehicleMake = await prisma.vehicleMake.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more VehicleMakes and only return the `id`
+     * const vehicleMakeWithIdOnly = await prisma.vehicleMake.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VehicleMakeUpdateManyAndReturnArgs>(args: SelectSubset<T, VehicleMakeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one VehicleMake.
+     * @param {VehicleMakeUpsertArgs} args - Arguments to update or create a VehicleMake.
+     * @example
+     * // Update or create a VehicleMake
+     * const vehicleMake = await prisma.vehicleMake.upsert({
+     *   create: {
+     *     // ... data to create a VehicleMake
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VehicleMake we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VehicleMakeUpsertArgs>(args: SelectSubset<T, VehicleMakeUpsertArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of VehicleMakes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleMakeCountArgs} args - Arguments to filter VehicleMakes to count.
+     * @example
+     * // Count the number of VehicleMakes
+     * const count = await prisma.vehicleMake.count({
+     *   where: {
+     *     // ... the filter for the VehicleMakes we want to count
+     *   }
+     * })
+    **/
+    count<T extends VehicleMakeCountArgs>(
+      args?: Subset<T, VehicleMakeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VehicleMakeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VehicleMake.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleMakeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VehicleMakeAggregateArgs>(args: Subset<T, VehicleMakeAggregateArgs>): Prisma.PrismaPromise<GetVehicleMakeAggregateType<T>>
+
+    /**
+     * Group by VehicleMake.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleMakeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VehicleMakeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VehicleMakeGroupByArgs['orderBy'] }
+        : { orderBy?: VehicleMakeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VehicleMakeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVehicleMakeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VehicleMake model
+   */
+  readonly fields: VehicleMakeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VehicleMake.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VehicleMakeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    models<T extends VehicleMake$modelsArgs<ExtArgs> = {}>(args?: Subset<T, VehicleMake$modelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VehicleMake model
+   */
+  interface VehicleMakeFieldRefs {
+    readonly id: FieldRef<"VehicleMake", 'String'>
+    readonly name: FieldRef<"VehicleMake", 'String'>
+    readonly isActive: FieldRef<"VehicleMake", 'Boolean'>
+    readonly createdAt: FieldRef<"VehicleMake", 'DateTime'>
+    readonly updatedAt: FieldRef<"VehicleMake", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VehicleMake findUnique
+   */
+  export type VehicleMakeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleMake to fetch.
+     */
+    where: VehicleMakeWhereUniqueInput
+  }
+
+  /**
+   * VehicleMake findUniqueOrThrow
+   */
+  export type VehicleMakeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleMake to fetch.
+     */
+    where: VehicleMakeWhereUniqueInput
+  }
+
+  /**
+   * VehicleMake findFirst
+   */
+  export type VehicleMakeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleMake to fetch.
+     */
+    where?: VehicleMakeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleMakes to fetch.
+     */
+    orderBy?: VehicleMakeOrderByWithRelationInput | VehicleMakeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VehicleMakes.
+     */
+    cursor?: VehicleMakeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleMakes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleMakes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleMakes.
+     */
+    distinct?: VehicleMakeScalarFieldEnum | VehicleMakeScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleMake findFirstOrThrow
+   */
+  export type VehicleMakeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleMake to fetch.
+     */
+    where?: VehicleMakeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleMakes to fetch.
+     */
+    orderBy?: VehicleMakeOrderByWithRelationInput | VehicleMakeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VehicleMakes.
+     */
+    cursor?: VehicleMakeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleMakes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleMakes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleMakes.
+     */
+    distinct?: VehicleMakeScalarFieldEnum | VehicleMakeScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleMake findMany
+   */
+  export type VehicleMakeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleMakes to fetch.
+     */
+    where?: VehicleMakeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleMakes to fetch.
+     */
+    orderBy?: VehicleMakeOrderByWithRelationInput | VehicleMakeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VehicleMakes.
+     */
+    cursor?: VehicleMakeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleMakes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleMakes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleMakes.
+     */
+    distinct?: VehicleMakeScalarFieldEnum | VehicleMakeScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleMake create
+   */
+  export type VehicleMakeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * The data needed to create a VehicleMake.
+     */
+    data: XOR<VehicleMakeCreateInput, VehicleMakeUncheckedCreateInput>
+  }
+
+  /**
+   * VehicleMake createMany
+   */
+  export type VehicleMakeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VehicleMakes.
+     */
+    data: VehicleMakeCreateManyInput | VehicleMakeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VehicleMake createManyAndReturn
+   */
+  export type VehicleMakeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * The data used to create many VehicleMakes.
+     */
+    data: VehicleMakeCreateManyInput | VehicleMakeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VehicleMake update
+   */
+  export type VehicleMakeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * The data needed to update a VehicleMake.
+     */
+    data: XOR<VehicleMakeUpdateInput, VehicleMakeUncheckedUpdateInput>
+    /**
+     * Choose, which VehicleMake to update.
+     */
+    where: VehicleMakeWhereUniqueInput
+  }
+
+  /**
+   * VehicleMake updateMany
+   */
+  export type VehicleMakeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VehicleMakes.
+     */
+    data: XOR<VehicleMakeUpdateManyMutationInput, VehicleMakeUncheckedUpdateManyInput>
+    /**
+     * Filter which VehicleMakes to update
+     */
+    where?: VehicleMakeWhereInput
+    /**
+     * Limit how many VehicleMakes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleMake updateManyAndReturn
+   */
+  export type VehicleMakeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * The data used to update VehicleMakes.
+     */
+    data: XOR<VehicleMakeUpdateManyMutationInput, VehicleMakeUncheckedUpdateManyInput>
+    /**
+     * Filter which VehicleMakes to update
+     */
+    where?: VehicleMakeWhereInput
+    /**
+     * Limit how many VehicleMakes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleMake upsert
+   */
+  export type VehicleMakeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * The filter to search for the VehicleMake to update in case it exists.
+     */
+    where: VehicleMakeWhereUniqueInput
+    /**
+     * In case the VehicleMake found by the `where` argument doesn't exist, create a new VehicleMake with this data.
+     */
+    create: XOR<VehicleMakeCreateInput, VehicleMakeUncheckedCreateInput>
+    /**
+     * In case the VehicleMake was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VehicleMakeUpdateInput, VehicleMakeUncheckedUpdateInput>
+  }
+
+  /**
+   * VehicleMake delete
+   */
+  export type VehicleMakeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+    /**
+     * Filter which VehicleMake to delete.
+     */
+    where: VehicleMakeWhereUniqueInput
+  }
+
+  /**
+   * VehicleMake deleteMany
+   */
+  export type VehicleMakeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VehicleMakes to delete
+     */
+    where?: VehicleMakeWhereInput
+    /**
+     * Limit how many VehicleMakes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleMake.models
+   */
+  export type VehicleMake$modelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    where?: VehicleModelWhereInput
+    orderBy?: VehicleModelOrderByWithRelationInput | VehicleModelOrderByWithRelationInput[]
+    cursor?: VehicleModelWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VehicleModelScalarFieldEnum | VehicleModelScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleMake without action
+   */
+  export type VehicleMakeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleMake
+     */
+    select?: VehicleMakeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleMake
+     */
+    omit?: VehicleMakeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleMakeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model VehicleModel
+   */
+
+  export type AggregateVehicleModel = {
+    _count: VehicleModelCountAggregateOutputType | null
+    _min: VehicleModelMinAggregateOutputType | null
+    _max: VehicleModelMaxAggregateOutputType | null
+  }
+
+  export type VehicleModelMinAggregateOutputType = {
+    id: string | null
+    makeId: string | null
+    name: string | null
+    vehicleTypeId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleModelMaxAggregateOutputType = {
+    id: string | null
+    makeId: string | null
+    name: string | null
+    vehicleTypeId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleModelCountAggregateOutputType = {
+    id: number
+    makeId: number
+    name: number
+    vehicleTypeId: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type VehicleModelMinAggregateInputType = {
+    id?: true
+    makeId?: true
+    name?: true
+    vehicleTypeId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleModelMaxAggregateInputType = {
+    id?: true
+    makeId?: true
+    name?: true
+    vehicleTypeId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleModelCountAggregateInputType = {
+    id?: true
+    makeId?: true
+    name?: true
+    vehicleTypeId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type VehicleModelAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VehicleModel to aggregate.
+     */
+    where?: VehicleModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleModels to fetch.
+     */
+    orderBy?: VehicleModelOrderByWithRelationInput | VehicleModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VehicleModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VehicleModels
+    **/
+    _count?: true | VehicleModelCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VehicleModelMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VehicleModelMaxAggregateInputType
+  }
+
+  export type GetVehicleModelAggregateType<T extends VehicleModelAggregateArgs> = {
+        [P in keyof T & keyof AggregateVehicleModel]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVehicleModel[P]>
+      : GetScalarType<T[P], AggregateVehicleModel[P]>
+  }
+
+
+
+
+  export type VehicleModelGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VehicleModelWhereInput
+    orderBy?: VehicleModelOrderByWithAggregationInput | VehicleModelOrderByWithAggregationInput[]
+    by: VehicleModelScalarFieldEnum[] | VehicleModelScalarFieldEnum
+    having?: VehicleModelScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VehicleModelCountAggregateInputType | true
+    _min?: VehicleModelMinAggregateInputType
+    _max?: VehicleModelMaxAggregateInputType
+  }
+
+  export type VehicleModelGroupByOutputType = {
+    id: string
+    makeId: string
+    name: string
+    vehicleTypeId: string | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: VehicleModelCountAggregateOutputType | null
+    _min: VehicleModelMinAggregateOutputType | null
+    _max: VehicleModelMaxAggregateOutputType | null
+  }
+
+  type GetVehicleModelGroupByPayload<T extends VehicleModelGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VehicleModelGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VehicleModelGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VehicleModelGroupByOutputType[P]>
+            : GetScalarType<T[P], VehicleModelGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VehicleModelSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    makeId?: boolean
+    name?: boolean
+    vehicleTypeId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    make?: boolean | VehicleMakeDefaultArgs<ExtArgs>
+    vehicleType?: boolean | VehicleModel$vehicleTypeArgs<ExtArgs>
+  }, ExtArgs["result"]["vehicleModel"]>
+
+  export type VehicleModelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    makeId?: boolean
+    name?: boolean
+    vehicleTypeId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    make?: boolean | VehicleMakeDefaultArgs<ExtArgs>
+    vehicleType?: boolean | VehicleModel$vehicleTypeArgs<ExtArgs>
+  }, ExtArgs["result"]["vehicleModel"]>
+
+  export type VehicleModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    makeId?: boolean
+    name?: boolean
+    vehicleTypeId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    make?: boolean | VehicleMakeDefaultArgs<ExtArgs>
+    vehicleType?: boolean | VehicleModel$vehicleTypeArgs<ExtArgs>
+  }, ExtArgs["result"]["vehicleModel"]>
+
+  export type VehicleModelSelectScalar = {
+    id?: boolean
+    makeId?: boolean
+    name?: boolean
+    vehicleTypeId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type VehicleModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "makeId" | "name" | "vehicleTypeId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicleModel"]>
+  export type VehicleModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    make?: boolean | VehicleMakeDefaultArgs<ExtArgs>
+    vehicleType?: boolean | VehicleModel$vehicleTypeArgs<ExtArgs>
+  }
+  export type VehicleModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    make?: boolean | VehicleMakeDefaultArgs<ExtArgs>
+    vehicleType?: boolean | VehicleModel$vehicleTypeArgs<ExtArgs>
+  }
+  export type VehicleModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    make?: boolean | VehicleMakeDefaultArgs<ExtArgs>
+    vehicleType?: boolean | VehicleModel$vehicleTypeArgs<ExtArgs>
+  }
+
+  export type $VehicleModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VehicleModel"
+    objects: {
+      make: Prisma.$VehicleMakePayload<ExtArgs>
+      vehicleType: Prisma.$VehicleTypePayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      makeId: string
+      name: string
+      vehicleTypeId: string | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["vehicleModel"]>
+    composites: {}
+  }
+
+  type VehicleModelGetPayload<S extends boolean | null | undefined | VehicleModelDefaultArgs> = $Result.GetResult<Prisma.$VehicleModelPayload, S>
+
+  type VehicleModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VehicleModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VehicleModelCountAggregateInputType | true
+    }
+
+  export interface VehicleModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VehicleModel'], meta: { name: 'VehicleModel' } }
+    /**
+     * Find zero or one VehicleModel that matches the filter.
+     * @param {VehicleModelFindUniqueArgs} args - Arguments to find a VehicleModel
+     * @example
+     * // Get one VehicleModel
+     * const vehicleModel = await prisma.vehicleModel.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VehicleModelFindUniqueArgs>(args: SelectSubset<T, VehicleModelFindUniqueArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one VehicleModel that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VehicleModelFindUniqueOrThrowArgs} args - Arguments to find a VehicleModel
+     * @example
+     * // Get one VehicleModel
+     * const vehicleModel = await prisma.vehicleModel.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VehicleModelFindUniqueOrThrowArgs>(args: SelectSubset<T, VehicleModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VehicleModel that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleModelFindFirstArgs} args - Arguments to find a VehicleModel
+     * @example
+     * // Get one VehicleModel
+     * const vehicleModel = await prisma.vehicleModel.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VehicleModelFindFirstArgs>(args?: SelectSubset<T, VehicleModelFindFirstArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VehicleModel that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleModelFindFirstOrThrowArgs} args - Arguments to find a VehicleModel
+     * @example
+     * // Get one VehicleModel
+     * const vehicleModel = await prisma.vehicleModel.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VehicleModelFindFirstOrThrowArgs>(args?: SelectSubset<T, VehicleModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more VehicleModels that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleModelFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VehicleModels
+     * const vehicleModels = await prisma.vehicleModel.findMany()
+     * 
+     * // Get first 10 VehicleModels
+     * const vehicleModels = await prisma.vehicleModel.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const vehicleModelWithIdOnly = await prisma.vehicleModel.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VehicleModelFindManyArgs>(args?: SelectSubset<T, VehicleModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a VehicleModel.
+     * @param {VehicleModelCreateArgs} args - Arguments to create a VehicleModel.
+     * @example
+     * // Create one VehicleModel
+     * const VehicleModel = await prisma.vehicleModel.create({
+     *   data: {
+     *     // ... data to create a VehicleModel
+     *   }
+     * })
+     * 
+     */
+    create<T extends VehicleModelCreateArgs>(args: SelectSubset<T, VehicleModelCreateArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many VehicleModels.
+     * @param {VehicleModelCreateManyArgs} args - Arguments to create many VehicleModels.
+     * @example
+     * // Create many VehicleModels
+     * const vehicleModel = await prisma.vehicleModel.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VehicleModelCreateManyArgs>(args?: SelectSubset<T, VehicleModelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VehicleModels and returns the data saved in the database.
+     * @param {VehicleModelCreateManyAndReturnArgs} args - Arguments to create many VehicleModels.
+     * @example
+     * // Create many VehicleModels
+     * const vehicleModel = await prisma.vehicleModel.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VehicleModels and only return the `id`
+     * const vehicleModelWithIdOnly = await prisma.vehicleModel.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VehicleModelCreateManyAndReturnArgs>(args?: SelectSubset<T, VehicleModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a VehicleModel.
+     * @param {VehicleModelDeleteArgs} args - Arguments to delete one VehicleModel.
+     * @example
+     * // Delete one VehicleModel
+     * const VehicleModel = await prisma.vehicleModel.delete({
+     *   where: {
+     *     // ... filter to delete one VehicleModel
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VehicleModelDeleteArgs>(args: SelectSubset<T, VehicleModelDeleteArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one VehicleModel.
+     * @param {VehicleModelUpdateArgs} args - Arguments to update one VehicleModel.
+     * @example
+     * // Update one VehicleModel
+     * const vehicleModel = await prisma.vehicleModel.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VehicleModelUpdateArgs>(args: SelectSubset<T, VehicleModelUpdateArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more VehicleModels.
+     * @param {VehicleModelDeleteManyArgs} args - Arguments to filter VehicleModels to delete.
+     * @example
+     * // Delete a few VehicleModels
+     * const { count } = await prisma.vehicleModel.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VehicleModelDeleteManyArgs>(args?: SelectSubset<T, VehicleModelDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VehicleModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleModelUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VehicleModels
+     * const vehicleModel = await prisma.vehicleModel.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VehicleModelUpdateManyArgs>(args: SelectSubset<T, VehicleModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VehicleModels and returns the data updated in the database.
+     * @param {VehicleModelUpdateManyAndReturnArgs} args - Arguments to update many VehicleModels.
+     * @example
+     * // Update many VehicleModels
+     * const vehicleModel = await prisma.vehicleModel.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more VehicleModels and only return the `id`
+     * const vehicleModelWithIdOnly = await prisma.vehicleModel.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VehicleModelUpdateManyAndReturnArgs>(args: SelectSubset<T, VehicleModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one VehicleModel.
+     * @param {VehicleModelUpsertArgs} args - Arguments to update or create a VehicleModel.
+     * @example
+     * // Update or create a VehicleModel
+     * const vehicleModel = await prisma.vehicleModel.upsert({
+     *   create: {
+     *     // ... data to create a VehicleModel
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VehicleModel we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VehicleModelUpsertArgs>(args: SelectSubset<T, VehicleModelUpsertArgs<ExtArgs>>): Prisma__VehicleModelClient<$Result.GetResult<Prisma.$VehicleModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of VehicleModels.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleModelCountArgs} args - Arguments to filter VehicleModels to count.
+     * @example
+     * // Count the number of VehicleModels
+     * const count = await prisma.vehicleModel.count({
+     *   where: {
+     *     // ... the filter for the VehicleModels we want to count
+     *   }
+     * })
+    **/
+    count<T extends VehicleModelCountArgs>(
+      args?: Subset<T, VehicleModelCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VehicleModelCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VehicleModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleModelAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VehicleModelAggregateArgs>(args: Subset<T, VehicleModelAggregateArgs>): Prisma.PrismaPromise<GetVehicleModelAggregateType<T>>
+
+    /**
+     * Group by VehicleModel.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleModelGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VehicleModelGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VehicleModelGroupByArgs['orderBy'] }
+        : { orderBy?: VehicleModelGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VehicleModelGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVehicleModelGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VehicleModel model
+   */
+  readonly fields: VehicleModelFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VehicleModel.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VehicleModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    make<T extends VehicleMakeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, VehicleMakeDefaultArgs<ExtArgs>>): Prisma__VehicleMakeClient<$Result.GetResult<Prisma.$VehicleMakePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    vehicleType<T extends VehicleModel$vehicleTypeArgs<ExtArgs> = {}>(args?: Subset<T, VehicleModel$vehicleTypeArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VehicleModel model
+   */
+  interface VehicleModelFieldRefs {
+    readonly id: FieldRef<"VehicleModel", 'String'>
+    readonly makeId: FieldRef<"VehicleModel", 'String'>
+    readonly name: FieldRef<"VehicleModel", 'String'>
+    readonly vehicleTypeId: FieldRef<"VehicleModel", 'String'>
+    readonly isActive: FieldRef<"VehicleModel", 'Boolean'>
+    readonly createdAt: FieldRef<"VehicleModel", 'DateTime'>
+    readonly updatedAt: FieldRef<"VehicleModel", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VehicleModel findUnique
+   */
+  export type VehicleModelFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleModel to fetch.
+     */
+    where: VehicleModelWhereUniqueInput
+  }
+
+  /**
+   * VehicleModel findUniqueOrThrow
+   */
+  export type VehicleModelFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleModel to fetch.
+     */
+    where: VehicleModelWhereUniqueInput
+  }
+
+  /**
+   * VehicleModel findFirst
+   */
+  export type VehicleModelFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleModel to fetch.
+     */
+    where?: VehicleModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleModels to fetch.
+     */
+    orderBy?: VehicleModelOrderByWithRelationInput | VehicleModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VehicleModels.
+     */
+    cursor?: VehicleModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleModels.
+     */
+    distinct?: VehicleModelScalarFieldEnum | VehicleModelScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleModel findFirstOrThrow
+   */
+  export type VehicleModelFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleModel to fetch.
+     */
+    where?: VehicleModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleModels to fetch.
+     */
+    orderBy?: VehicleModelOrderByWithRelationInput | VehicleModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VehicleModels.
+     */
+    cursor?: VehicleModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleModels.
+     */
+    distinct?: VehicleModelScalarFieldEnum | VehicleModelScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleModel findMany
+   */
+  export type VehicleModelFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * Filter, which VehicleModels to fetch.
+     */
+    where?: VehicleModelWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleModels to fetch.
+     */
+    orderBy?: VehicleModelOrderByWithRelationInput | VehicleModelOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VehicleModels.
+     */
+    cursor?: VehicleModelWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleModels from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleModels.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleModels.
+     */
+    distinct?: VehicleModelScalarFieldEnum | VehicleModelScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleModel create
+   */
+  export type VehicleModelCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * The data needed to create a VehicleModel.
+     */
+    data: XOR<VehicleModelCreateInput, VehicleModelUncheckedCreateInput>
+  }
+
+  /**
+   * VehicleModel createMany
+   */
+  export type VehicleModelCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VehicleModels.
+     */
+    data: VehicleModelCreateManyInput | VehicleModelCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VehicleModel createManyAndReturn
+   */
+  export type VehicleModelCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * The data used to create many VehicleModels.
+     */
+    data: VehicleModelCreateManyInput | VehicleModelCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VehicleModel update
+   */
+  export type VehicleModelUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * The data needed to update a VehicleModel.
+     */
+    data: XOR<VehicleModelUpdateInput, VehicleModelUncheckedUpdateInput>
+    /**
+     * Choose, which VehicleModel to update.
+     */
+    where: VehicleModelWhereUniqueInput
+  }
+
+  /**
+   * VehicleModel updateMany
+   */
+  export type VehicleModelUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VehicleModels.
+     */
+    data: XOR<VehicleModelUpdateManyMutationInput, VehicleModelUncheckedUpdateManyInput>
+    /**
+     * Filter which VehicleModels to update
+     */
+    where?: VehicleModelWhereInput
+    /**
+     * Limit how many VehicleModels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleModel updateManyAndReturn
+   */
+  export type VehicleModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * The data used to update VehicleModels.
+     */
+    data: XOR<VehicleModelUpdateManyMutationInput, VehicleModelUncheckedUpdateManyInput>
+    /**
+     * Filter which VehicleModels to update
+     */
+    where?: VehicleModelWhereInput
+    /**
+     * Limit how many VehicleModels to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VehicleModel upsert
+   */
+  export type VehicleModelUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * The filter to search for the VehicleModel to update in case it exists.
+     */
+    where: VehicleModelWhereUniqueInput
+    /**
+     * In case the VehicleModel found by the `where` argument doesn't exist, create a new VehicleModel with this data.
+     */
+    create: XOR<VehicleModelCreateInput, VehicleModelUncheckedCreateInput>
+    /**
+     * In case the VehicleModel was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VehicleModelUpdateInput, VehicleModelUncheckedUpdateInput>
+  }
+
+  /**
+   * VehicleModel delete
+   */
+  export type VehicleModelDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
+    /**
+     * Filter which VehicleModel to delete.
+     */
+    where: VehicleModelWhereUniqueInput
+  }
+
+  /**
+   * VehicleModel deleteMany
+   */
+  export type VehicleModelDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VehicleModels to delete
+     */
+    where?: VehicleModelWhereInput
+    /**
+     * Limit how many VehicleModels to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleModel.vehicleType
+   */
+  export type VehicleModel$vehicleTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleTypeInclude<ExtArgs> | null
+    where?: VehicleTypeWhereInput
+  }
+
+  /**
+   * VehicleModel without action
+   */
+  export type VehicleModelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleModel
+     */
+    select?: VehicleModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleModel
+     */
+    omit?: VehicleModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VehicleModelInclude<ExtArgs> | null
   }
 
 
@@ -20952,6 +23393,30 @@ export namespace Prisma {
   export type VehicleTypeScalarFieldEnum = (typeof VehicleTypeScalarFieldEnum)[keyof typeof VehicleTypeScalarFieldEnum]
 
 
+  export const VehicleMakeScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type VehicleMakeScalarFieldEnum = (typeof VehicleMakeScalarFieldEnum)[keyof typeof VehicleMakeScalarFieldEnum]
+
+
+  export const VehicleModelScalarFieldEnum: {
+    id: 'id',
+    makeId: 'makeId',
+    name: 'name',
+    vehicleTypeId: 'vehicleTypeId',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type VehicleModelScalarFieldEnum = (typeof VehicleModelScalarFieldEnum)[keyof typeof VehicleModelScalarFieldEnum]
+
+
   export const VehicleScalarFieldEnum: {
     id: 'id',
     driverId: 'driverId',
@@ -21431,6 +23896,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VehicleType"> | Date | string
     updatedAt?: DateTimeFilter<"VehicleType"> | Date | string
     vehicles?: VehicleListRelationFilter
+    models?: VehicleModelListRelationFilter
   }
 
   export type VehicleTypeOrderByWithRelationInput = {
@@ -21447,6 +23913,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     vehicles?: VehicleOrderByRelationAggregateInput
+    models?: VehicleModelOrderByRelationAggregateInput
   }
 
   export type VehicleTypeWhereUniqueInput = Prisma.AtLeast<{
@@ -21466,6 +23933,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VehicleType"> | Date | string
     updatedAt?: DateTimeFilter<"VehicleType"> | Date | string
     vehicles?: VehicleListRelationFilter
+    models?: VehicleModelListRelationFilter
   }, "id">
 
   export type VehicleTypeOrderByWithAggregationInput = {
@@ -21504,6 +23972,130 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"VehicleType"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"VehicleType"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"VehicleType"> | Date | string
+  }
+
+  export type VehicleMakeWhereInput = {
+    AND?: VehicleMakeWhereInput | VehicleMakeWhereInput[]
+    OR?: VehicleMakeWhereInput[]
+    NOT?: VehicleMakeWhereInput | VehicleMakeWhereInput[]
+    id?: StringFilter<"VehicleMake"> | string
+    name?: StringFilter<"VehicleMake"> | string
+    isActive?: BoolFilter<"VehicleMake"> | boolean
+    createdAt?: DateTimeFilter<"VehicleMake"> | Date | string
+    updatedAt?: DateTimeFilter<"VehicleMake"> | Date | string
+    models?: VehicleModelListRelationFilter
+  }
+
+  export type VehicleMakeOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    models?: VehicleModelOrderByRelationAggregateInput
+  }
+
+  export type VehicleMakeWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    name?: string
+    AND?: VehicleMakeWhereInput | VehicleMakeWhereInput[]
+    OR?: VehicleMakeWhereInput[]
+    NOT?: VehicleMakeWhereInput | VehicleMakeWhereInput[]
+    isActive?: BoolFilter<"VehicleMake"> | boolean
+    createdAt?: DateTimeFilter<"VehicleMake"> | Date | string
+    updatedAt?: DateTimeFilter<"VehicleMake"> | Date | string
+    models?: VehicleModelListRelationFilter
+  }, "id" | "name">
+
+  export type VehicleMakeOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: VehicleMakeCountOrderByAggregateInput
+    _max?: VehicleMakeMaxOrderByAggregateInput
+    _min?: VehicleMakeMinOrderByAggregateInput
+  }
+
+  export type VehicleMakeScalarWhereWithAggregatesInput = {
+    AND?: VehicleMakeScalarWhereWithAggregatesInput | VehicleMakeScalarWhereWithAggregatesInput[]
+    OR?: VehicleMakeScalarWhereWithAggregatesInput[]
+    NOT?: VehicleMakeScalarWhereWithAggregatesInput | VehicleMakeScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"VehicleMake"> | string
+    name?: StringWithAggregatesFilter<"VehicleMake"> | string
+    isActive?: BoolWithAggregatesFilter<"VehicleMake"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"VehicleMake"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"VehicleMake"> | Date | string
+  }
+
+  export type VehicleModelWhereInput = {
+    AND?: VehicleModelWhereInput | VehicleModelWhereInput[]
+    OR?: VehicleModelWhereInput[]
+    NOT?: VehicleModelWhereInput | VehicleModelWhereInput[]
+    id?: StringFilter<"VehicleModel"> | string
+    makeId?: StringFilter<"VehicleModel"> | string
+    name?: StringFilter<"VehicleModel"> | string
+    vehicleTypeId?: StringNullableFilter<"VehicleModel"> | string | null
+    isActive?: BoolFilter<"VehicleModel"> | boolean
+    createdAt?: DateTimeFilter<"VehicleModel"> | Date | string
+    updatedAt?: DateTimeFilter<"VehicleModel"> | Date | string
+    make?: XOR<VehicleMakeScalarRelationFilter, VehicleMakeWhereInput>
+    vehicleType?: XOR<VehicleTypeNullableScalarRelationFilter, VehicleTypeWhereInput> | null
+  }
+
+  export type VehicleModelOrderByWithRelationInput = {
+    id?: SortOrder
+    makeId?: SortOrder
+    name?: SortOrder
+    vehicleTypeId?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    make?: VehicleMakeOrderByWithRelationInput
+    vehicleType?: VehicleTypeOrderByWithRelationInput
+  }
+
+  export type VehicleModelWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    makeId_name?: VehicleModelMakeIdNameCompoundUniqueInput
+    AND?: VehicleModelWhereInput | VehicleModelWhereInput[]
+    OR?: VehicleModelWhereInput[]
+    NOT?: VehicleModelWhereInput | VehicleModelWhereInput[]
+    makeId?: StringFilter<"VehicleModel"> | string
+    name?: StringFilter<"VehicleModel"> | string
+    vehicleTypeId?: StringNullableFilter<"VehicleModel"> | string | null
+    isActive?: BoolFilter<"VehicleModel"> | boolean
+    createdAt?: DateTimeFilter<"VehicleModel"> | Date | string
+    updatedAt?: DateTimeFilter<"VehicleModel"> | Date | string
+    make?: XOR<VehicleMakeScalarRelationFilter, VehicleMakeWhereInput>
+    vehicleType?: XOR<VehicleTypeNullableScalarRelationFilter, VehicleTypeWhereInput> | null
+  }, "id" | "makeId_name">
+
+  export type VehicleModelOrderByWithAggregationInput = {
+    id?: SortOrder
+    makeId?: SortOrder
+    name?: SortOrder
+    vehicleTypeId?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: VehicleModelCountOrderByAggregateInput
+    _max?: VehicleModelMaxOrderByAggregateInput
+    _min?: VehicleModelMinOrderByAggregateInput
+  }
+
+  export type VehicleModelScalarWhereWithAggregatesInput = {
+    AND?: VehicleModelScalarWhereWithAggregatesInput | VehicleModelScalarWhereWithAggregatesInput[]
+    OR?: VehicleModelScalarWhereWithAggregatesInput[]
+    NOT?: VehicleModelScalarWhereWithAggregatesInput | VehicleModelScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"VehicleModel"> | string
+    makeId?: StringWithAggregatesFilter<"VehicleModel"> | string
+    name?: StringWithAggregatesFilter<"VehicleModel"> | string
+    vehicleTypeId?: StringNullableWithAggregatesFilter<"VehicleModel"> | string | null
+    isActive?: BoolWithAggregatesFilter<"VehicleModel"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"VehicleModel"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"VehicleModel"> | Date | string
   }
 
   export type VehicleWhereInput = {
@@ -22861,6 +25453,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     vehicles?: VehicleCreateNestedManyWithoutVehicleTypeInput
+    models?: VehicleModelCreateNestedManyWithoutVehicleTypeInput
   }
 
   export type VehicleTypeUncheckedCreateInput = {
@@ -22877,6 +25470,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     vehicles?: VehicleUncheckedCreateNestedManyWithoutVehicleTypeInput
+    models?: VehicleModelUncheckedCreateNestedManyWithoutVehicleTypeInput
   }
 
   export type VehicleTypeUpdateInput = {
@@ -22893,6 +25487,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     vehicles?: VehicleUpdateManyWithoutVehicleTypeNestedInput
+    models?: VehicleModelUpdateManyWithoutVehicleTypeNestedInput
   }
 
   export type VehicleTypeUncheckedUpdateInput = {
@@ -22909,6 +25504,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     vehicles?: VehicleUncheckedUpdateManyWithoutVehicleTypeNestedInput
+    models?: VehicleModelUncheckedUpdateManyWithoutVehicleTypeNestedInput
   }
 
   export type VehicleTypeCreateManyInput = {
@@ -22951,6 +25547,134 @@ export namespace Prisma {
     minFare?: FloatFieldUpdateOperationsInput | number
     maxPassengers?: IntFieldUpdateOperationsInput | number
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleMakeCreateInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    models?: VehicleModelCreateNestedManyWithoutMakeInput
+  }
+
+  export type VehicleMakeUncheckedCreateInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    models?: VehicleModelUncheckedCreateNestedManyWithoutMakeInput
+  }
+
+  export type VehicleMakeUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    models?: VehicleModelUpdateManyWithoutMakeNestedInput
+  }
+
+  export type VehicleMakeUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    models?: VehicleModelUncheckedUpdateManyWithoutMakeNestedInput
+  }
+
+  export type VehicleMakeCreateManyInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleMakeUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleMakeUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleModelCreateInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    make: VehicleMakeCreateNestedOneWithoutModelsInput
+    vehicleType?: VehicleTypeCreateNestedOneWithoutModelsInput
+  }
+
+  export type VehicleModelUncheckedCreateInput = {
+    id?: string
+    makeId: string
+    name: string
+    vehicleTypeId?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleModelUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    make?: VehicleMakeUpdateOneRequiredWithoutModelsNestedInput
+    vehicleType?: VehicleTypeUpdateOneWithoutModelsNestedInput
+  }
+
+  export type VehicleModelUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    makeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    vehicleTypeId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleModelCreateManyInput = {
+    id?: string
+    makeId: string
+    name: string
+    vehicleTypeId?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleModelUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleModelUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    makeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    vehicleTypeId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24576,7 +27300,17 @@ export namespace Prisma {
     none?: VehicleWhereInput
   }
 
+  export type VehicleModelListRelationFilter = {
+    every?: VehicleModelWhereInput
+    some?: VehicleModelWhereInput
+    none?: VehicleModelWhereInput
+  }
+
   export type VehicleOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type VehicleModelOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -24679,6 +27413,75 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type VehicleMakeCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleMakeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleMakeMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleMakeScalarRelationFilter = {
+    is?: VehicleMakeWhereInput
+    isNot?: VehicleMakeWhereInput
+  }
+
+  export type VehicleTypeNullableScalarRelationFilter = {
+    is?: VehicleTypeWhereInput | null
+    isNot?: VehicleTypeWhereInput | null
+  }
+
+  export type VehicleModelMakeIdNameCompoundUniqueInput = {
+    makeId: string
+    name: string
+  }
+
+  export type VehicleModelCountOrderByAggregateInput = {
+    id?: SortOrder
+    makeId?: SortOrder
+    name?: SortOrder
+    vehicleTypeId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleModelMaxOrderByAggregateInput = {
+    id?: SortOrder
+    makeId?: SortOrder
+    name?: SortOrder
+    vehicleTypeId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleModelMinOrderByAggregateInput = {
+    id?: SortOrder
+    makeId?: SortOrder
+    name?: SortOrder
+    vehicleTypeId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type VehicleTypeScalarRelationFilter = {
@@ -25623,11 +28426,25 @@ export namespace Prisma {
     connect?: VehicleWhereUniqueInput | VehicleWhereUniqueInput[]
   }
 
+  export type VehicleModelCreateNestedManyWithoutVehicleTypeInput = {
+    create?: XOR<VehicleModelCreateWithoutVehicleTypeInput, VehicleModelUncheckedCreateWithoutVehicleTypeInput> | VehicleModelCreateWithoutVehicleTypeInput[] | VehicleModelUncheckedCreateWithoutVehicleTypeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutVehicleTypeInput | VehicleModelCreateOrConnectWithoutVehicleTypeInput[]
+    createMany?: VehicleModelCreateManyVehicleTypeInputEnvelope
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+  }
+
   export type VehicleUncheckedCreateNestedManyWithoutVehicleTypeInput = {
     create?: XOR<VehicleCreateWithoutVehicleTypeInput, VehicleUncheckedCreateWithoutVehicleTypeInput> | VehicleCreateWithoutVehicleTypeInput[] | VehicleUncheckedCreateWithoutVehicleTypeInput[]
     connectOrCreate?: VehicleCreateOrConnectWithoutVehicleTypeInput | VehicleCreateOrConnectWithoutVehicleTypeInput[]
     createMany?: VehicleCreateManyVehicleTypeInputEnvelope
     connect?: VehicleWhereUniqueInput | VehicleWhereUniqueInput[]
+  }
+
+  export type VehicleModelUncheckedCreateNestedManyWithoutVehicleTypeInput = {
+    create?: XOR<VehicleModelCreateWithoutVehicleTypeInput, VehicleModelUncheckedCreateWithoutVehicleTypeInput> | VehicleModelCreateWithoutVehicleTypeInput[] | VehicleModelUncheckedCreateWithoutVehicleTypeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutVehicleTypeInput | VehicleModelCreateOrConnectWithoutVehicleTypeInput[]
+    createMany?: VehicleModelCreateManyVehicleTypeInputEnvelope
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -25664,6 +28481,20 @@ export namespace Prisma {
     deleteMany?: VehicleScalarWhereInput | VehicleScalarWhereInput[]
   }
 
+  export type VehicleModelUpdateManyWithoutVehicleTypeNestedInput = {
+    create?: XOR<VehicleModelCreateWithoutVehicleTypeInput, VehicleModelUncheckedCreateWithoutVehicleTypeInput> | VehicleModelCreateWithoutVehicleTypeInput[] | VehicleModelUncheckedCreateWithoutVehicleTypeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutVehicleTypeInput | VehicleModelCreateOrConnectWithoutVehicleTypeInput[]
+    upsert?: VehicleModelUpsertWithWhereUniqueWithoutVehicleTypeInput | VehicleModelUpsertWithWhereUniqueWithoutVehicleTypeInput[]
+    createMany?: VehicleModelCreateManyVehicleTypeInputEnvelope
+    set?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    disconnect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    delete?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    update?: VehicleModelUpdateWithWhereUniqueWithoutVehicleTypeInput | VehicleModelUpdateWithWhereUniqueWithoutVehicleTypeInput[]
+    updateMany?: VehicleModelUpdateManyWithWhereWithoutVehicleTypeInput | VehicleModelUpdateManyWithWhereWithoutVehicleTypeInput[]
+    deleteMany?: VehicleModelScalarWhereInput | VehicleModelScalarWhereInput[]
+  }
+
   export type VehicleUncheckedUpdateManyWithoutVehicleTypeNestedInput = {
     create?: XOR<VehicleCreateWithoutVehicleTypeInput, VehicleUncheckedCreateWithoutVehicleTypeInput> | VehicleCreateWithoutVehicleTypeInput[] | VehicleUncheckedCreateWithoutVehicleTypeInput[]
     connectOrCreate?: VehicleCreateOrConnectWithoutVehicleTypeInput | VehicleCreateOrConnectWithoutVehicleTypeInput[]
@@ -25676,6 +28507,92 @@ export namespace Prisma {
     update?: VehicleUpdateWithWhereUniqueWithoutVehicleTypeInput | VehicleUpdateWithWhereUniqueWithoutVehicleTypeInput[]
     updateMany?: VehicleUpdateManyWithWhereWithoutVehicleTypeInput | VehicleUpdateManyWithWhereWithoutVehicleTypeInput[]
     deleteMany?: VehicleScalarWhereInput | VehicleScalarWhereInput[]
+  }
+
+  export type VehicleModelUncheckedUpdateManyWithoutVehicleTypeNestedInput = {
+    create?: XOR<VehicleModelCreateWithoutVehicleTypeInput, VehicleModelUncheckedCreateWithoutVehicleTypeInput> | VehicleModelCreateWithoutVehicleTypeInput[] | VehicleModelUncheckedCreateWithoutVehicleTypeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutVehicleTypeInput | VehicleModelCreateOrConnectWithoutVehicleTypeInput[]
+    upsert?: VehicleModelUpsertWithWhereUniqueWithoutVehicleTypeInput | VehicleModelUpsertWithWhereUniqueWithoutVehicleTypeInput[]
+    createMany?: VehicleModelCreateManyVehicleTypeInputEnvelope
+    set?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    disconnect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    delete?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    update?: VehicleModelUpdateWithWhereUniqueWithoutVehicleTypeInput | VehicleModelUpdateWithWhereUniqueWithoutVehicleTypeInput[]
+    updateMany?: VehicleModelUpdateManyWithWhereWithoutVehicleTypeInput | VehicleModelUpdateManyWithWhereWithoutVehicleTypeInput[]
+    deleteMany?: VehicleModelScalarWhereInput | VehicleModelScalarWhereInput[]
+  }
+
+  export type VehicleModelCreateNestedManyWithoutMakeInput = {
+    create?: XOR<VehicleModelCreateWithoutMakeInput, VehicleModelUncheckedCreateWithoutMakeInput> | VehicleModelCreateWithoutMakeInput[] | VehicleModelUncheckedCreateWithoutMakeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutMakeInput | VehicleModelCreateOrConnectWithoutMakeInput[]
+    createMany?: VehicleModelCreateManyMakeInputEnvelope
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+  }
+
+  export type VehicleModelUncheckedCreateNestedManyWithoutMakeInput = {
+    create?: XOR<VehicleModelCreateWithoutMakeInput, VehicleModelUncheckedCreateWithoutMakeInput> | VehicleModelCreateWithoutMakeInput[] | VehicleModelUncheckedCreateWithoutMakeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutMakeInput | VehicleModelCreateOrConnectWithoutMakeInput[]
+    createMany?: VehicleModelCreateManyMakeInputEnvelope
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+  }
+
+  export type VehicleModelUpdateManyWithoutMakeNestedInput = {
+    create?: XOR<VehicleModelCreateWithoutMakeInput, VehicleModelUncheckedCreateWithoutMakeInput> | VehicleModelCreateWithoutMakeInput[] | VehicleModelUncheckedCreateWithoutMakeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutMakeInput | VehicleModelCreateOrConnectWithoutMakeInput[]
+    upsert?: VehicleModelUpsertWithWhereUniqueWithoutMakeInput | VehicleModelUpsertWithWhereUniqueWithoutMakeInput[]
+    createMany?: VehicleModelCreateManyMakeInputEnvelope
+    set?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    disconnect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    delete?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    update?: VehicleModelUpdateWithWhereUniqueWithoutMakeInput | VehicleModelUpdateWithWhereUniqueWithoutMakeInput[]
+    updateMany?: VehicleModelUpdateManyWithWhereWithoutMakeInput | VehicleModelUpdateManyWithWhereWithoutMakeInput[]
+    deleteMany?: VehicleModelScalarWhereInput | VehicleModelScalarWhereInput[]
+  }
+
+  export type VehicleModelUncheckedUpdateManyWithoutMakeNestedInput = {
+    create?: XOR<VehicleModelCreateWithoutMakeInput, VehicleModelUncheckedCreateWithoutMakeInput> | VehicleModelCreateWithoutMakeInput[] | VehicleModelUncheckedCreateWithoutMakeInput[]
+    connectOrCreate?: VehicleModelCreateOrConnectWithoutMakeInput | VehicleModelCreateOrConnectWithoutMakeInput[]
+    upsert?: VehicleModelUpsertWithWhereUniqueWithoutMakeInput | VehicleModelUpsertWithWhereUniqueWithoutMakeInput[]
+    createMany?: VehicleModelCreateManyMakeInputEnvelope
+    set?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    disconnect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    delete?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    connect?: VehicleModelWhereUniqueInput | VehicleModelWhereUniqueInput[]
+    update?: VehicleModelUpdateWithWhereUniqueWithoutMakeInput | VehicleModelUpdateWithWhereUniqueWithoutMakeInput[]
+    updateMany?: VehicleModelUpdateManyWithWhereWithoutMakeInput | VehicleModelUpdateManyWithWhereWithoutMakeInput[]
+    deleteMany?: VehicleModelScalarWhereInput | VehicleModelScalarWhereInput[]
+  }
+
+  export type VehicleMakeCreateNestedOneWithoutModelsInput = {
+    create?: XOR<VehicleMakeCreateWithoutModelsInput, VehicleMakeUncheckedCreateWithoutModelsInput>
+    connectOrCreate?: VehicleMakeCreateOrConnectWithoutModelsInput
+    connect?: VehicleMakeWhereUniqueInput
+  }
+
+  export type VehicleTypeCreateNestedOneWithoutModelsInput = {
+    create?: XOR<VehicleTypeCreateWithoutModelsInput, VehicleTypeUncheckedCreateWithoutModelsInput>
+    connectOrCreate?: VehicleTypeCreateOrConnectWithoutModelsInput
+    connect?: VehicleTypeWhereUniqueInput
+  }
+
+  export type VehicleMakeUpdateOneRequiredWithoutModelsNestedInput = {
+    create?: XOR<VehicleMakeCreateWithoutModelsInput, VehicleMakeUncheckedCreateWithoutModelsInput>
+    connectOrCreate?: VehicleMakeCreateOrConnectWithoutModelsInput
+    upsert?: VehicleMakeUpsertWithoutModelsInput
+    connect?: VehicleMakeWhereUniqueInput
+    update?: XOR<XOR<VehicleMakeUpdateToOneWithWhereWithoutModelsInput, VehicleMakeUpdateWithoutModelsInput>, VehicleMakeUncheckedUpdateWithoutModelsInput>
+  }
+
+  export type VehicleTypeUpdateOneWithoutModelsNestedInput = {
+    create?: XOR<VehicleTypeCreateWithoutModelsInput, VehicleTypeUncheckedCreateWithoutModelsInput>
+    connectOrCreate?: VehicleTypeCreateOrConnectWithoutModelsInput
+    upsert?: VehicleTypeUpsertWithoutModelsInput
+    disconnect?: VehicleTypeWhereInput | boolean
+    delete?: VehicleTypeWhereInput | boolean
+    connect?: VehicleTypeWhereUniqueInput
+    update?: XOR<XOR<VehicleTypeUpdateToOneWithWhereWithoutModelsInput, VehicleTypeUpdateWithoutModelsInput>, VehicleTypeUncheckedUpdateWithoutModelsInput>
   }
 
   export type VehicleTypeCreateNestedOneWithoutVehiclesInput = {
@@ -26291,6 +29208,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type VehicleModelCreateWithoutVehicleTypeInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    make: VehicleMakeCreateNestedOneWithoutModelsInput
+  }
+
+  export type VehicleModelUncheckedCreateWithoutVehicleTypeInput = {
+    id?: string
+    makeId: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleModelCreateOrConnectWithoutVehicleTypeInput = {
+    where: VehicleModelWhereUniqueInput
+    create: XOR<VehicleModelCreateWithoutVehicleTypeInput, VehicleModelUncheckedCreateWithoutVehicleTypeInput>
+  }
+
+  export type VehicleModelCreateManyVehicleTypeInputEnvelope = {
+    data: VehicleModelCreateManyVehicleTypeInput | VehicleModelCreateManyVehicleTypeInput[]
+    skipDuplicates?: boolean
+  }
+
   export type VehicleUpsertWithWhereUniqueWithoutVehicleTypeInput = {
     where: VehicleWhereUniqueInput
     update: XOR<VehicleUpdateWithoutVehicleTypeInput, VehicleUncheckedUpdateWithoutVehicleTypeInput>
@@ -26328,6 +29273,207 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Vehicle"> | Date | string
   }
 
+  export type VehicleModelUpsertWithWhereUniqueWithoutVehicleTypeInput = {
+    where: VehicleModelWhereUniqueInput
+    update: XOR<VehicleModelUpdateWithoutVehicleTypeInput, VehicleModelUncheckedUpdateWithoutVehicleTypeInput>
+    create: XOR<VehicleModelCreateWithoutVehicleTypeInput, VehicleModelUncheckedCreateWithoutVehicleTypeInput>
+  }
+
+  export type VehicleModelUpdateWithWhereUniqueWithoutVehicleTypeInput = {
+    where: VehicleModelWhereUniqueInput
+    data: XOR<VehicleModelUpdateWithoutVehicleTypeInput, VehicleModelUncheckedUpdateWithoutVehicleTypeInput>
+  }
+
+  export type VehicleModelUpdateManyWithWhereWithoutVehicleTypeInput = {
+    where: VehicleModelScalarWhereInput
+    data: XOR<VehicleModelUpdateManyMutationInput, VehicleModelUncheckedUpdateManyWithoutVehicleTypeInput>
+  }
+
+  export type VehicleModelScalarWhereInput = {
+    AND?: VehicleModelScalarWhereInput | VehicleModelScalarWhereInput[]
+    OR?: VehicleModelScalarWhereInput[]
+    NOT?: VehicleModelScalarWhereInput | VehicleModelScalarWhereInput[]
+    id?: StringFilter<"VehicleModel"> | string
+    makeId?: StringFilter<"VehicleModel"> | string
+    name?: StringFilter<"VehicleModel"> | string
+    vehicleTypeId?: StringNullableFilter<"VehicleModel"> | string | null
+    isActive?: BoolFilter<"VehicleModel"> | boolean
+    createdAt?: DateTimeFilter<"VehicleModel"> | Date | string
+    updatedAt?: DateTimeFilter<"VehicleModel"> | Date | string
+  }
+
+  export type VehicleModelCreateWithoutMakeInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vehicleType?: VehicleTypeCreateNestedOneWithoutModelsInput
+  }
+
+  export type VehicleModelUncheckedCreateWithoutMakeInput = {
+    id?: string
+    name: string
+    vehicleTypeId?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleModelCreateOrConnectWithoutMakeInput = {
+    where: VehicleModelWhereUniqueInput
+    create: XOR<VehicleModelCreateWithoutMakeInput, VehicleModelUncheckedCreateWithoutMakeInput>
+  }
+
+  export type VehicleModelCreateManyMakeInputEnvelope = {
+    data: VehicleModelCreateManyMakeInput | VehicleModelCreateManyMakeInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type VehicleModelUpsertWithWhereUniqueWithoutMakeInput = {
+    where: VehicleModelWhereUniqueInput
+    update: XOR<VehicleModelUpdateWithoutMakeInput, VehicleModelUncheckedUpdateWithoutMakeInput>
+    create: XOR<VehicleModelCreateWithoutMakeInput, VehicleModelUncheckedCreateWithoutMakeInput>
+  }
+
+  export type VehicleModelUpdateWithWhereUniqueWithoutMakeInput = {
+    where: VehicleModelWhereUniqueInput
+    data: XOR<VehicleModelUpdateWithoutMakeInput, VehicleModelUncheckedUpdateWithoutMakeInput>
+  }
+
+  export type VehicleModelUpdateManyWithWhereWithoutMakeInput = {
+    where: VehicleModelScalarWhereInput
+    data: XOR<VehicleModelUpdateManyMutationInput, VehicleModelUncheckedUpdateManyWithoutMakeInput>
+  }
+
+  export type VehicleMakeCreateWithoutModelsInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleMakeUncheckedCreateWithoutModelsInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleMakeCreateOrConnectWithoutModelsInput = {
+    where: VehicleMakeWhereUniqueInput
+    create: XOR<VehicleMakeCreateWithoutModelsInput, VehicleMakeUncheckedCreateWithoutModelsInput>
+  }
+
+  export type VehicleTypeCreateWithoutModelsInput = {
+    id?: string
+    name: string
+    type: string
+    baseFare: number
+    perKmRate: number
+    perMinuteRate: number
+    minFare: number
+    maxPassengers: number
+    imageUrl?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vehicles?: VehicleCreateNestedManyWithoutVehicleTypeInput
+  }
+
+  export type VehicleTypeUncheckedCreateWithoutModelsInput = {
+    id?: string
+    name: string
+    type: string
+    baseFare: number
+    perKmRate: number
+    perMinuteRate: number
+    minFare: number
+    maxPassengers: number
+    imageUrl?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vehicles?: VehicleUncheckedCreateNestedManyWithoutVehicleTypeInput
+  }
+
+  export type VehicleTypeCreateOrConnectWithoutModelsInput = {
+    where: VehicleTypeWhereUniqueInput
+    create: XOR<VehicleTypeCreateWithoutModelsInput, VehicleTypeUncheckedCreateWithoutModelsInput>
+  }
+
+  export type VehicleMakeUpsertWithoutModelsInput = {
+    update: XOR<VehicleMakeUpdateWithoutModelsInput, VehicleMakeUncheckedUpdateWithoutModelsInput>
+    create: XOR<VehicleMakeCreateWithoutModelsInput, VehicleMakeUncheckedCreateWithoutModelsInput>
+    where?: VehicleMakeWhereInput
+  }
+
+  export type VehicleMakeUpdateToOneWithWhereWithoutModelsInput = {
+    where?: VehicleMakeWhereInput
+    data: XOR<VehicleMakeUpdateWithoutModelsInput, VehicleMakeUncheckedUpdateWithoutModelsInput>
+  }
+
+  export type VehicleMakeUpdateWithoutModelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleMakeUncheckedUpdateWithoutModelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleTypeUpsertWithoutModelsInput = {
+    update: XOR<VehicleTypeUpdateWithoutModelsInput, VehicleTypeUncheckedUpdateWithoutModelsInput>
+    create: XOR<VehicleTypeCreateWithoutModelsInput, VehicleTypeUncheckedCreateWithoutModelsInput>
+    where?: VehicleTypeWhereInput
+  }
+
+  export type VehicleTypeUpdateToOneWithWhereWithoutModelsInput = {
+    where?: VehicleTypeWhereInput
+    data: XOR<VehicleTypeUpdateWithoutModelsInput, VehicleTypeUncheckedUpdateWithoutModelsInput>
+  }
+
+  export type VehicleTypeUpdateWithoutModelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    baseFare?: FloatFieldUpdateOperationsInput | number
+    perKmRate?: FloatFieldUpdateOperationsInput | number
+    perMinuteRate?: FloatFieldUpdateOperationsInput | number
+    minFare?: FloatFieldUpdateOperationsInput | number
+    maxPassengers?: IntFieldUpdateOperationsInput | number
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vehicles?: VehicleUpdateManyWithoutVehicleTypeNestedInput
+  }
+
+  export type VehicleTypeUncheckedUpdateWithoutModelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    baseFare?: FloatFieldUpdateOperationsInput | number
+    perKmRate?: FloatFieldUpdateOperationsInput | number
+    perMinuteRate?: FloatFieldUpdateOperationsInput | number
+    minFare?: FloatFieldUpdateOperationsInput | number
+    maxPassengers?: IntFieldUpdateOperationsInput | number
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vehicles?: VehicleUncheckedUpdateManyWithoutVehicleTypeNestedInput
+  }
+
   export type VehicleTypeCreateWithoutVehiclesInput = {
     id?: string
     name: string
@@ -26341,6 +29487,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    models?: VehicleModelCreateNestedManyWithoutVehicleTypeInput
   }
 
   export type VehicleTypeUncheckedCreateWithoutVehiclesInput = {
@@ -26356,6 +29503,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    models?: VehicleModelUncheckedCreateNestedManyWithoutVehicleTypeInput
   }
 
   export type VehicleTypeCreateOrConnectWithoutVehiclesInput = {
@@ -26387,6 +29535,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    models?: VehicleModelUpdateManyWithoutVehicleTypeNestedInput
   }
 
   export type VehicleTypeUncheckedUpdateWithoutVehiclesInput = {
@@ -26402,6 +29551,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    models?: VehicleModelUncheckedUpdateManyWithoutVehicleTypeNestedInput
   }
 
   export type WalletTransactionCreateWithoutWalletInput = {
@@ -27112,6 +30262,15 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type VehicleModelCreateManyVehicleTypeInput = {
+    id?: string
+    makeId: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type VehicleUpdateWithoutVehicleTypeInput = {
     id?: StringFieldUpdateOperationsInput | string
     driverId?: StringFieldUpdateOperationsInput | string
@@ -27159,6 +30318,69 @@ export namespace Prisma {
     insuranceExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleModelUpdateWithoutVehicleTypeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    make?: VehicleMakeUpdateOneRequiredWithoutModelsNestedInput
+  }
+
+  export type VehicleModelUncheckedUpdateWithoutVehicleTypeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    makeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleModelUncheckedUpdateManyWithoutVehicleTypeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    makeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleModelCreateManyMakeInput = {
+    id?: string
+    name: string
+    vehicleTypeId?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleModelUpdateWithoutMakeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vehicleType?: VehicleTypeUpdateOneWithoutModelsNestedInput
+  }
+
+  export type VehicleModelUncheckedUpdateWithoutMakeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    vehicleTypeId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleModelUncheckedUpdateManyWithoutMakeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    vehicleTypeId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
