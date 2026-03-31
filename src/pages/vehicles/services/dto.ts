@@ -61,3 +61,42 @@ export interface CreateVehicleDTO {
 }
 
 export type UpdateVehicleDTO = Partial<CreateVehicleDTO>;
+
+export interface VehicleMakeDTO {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    models: number;
+  };
+}
+
+export interface VehicleModelDTO {
+  id: string;
+  makeId: string;
+  name: string;
+  vehicleTypeId?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  make?: VehicleMakeDTO;
+  vehicleType?: VehicleTypeDTO;
+}
+
+export interface CreateVehicleMakeDTO {
+  name: string;
+  isActive?: boolean;
+}
+
+export type UpdateVehicleMakeDTO = Partial<CreateVehicleMakeDTO>;
+
+export interface CreateVehicleModelDTO {
+  makeId: string;
+  name: string;
+  vehicleTypeId?: string | null;
+  isActive?: boolean;
+}
+
+export type UpdateVehicleModelDTO = Partial<CreateVehicleModelDTO>;

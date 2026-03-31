@@ -169,6 +169,8 @@ export function UsersPage() {
           <SelectContent>
             <SelectItem value="all">جميع الحالات</SelectItem>
             <SelectItem value="ACTIVE">نشط</SelectItem>
+            <SelectItem value="UNDER_REVIEW">قيد المراجعة</SelectItem>
+            <SelectItem value="PENDING_DOCUMENTS">انتظار الوثائق</SelectItem>
             <SelectItem value="INACTIVE">غير نشط</SelectItem>
             <SelectItem value="SUSPENDED">موقوف</SelectItem>
             <SelectItem value="BANNED">محظور</SelectItem>

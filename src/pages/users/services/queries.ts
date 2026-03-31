@@ -6,7 +6,19 @@ export const userKeys = {
   all: ['users'] as const,
   list: (filters: UserFilters) => [...userKeys.all, 'list', filters] as const,
   detail: (id: string) => [...userKeys.all, 'detail', id] as const,
+  onboarding: (id: string) => [...userKeys.all, 'onboarding', id] as const,
   stats: () => [...userKeys.all, 'stats'] as const,
+};
+
+export const useGetOnboardingStatus = (id: string) => {
+  return useQuery({
+    queryKey: userKeys.onboarding(id),
+    queryFn: async () => {
+      const res = await usersApi.getOnboardingStatus(id);
+      return res.data.data;
+    },
+    enabled: !!id,
+  });
 };
 
 export const useGetAllUsers = (filters: UserFilters) => {

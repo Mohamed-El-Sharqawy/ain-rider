@@ -1,4 +1,4 @@
-import { useGetVehicleTypes, useGetVehicles } from './services/queries';
+import { useGetVehicleTypes, useGetVehicles, useGetVehicleMakes, useGetVehicleModels } from './services/queries';
 import { useVehicleFilters } from './hooks/useVehicleFilters';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
@@ -7,15 +7,20 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { CreateVehicleTypeModal } from './components/CreateVehicleTypeModal';
+import { CreateVehicleMakeModal } from './components/CreateVehicleMakeModal';
+import { CreateVehicleModelModal } from './components/CreateVehicleModelModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Car } from 'lucide-react';
+import { Car, Smartphone as Brand, Layers as ModelType } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import type { VehicleType, Vehicle } from './services/transformers';
+import type { VehicleMakeDTO, VehicleModelDTO } from './services/dto';
 
 export function VehiclesPage() {
   const { filters } = useVehicleFilters();
   const { data: vehicleTypes, isLoading: typesLoading, isError: typesError, refetch: refetchTypes } = useGetVehicleTypes();
   const { data: vehicles, isLoading: vehiclesLoading, isError: vehiclesError, refetch: refetchVehicles } = useGetVehicles(filters.driverId);
+  const { data: makes, isLoading: makesLoading, isError: makesError, refetch: refetchMakes } = useGetVehicleMakes();
+  const { data: models, isLoading: modelsLoading, isError: modelsError, refetch: refetchModels } = useGetVehicleModels();
 
   const typeColumns: Column<VehicleType>[] = [
     { key: 'name', label: 'الاسم' },
@@ -37,6 +42,19 @@ export function VehiclesPage() {
     { key: 'status', label: 'الحالة', render: (v) => <StatusBadge status={String(v)} /> },
   ];
 
+  const makeColumns: Column<VehicleMakeDTO>[] = [
+    { key: 'name', label: 'الماركة' },
+    { key: '_count' as any, label: 'عدد الموديلات', render: (_, item) => item._count?.models || 0 },
+    { key: 'isActive', label: 'الحالة', render: (v) => <StatusBadge status={v ? 'ACTIVE' : 'INACTIVE'} /> },
+  ];
+
+  const modelColumns: Column<VehicleModelDTO>[] = [
+    { key: 'make' as any, label: 'الماركة', render: (_, item) => item.make?.name },
+    { key: 'name', label: 'الموديل' },
+    { key: 'vehicleType' as any, label: 'النوع التلقائي', render: (_, item) => item.vehicleType?.name || '---' },
+    { key: 'isActive', label: 'الحالة', render: (v) => <StatusBadge status={v ? 'ACTIVE' : 'INACTIVE'} /> },
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -46,8 +64,10 @@ export function VehiclesPage() {
 
       <Tabs defaultValue="types">
         <TabsList>
-          <TabsTrigger value="types">أنواع المركبات</TabsTrigger>
-          <TabsTrigger value="vehicles">المركبات</TabsTrigger>
+          <TabsTrigger value="types">خدمات النقل</TabsTrigger>
+          <TabsTrigger value="makes">الماركات</TabsTrigger>
+          <TabsTrigger value="models">الموديلات</TabsTrigger>
+          <TabsTrigger value="vehicles">مركبات الأسطول</TabsTrigger>
         </TabsList>
 
         <TabsContent value="types" className="space-y-4">
@@ -67,6 +87,46 @@ export function VehiclesPage() {
             />
           ) : (
             <DataTable data={vehicleTypes} columns={typeColumns} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="makes" className="space-y-4">
+          <div className="flex justify-end">
+            <CreateVehicleMakeModal />
+          </div>
+
+          {makesError ? (
+            <ErrorState message="فشل تحميل الماركات" onRetry={refetchMakes} />
+          ) : makesLoading ? (
+            <TableSkeleton rows={5} columns={3} />
+          ) : !makes || makes.length === 0 ? (
+            <EmptyState
+              icon={Brand}
+              title="لا توجد ماركات"
+              description="لم يتم تعريف ماركات سيارات في النظام بعد"
+            />
+          ) : (
+            <DataTable data={makes} columns={makeColumns} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="models" className="space-y-4">
+          <div className="flex justify-end">
+            <CreateVehicleModelModal />
+          </div>
+
+          {modelsError ? (
+            <ErrorState message="فشل تحميل الموديلات" onRetry={refetchModels} />
+          ) : modelsLoading ? (
+            <TableSkeleton rows={8} columns={4} />
+          ) : !models || models.length === 0 ? (
+            <EmptyState
+              icon={ModelType}
+              title="لا توجد موديلات"
+              description="لم يتم تعريف موديلات في النظام بعد"
+            />
+          ) : (
+            <DataTable data={models} columns={modelColumns} />
           )}
         </TabsContent>
 

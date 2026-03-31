@@ -24,6 +24,8 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
   // User statuses
   SUSPENDED: { label: 'معلق', variant: 'destructive' },
   BANNED: { label: 'محظور', variant: 'destructive' },
+  UNDER_REVIEW: { label: 'قيد المراجعة', variant: 'secondary' },
+  PENDING_DOCUMENTS: { label: 'انتظار الوثائق', variant: 'outline' },
   
   // Payment statuses
   COLLECTED: { label: 'تم التحصيل', variant: 'default' },

@@ -6,6 +6,8 @@ export const vehicleKeys = {
   all: ['vehicles'] as const,
   list: (driverId?: string) => ['vehicles', 'list', { driverId }] as const,
   types: ['vehicle-types'] as const,
+  makes: (activeOnly?: boolean) => ['vehicle-makes', { activeOnly }] as const,
+  models: (makeId?: string) => ['vehicle-models', { makeId }] as const,
 };
 
 export const useGetVehicles = (driverId?: string) => {
@@ -20,6 +22,22 @@ export const useGetVehicleTypes = () => {
   return useQuery({
     queryKey: vehicleKeys.types,
     queryFn: () => vehiclesApi.getAllTypes().then((r) => r.data.map(transformVehicleType)),
+    placeholderData: keepPreviousData,
+  });
+};
+
+export const useGetVehicleMakes = (activeOnly?: boolean) => {
+  return useQuery({
+    queryKey: vehicleKeys.makes(activeOnly),
+    queryFn: () => vehiclesApi.getAllMakes(activeOnly).then((r) => r.data),
+    placeholderData: keepPreviousData,
+  });
+};
+
+export const useGetVehicleModels = (makeId?: string) => {
+  return useQuery({
+    queryKey: vehicleKeys.models(makeId),
+    queryFn: () => vehiclesApi.getAllModels(makeId).then((r) => r.data),
     placeholderData: keepPreviousData,
   });
 };

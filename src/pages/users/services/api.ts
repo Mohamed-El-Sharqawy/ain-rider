@@ -29,9 +29,20 @@ export const usersApi = {
   updateStatus: (id: string, data: UpdateUserStatusDTO) =>
     api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/status`, data),
 
+  getOnboardingStatus: (id: string) =>
+    api.get<any>(`/auth/driver/${id}/onboarding-status`),
+
+  approveDriver: (id: string) =>
+    api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/approve-driver`, {}),
+
+  rejectDocument: (id: string, stage: string, reason: string) =>
+    api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/reject-document`, { stage, reason }),
+
   create: (data: CreateUserDTO) => {
     // Always use admin endpoint when creating users from dashboard
     // This doesn't store tokens since admin is creating, not logging in
     return api.post<UserDTO>('/auth/admin/create-user', data);
   },
+  resetUploadAttempts: (id: string) =>
+    api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/reset-attempts`, {}),
 };
