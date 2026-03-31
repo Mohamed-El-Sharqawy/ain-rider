@@ -40,7 +40,7 @@ export class AuthService {
 
       if (data.role === UserRole.DRIVER) {
         await this.prisma.driver.create({
-          data: { userId: user.id, licenseNumber: "" },
+          data: { userId: user.id },
         });
       } else if (data.role === UserRole.RIDER) {
         await this.prisma.rider.create({ data: { userId: user.id } });

@@ -44,7 +44,7 @@ export class AuthController {
     if (req.user.role !== UserRole.ADMIN) {
       throw new ForbiddenException("Only admins can create users");
     }
-    return this.authService.adminCreateUser(body, req.user.sub);
+    return this.authService.adminCreateUser(body, req.user.id);
   }
 
   @Post("login")

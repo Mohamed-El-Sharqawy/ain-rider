@@ -67,7 +67,7 @@ model Driver {
   id               String           @id @default(uuid())
   userId           String           @unique
   vehicleId        String?
-  licenseNumber    String           @unique
+  licenseNumber    String?          @unique
   rating           Float            @default(5.0)
   totalTrips       Int              @default(0)
   onboardingStatus OnboardingStatus @default(PENDING_DOCUMENTS)

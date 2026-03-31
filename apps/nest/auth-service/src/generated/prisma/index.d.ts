@@ -3996,7 +3996,7 @@ export namespace Prisma {
     id: string
     userId: string
     vehicleId: string | null
-    licenseNumber: string
+    licenseNumber: string | null
     rating: number
     totalTrips: number
     onboardingStatus: $Enums.OnboardingStatus
@@ -4109,7 +4109,7 @@ export namespace Prisma {
       id: string
       userId: string
       vehicleId: string | null
-      licenseNumber: string
+      licenseNumber: string | null
       rating: number
       totalTrips: number
       onboardingStatus: $Enums.OnboardingStatus
@@ -9003,7 +9003,7 @@ export namespace Prisma {
     id?: StringFilter<"Driver"> | string
     userId?: StringFilter<"Driver"> | string
     vehicleId?: StringNullableFilter<"Driver"> | string | null
-    licenseNumber?: StringFilter<"Driver"> | string
+    licenseNumber?: StringNullableFilter<"Driver"> | string | null
     rating?: FloatFilter<"Driver"> | number
     totalTrips?: IntFilter<"Driver"> | number
     onboardingStatus?: EnumOnboardingStatusFilter<"Driver"> | $Enums.OnboardingStatus
@@ -9019,7 +9019,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     vehicleId?: SortOrderInput | SortOrder
-    licenseNumber?: SortOrder
+    licenseNumber?: SortOrderInput | SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
     onboardingStatus?: SortOrder
@@ -9054,7 +9054,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     vehicleId?: SortOrderInput | SortOrder
-    licenseNumber?: SortOrder
+    licenseNumber?: SortOrderInput | SortOrder
     rating?: SortOrder
     totalTrips?: SortOrder
     onboardingStatus?: SortOrder
@@ -9075,7 +9075,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Driver"> | string
     userId?: StringWithAggregatesFilter<"Driver"> | string
     vehicleId?: StringNullableWithAggregatesFilter<"Driver"> | string | null
-    licenseNumber?: StringWithAggregatesFilter<"Driver"> | string
+    licenseNumber?: StringNullableWithAggregatesFilter<"Driver"> | string | null
     rating?: FloatWithAggregatesFilter<"Driver"> | number
     totalTrips?: IntWithAggregatesFilter<"Driver"> | number
     onboardingStatus?: EnumOnboardingStatusWithAggregatesFilter<"Driver"> | $Enums.OnboardingStatus
@@ -9580,7 +9580,7 @@ export namespace Prisma {
 
   export type DriverCreateInput = {
     id?: string
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -9596,7 +9596,7 @@ export namespace Prisma {
     id?: string
     userId: string
     vehicleId?: string | null
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -9608,7 +9608,7 @@ export namespace Prisma {
 
   export type DriverUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -9624,7 +9624,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -9638,7 +9638,7 @@ export namespace Prisma {
     id?: string
     userId: string
     vehicleId?: string | null
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -9649,7 +9649,7 @@ export namespace Prisma {
 
   export type DriverUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -9662,7 +9662,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -11119,7 +11119,7 @@ export namespace Prisma {
 
   export type DriverCreateWithoutUserInput = {
     id?: string
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -11133,7 +11133,7 @@ export namespace Prisma {
   export type DriverUncheckedCreateWithoutUserInput = {
     id?: string
     vehicleId?: string | null
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -11215,7 +11215,7 @@ export namespace Prisma {
 
   export type DriverUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -11229,7 +11229,7 @@ export namespace Prisma {
   export type DriverUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -11644,7 +11644,7 @@ export namespace Prisma {
 
   export type DriverCreateWithoutDocumentInput = {
     id?: string
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -11659,7 +11659,7 @@ export namespace Prisma {
     id?: string
     userId: string
     vehicleId?: string | null
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -11686,7 +11686,7 @@ export namespace Prisma {
 
   export type DriverUpdateWithoutDocumentInput = {
     id?: StringFieldUpdateOperationsInput | string
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -11701,7 +11701,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     vehicleId?: NullableStringFieldUpdateOperationsInput | string | null
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -11712,7 +11712,7 @@ export namespace Prisma {
 
   export type DriverCreateWithoutVehicleInput = {
     id?: string
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -11726,7 +11726,7 @@ export namespace Prisma {
   export type DriverUncheckedCreateWithoutVehicleInput = {
     id?: string
     userId: string
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -11769,7 +11769,7 @@ export namespace Prisma {
     id?: StringFilter<"Driver"> | string
     userId?: StringFilter<"Driver"> | string
     vehicleId?: StringNullableFilter<"Driver"> | string | null
-    licenseNumber?: StringFilter<"Driver"> | string
+    licenseNumber?: StringNullableFilter<"Driver"> | string | null
     rating?: FloatFilter<"Driver"> | number
     totalTrips?: IntFilter<"Driver"> | number
     onboardingStatus?: EnumOnboardingStatusFilter<"Driver"> | $Enums.OnboardingStatus
@@ -11925,7 +11925,7 @@ export namespace Prisma {
   export type DriverCreateManyVehicleInput = {
     id?: string
     userId: string
-    licenseNumber: string
+    licenseNumber?: string | null
     rating?: number
     totalTrips?: number
     onboardingStatus?: $Enums.OnboardingStatus
@@ -11936,7 +11936,7 @@ export namespace Prisma {
 
   export type DriverUpdateWithoutVehicleInput = {
     id?: StringFieldUpdateOperationsInput | string
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -11950,7 +11950,7 @@ export namespace Prisma {
   export type DriverUncheckedUpdateWithoutVehicleInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
@@ -11963,7 +11963,7 @@ export namespace Prisma {
   export type DriverUncheckedUpdateManyWithoutVehicleInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: FloatFieldUpdateOperationsInput | number
     totalTrips?: IntFieldUpdateOperationsInput | number
     onboardingStatus?: EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus

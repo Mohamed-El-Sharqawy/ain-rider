@@ -43,7 +43,7 @@ export class DriverOnboardingController {
     @Request() req: any,
     @Body() dto: UpdateDriverProfileDto,
   ) {
-    const result = await this.service.updateDriverProfile(req.user.sub, dto);
+    const result = await this.service.updateDriverProfile(req.user.id, dto);
     return { success: true, data: result };
   }
 
@@ -53,7 +53,7 @@ export class DriverOnboardingController {
   @ApiOperation({ summary: "Toggle driver online/searching status" })
   async updateStatus(@Request() req: any, @Body() dto: UpdateOnlineStatusDto) {
     const result = await this.service.updateOnlineStatus(
-      req.user.sub,
+      req.user.id,
       dto.isOnline,
     );
     return { success: true, data: result };
@@ -89,7 +89,7 @@ export class DriverOnboardingController {
     );
 
     const result = await (this.service as any).uploadIdentityDocuments(
-      (req as any).user.sub,
+      (req as any).user.id,
       processedFiles,
     );
     return { success: true, data: result };
@@ -135,7 +135,7 @@ export class DriverOnboardingController {
     );
 
     const result = await (this.service as any).uploadDrivingLicense(
-      (req as any).user.sub,
+      (req as any).user.id,
       processedFiles,
       licenseNumber,
     );
@@ -184,7 +184,7 @@ export class DriverOnboardingController {
     };
 
     const result = await (this.service as any).registerVehicle(
-      (req as any).user.sub,
+      (req as any).user.id,
       {
         make: fields["make"] || body?.make,
         model: fields["model"] || body?.model,
@@ -203,7 +203,7 @@ export class DriverOnboardingController {
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get driver onboarding status" })
   async getOnboardingStatus(@Request() req: any) {
-    const result = await this.service.getOnboardingStatus(req.user.sub);
+    const result = await this.service.getOnboardingStatus(req.user.id);
     return { success: true, data: result };
   }
 }
