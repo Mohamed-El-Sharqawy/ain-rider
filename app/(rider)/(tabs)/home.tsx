@@ -1,80 +1,96 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { useState, useRef, useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocation } from '../../../hooks/useLocation';
+import { useNearbyDrivers } from '../../../hooks/useNearbyDrivers';
+import { AppMapView, AppMapViewRef } from '../../../components/map/MapView';
+import { CarMarker } from '../../../components/map/CarMarker';
+import { LocationMarker } from '../../../components/map/LocationMarker';
 
 export default function RiderHome() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [followUser, setFollowUser] = useState(true);
+  const mapRef = useRef<AppMapViewRef>(null);
+  const { currentLocation } = useLocation();
+  const drivers = useNearbyDrivers(
+    currentLocation?.latitude,
+    currentLocation?.longitude,
+  );
+
+  useEffect(() => {
+    if (followUser && currentLocation && mapRef.current) {
+      mapRef.current.flyTo(currentLocation);
+    }
+  }, [currentLocation, followUser]);
+
   return (
     <SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
-      <ScrollView className="flex-1">
-        <View className="px-6 pt-8 pb-4">
-          <Text className="text-zinc-400 text-sm font-medium mb-1">Welcome back,</Text>
-          <Text className="text-white text-3xl font-bold leading-tight">Where are you going?</Text>
-        </View>
+      <View className="flex-1">
+        <AppMapView
+          ref={mapRef}
+          center={currentLocation || { latitude: 33.3152, longitude: 44.3661 }}
+          zoom={14}
+          style={StyleSheet.absoluteFill}
+          onRegionChange={(e) => {
+            if (e.properties.isUserInteraction) {
+              setFollowUser(false);
+            }
+          }}
+        >
+          {currentLocation && <LocationMarker coordinate={currentLocation} type="rider" />}
+          {drivers.map((d) => (
+            <CarMarker
+              key={d.id}
+              id={d.id}
+              coordinate={{ latitude: d.lat, longitude: d.lng }}
+            />
+          ))}
+        </AppMapView>
 
-        <View className="px-6 mt-6">
-          <TouchableOpacity className="bg-zinc-900 h-20 rounded-[32px] flex-row items-center px-6 border border-zinc-800/50 shadow-2xl">
-            <View className="bg-emerald-500/10 p-3 rounded-full mr-4">
-              <Ionicons name="search" size={24} color="#10b981" />
+        <View className="absolute top-4 left-4 right-4 z-20">
+          <TouchableOpacity
+            onPress={() => router.push('/(rider)/search')}
+            className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-4 border border-zinc-800 shadow-2xl"
+          >
+            <Ionicons name="search" size={20} color="#10b981" />
+            <View className="ml-3">
+              <Text className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-0.5">Where are you going?</Text>
+              <Text className="text-white font-medium">Search for your destination</Text>
             </View>
-            <Text className="text-zinc-500 text-xl font-medium">Search destination...</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Quick Actions */}
-        <View className="flex-row justify-between px-6 mt-10" style={{ gap: 16 }}>
-          <TouchableOpacity className="bg-zinc-900/50 flex-1 p-5 rounded-[32px] items-center border border-zinc-800/50">
-            <View className="bg-emerald-500/10 p-3.5 rounded-2xl mb-3">
-              <Ionicons name="home" size={26} color="#10b981" />
-            </View>
-            <Text className="text-white/90 font-semibold text-base">Home</Text>
+        {!followUser && (
+          <TouchableOpacity
+            onPress={() => setFollowUser(true)}
+            className="absolute bottom-24 right-6 w-12 h-12 bg-emerald-500 rounded-full items-center justify-center shadow-lg"
+          >
+            <Ionicons name="locate" size={24} color="white" />
           </TouchableOpacity>
+        )}
 
-          <TouchableOpacity className="bg-zinc-900/50 flex-1 p-5 rounded-[32px] items-center border border-zinc-800/50">
-            <View className="bg-purple-500/10 p-3.5 rounded-2xl mb-3">
-              <Ionicons name="briefcase" size={26} color="#a855f7" />
-            </View>
-            <Text className="text-white/90 font-semibold text-base">Work</Text>
+        <View 
+          style={{ bottom: insets.bottom + 20 }}
+          className="absolute left-4 right-4 flex-row gap-3"
+        >
+          <TouchableOpacity className="bg-zinc-900/90 flex-1 p-4 rounded-2xl items-center border border-zinc-800 shadow-xl">
+            <Ionicons name="home" size={22} color="#10b981" />
+            <Text className="text-white/80 text-xs font-bold mt-1">Home</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity className="bg-zinc-900/50 flex-1 p-5 rounded-[32px] items-center border border-zinc-800/50">
-            <View className="bg-amber-500/10 p-3.5 rounded-2xl mb-3">
-              <Ionicons name="star" size={26} color="#f59e0b" />
-            </View>
-            <Text className="text-white/90 font-semibold text-base">Saved</Text>
+          <TouchableOpacity className="bg-zinc-900/90 flex-1 p-4 rounded-2xl items-center border border-zinc-800 shadow-xl">
+            <Ionicons name="briefcase" size={22} color="#a855f7" />
+            <Text className="text-white/80 text-xs font-bold mt-1">Work</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-zinc-900/90 flex-1 p-4 rounded-2xl items-center border border-zinc-800 shadow-xl">
+            <Ionicons name="star" size={22} color="#f59e0b" />
+            <Text className="text-white/80 text-xs font-bold mt-1">Saved</Text>
           </TouchableOpacity>
         </View>
-
-        <View className="px-6 mt-10">
-          <Text className="text-zinc-500 text-sm font-semibold uppercase tracking-wider mb-4">Recent Trips</Text>
-          <View className="bg-zinc-900/30 rounded-3xl p-4 border border-zinc-800/30">
-            <View className="flex-row items-center justify-between mb-4 border-b border-zinc-800/50 pb-4 last:border-0 last:pb-0">
-              <View className="flex-row items-center">
-                <View className="bg-zinc-800 p-2.5 rounded-xl mr-3">
-                  <Ionicons name="location" size={20} color="#71717a" />
-                </View>
-                <View>
-                  <Text className="text-white font-medium">Grand Central Mall</Text>
-                  <Text className="text-zinc-500 text-xs mt-0.5">Downtown District</Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color="#3f3f46" />
-            </View>
-
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <View className="bg-zinc-800 p-2.5 rounded-xl mr-3">
-                  <Ionicons name="location" size={20} color="#71717a" />
-                </View>
-                <View>
-                  <Text className="text-white font-medium">Starbucks Coffee</Text>
-                  <Text className="text-zinc-500 text-xs mt-0.5">Uptown Avenue</Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color="#3f3f46" />
-            </View>
-          </View>
-        </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

@@ -192,3 +192,51 @@ export interface VehicleModel {
   vehicleTypeId?: string;
   isActive: boolean;
 }
+
+/* Trip & Location Types */
+
+export interface TripResponse {
+  id: string;
+  riderId: string;
+  driverId?: string;
+  status: string;
+  pickupLat: number;
+  pickupLng: number;
+  pickupAddress: string;
+  dropoffLat: number;
+  dropoffLng: number;
+  dropoffAddress: string;
+  estimatedFare: number;
+  actualFare?: number;
+  distance?: number;
+  duration?: number;
+  paymentMethod: string;
+  paymentStatus: string;
+  requestedAt: string;
+  matchedAt?: string;
+  startedAt?: string;
+  completedAt?: string;
+}
+
+export interface FareEstimate {
+  estimatedFare: number;
+  distance: number;
+  duration: number;
+  currency: string;
+  breakdown: {
+    baseFare: number;
+    distanceFare: number;
+    timeFare: number;
+  };
+}
+
+export interface NearbyDriversResponse {
+  drivers: Array<{
+    driverId: string;
+    latitude: number;
+    longitude: number;
+    h3Index: string;
+  }>;
+  centerH3: string;
+  count: number;
+}

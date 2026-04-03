@@ -79,14 +79,14 @@ export default function RootLayout() {
         }
         return; // Early return to avoid going into next branch
       }
-    } 
-    
+    }
+
     if (isAuthenticated && role === 'DRIVER' && (isOnboarding || (onboardingStatus && onboardingStatus !== 'APPROVED'))) {
       console.log('[LayoutDebug] Onboarding flow routing. documentsStatus:', documentsStatus);
       // Smart redirection for rejected drivers
       const allSegments = segments as string[];
       const currentAuthStep = allSegments[allSegments.length - 1];
-      
+
       if (documentsStatus?.identity.status === 'REJECTED') {
         console.log('[LayoutDebug] Identity rejected -> driver-documents');
         if (currentAuthStep !== 'driver-documents') {
@@ -128,7 +128,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <Slot />
-      {__DEV__ && (
+      {/* {__DEV__ && (
         <Pressable
           onPress={async () => {
             console.log('Resetting auth...');
@@ -139,7 +139,7 @@ export default function RootLayout() {
         >
           <Text style={{ fontSize: 11, color: 'red' }}>Reset auth</Text>
         </Pressable>
-      )}
+      )} */}
     </SafeAreaProvider>
   );
 }
