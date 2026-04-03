@@ -10,16 +10,15 @@ import {
   JetStreamConsumer,
   EventEnvelope,
   IdempotencyService,
-  createClient,
 } from '@ain-rider/nats-client';
 import type { NatsConnection, JsMsg } from '@ain-rider/nats-client';
 import { NATS_SUBJECTS } from '@ain-rider/shared-types';
 import type { LocationUpdate } from '@ain-rider/shared-types';
 import { ConnectionStore } from '../../shared/connections';
+import { redisCluster } from '../../shared/redis';
 import { natsEventsTotal, wsConnectionsTotal } from '../../shared/metrics';
 import { log } from '../../shared/logger';
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 const NATS_SERVERS = process.env.NATS_SERVERS?.split(',') || ['nats://localhost:4222'];
 
 // Driver watchers: driverId -> Set of WebSocket keys watching this driver
@@ -97,7 +96,8 @@ class TripMatchedConsumer extends JetStreamConsumer {
     natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_MATCHED });
 
     ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_matched', data });
-    ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_assigned', data });
+    const sent = ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_assigned', data });
+    log('info', 'Trip assigned forwarded to driver', { tripId: data.tripId, driverId: data.driverId, sent });
 
     // Add rider as watcher of this driver
     const watchers = driverWatchers.get(data.driverId) ?? new Set();
@@ -258,6 +258,66 @@ class SOSResolvedConsumer extends JetStreamConsumer {
 }
 
 /**
+ * Trip No Match Consumer
+ */
+class TripNoMatchConsumer extends JetStreamConsumer {
+  constructor(nc: NatsConnection, idempotency: IdempotencyService) {
+    super(nc, {
+      streamName: 'AIN_RIDER_OPS',
+      consumerName: 'websocket-server-trip-no-match',
+      serviceName: 'websocket-server',
+      filterSubject: NATS_SUBJECTS.TRIP_NO_MATCH,
+      maxDeliver: 3,
+      enableIdempotency: true,
+      enableDLQ: true,
+    }, { idempotencyService: idempotency });
+  }
+
+  async handleMessage(envelope: EventEnvelope<unknown>, _msg: JsMsg, _traceId: string): Promise<void> {
+    const data = envelope.data as { tripId: string; riderId: string; reason: string };
+    natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_NO_MATCH });
+
+    ConnectionStore.send(`trip:${data.tripId}:rider`, {
+      type: 'trip_no_match',
+      data: { tripId: data.tripId, reason: data.reason },
+    });
+
+    log('info', 'Trip no match forwarded to rider', { tripId: data.tripId, riderId: data.riderId });
+  }
+}
+
+/**
+ * Trip Cancelled Consumer
+ */
+class TripCancelledConsumer extends JetStreamConsumer {
+  constructor(nc: NatsConnection, idempotency: IdempotencyService) {
+    super(nc, {
+      streamName: 'AIN_RIDER_OPS',
+      consumerName: 'websocket-server-trip-cancelled',
+      serviceName: 'websocket-server',
+      filterSubject: NATS_SUBJECTS.TRIP_CANCELLED,
+      maxDeliver: 3,
+      enableIdempotency: true,
+      enableDLQ: true,
+    }, { idempotencyService: idempotency });
+  }
+
+  async handleMessage(envelope: EventEnvelope<unknown>, _msg: JsMsg, _traceId: string): Promise<void> {
+    const data = envelope.data as { tripId: string; driverId?: string; riderId: string };
+    natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_CANCELLED });
+
+    // Notify rider
+    ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_cancelled', data });
+    
+    // Notify driver if assigned
+    if (data.driverId) {
+      const sent = ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_cancelled', data });
+      log('info', 'Trip cancellation forwarded to driver', { tripId: data.tripId, driverId: data.driverId, sent });
+    }
+  }
+}
+
+/**
  * Payment Processed Consumer
  */
 class PaymentProcessedConsumer extends JetStreamConsumer {
@@ -299,10 +359,9 @@ export async function initNatsConsumers(): Promise<void> {
   nc = await createNatsConnection({ servers: NATS_SERVERS, name: 'websocket-server' });
   log('info', 'Connected to NATS JetStream');
 
-  // Initialize idempotency service with Redis
-  const redisClient = createClient({ url: REDIS_URL });
-  await redisClient.connect();
-  idempotency = new IdempotencyService(redisClient);
+  // Initialize idempotency service with the shared Redis Cluster client
+  idempotency = new IdempotencyService(redisCluster);
+  await idempotency.connect();
 
   // Create and start all consumers
   const consumerClasses = [
@@ -310,10 +369,12 @@ export async function initNatsConsumers(): Promise<void> {
     TripMatchedConsumer,
     TripStartedConsumer,
     TripCompletedConsumer,
+    TripNoMatchConsumer,
     NotificationConsumer,
     SOSCreatedConsumer,
     SOSResolvedConsumer,
     PaymentProcessedConsumer,
+    TripCancelledConsumer,
   ];
 
   for (const ConsumerClass of consumerClasses) {

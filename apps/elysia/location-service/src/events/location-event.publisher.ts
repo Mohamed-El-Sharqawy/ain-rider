@@ -25,7 +25,7 @@ export const LOCATION_SUBJECTS = {
 } as const;
 
 export class LocationEventPublisher {
-  constructor(private publisher: JetStreamPublisher) {}
+  constructor(private publisher: JetStreamPublisher) { }
 
   /**
    * Publish location update event when driver GPS updates

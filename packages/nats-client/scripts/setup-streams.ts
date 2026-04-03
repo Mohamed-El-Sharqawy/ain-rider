@@ -65,22 +65,32 @@ async function createStream(
   jsm: JetStreamManager,
   config: StreamConfig
 ): Promise<void> {
+  const streamConfig = {
+    name: config.name,
+    subjects: config.subjects,
+    retention: RetentionPolicy.Limits,
+    max_age: config.maxAgeDays * 24 * 60 * 60 * 1_000_000_000, // days to nanoseconds
+    storage: StorageType.File,
+    num_replicas: parseInt(process.env.NATS_REPLICAS || '1', 10),
+    discard: 'old' as any,
+  };
+
   try {
     // Check if stream already exists
-    await jsm.streams.info(config.name);
-    console.log(`[SETUP] Stream ${config.name} already exists - skipping creation`);
+    const existing = await jsm.streams.info(config.name);
+    // Always update to ensure subjects are in sync
+    const existingSubjects = existing.config.subjects.sort().join(',');
+    const desiredSubjects = config.subjects.sort().join(',');
+    if (existingSubjects !== desiredSubjects) {
+      await jsm.streams.update(config.name, { ...existing.config, subjects: config.subjects });
+      console.log(`[SETUP] Updated stream ${config.name} subjects: ${config.subjects.join(', ')}`);
+    } else {
+      console.log(`[SETUP] Stream ${config.name} already up-to-date`);
+    }
   } catch (err: any) {
     if (err?.api_error?.err_code === 10059) {
       // Stream not found - create it
-      await jsm.streams.add({
-        name: config.name,
-        subjects: config.subjects,
-        retention: RetentionPolicy.Limits,
-        max_age: config.maxAgeDays * 24 * 60 * 60 * 1_000_000_000, // days to nanoseconds
-        storage: StorageType.File,
-        num_replicas: parseInt(process.env.NATS_REPLICAS || '1', 10),
-        discard: 'old' as any,
-      });
+      await jsm.streams.add(streamConfig);
       console.log(`[SETUP] Created stream ${config.name}: ${config.description}`);
     } else {
       throw err;

@@ -1,5 +1,5 @@
 import { latLngToCell, gridDisk } from 'h3-js';
-import { cache } from '../../shared/redis';
+import { cache, redisCluster } from '../../shared/redis';
 import { getPublisher, getIdempotency, generateTrace } from '../../shared/nats';
 import type { 
   TripMatchedPayload, 
@@ -9,14 +9,28 @@ import {
   matchAttemptsTotal,
   matchDuration,
   availableDriversGauge,
-  ringExpansionsTotal,
 } from '../../shared/metrics';
 import { log } from '../../shared/logger';
 import type { AvailableDriver, DriverAvailableBody } from './model';
 
 const H3_RESOLUTION = 9;
 const DRIVER_TTL_SECONDS = 300; // 5 minutes
-const MIN_CANDIDATES = 3;
+const MAX_SEARCH_RADIUS_M = 10000; // 10km
+const SEARCH_RINGS = [1, 2, 4, 8, 16, 24, 35]; // Uber-style incremental rings
+
+function haversineDistance(
+  a: { latitude: number; longitude: number },
+  b: { latitude: number; longitude: number },
+): number {
+  const R = 6371e3; // Earth radius in meters
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.latitude - a.latitude);
+  const dLon = toRad(b.longitude - a.longitude);
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const h = sinLat * sinLat + Math.cos(toRad(a.latitude)) * Math.cos(toRad(b.latitude)) * sinLon * sinLon;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
 
 export abstract class MatchService {
   static async registerAvailableDriver(body: DriverAvailableBody): Promise<{ h3Index: string }> {
@@ -30,6 +44,12 @@ export abstract class MatchService {
       vehicleTypeId,
       h3Index,
       availableSince: Date.now(),
+      driverName: body.driverName,
+      driverPhone: body.driverPhone,
+      driverRating: body.driverRating,
+      vehicleMake: body.vehicleMake,
+      vehicleModel: body.vehicleModel,
+      vehiclePlate: body.vehiclePlate,
     };
 
     // Store driver in H3 cell set
@@ -41,6 +61,17 @@ export abstract class MatchService {
 
     // Also store individual driver record for fast lookup
     await cache.set(`driver:available:${driverId}`, driver, DRIVER_TTL_SECONDS);
+    
+    // Store metadata for automatic re-registration via location updates
+    await cache.set(`driver:metadata:${driverId}`, {
+        driverName: body.driverName,
+        driverPhone: body.driverPhone,
+        driverRating: body.driverRating,
+        vehicleMake: body.vehicleMake,
+        vehicleModel: body.vehicleModel,
+        vehiclePlate: body.vehiclePlate,
+        vehicleTypeId: body.vehicleTypeId,
+    }, 86400); // 24h metadata TTL
 
     availableDriversGauge.inc();
     log('info', 'Driver registered as available', { driverId, h3Index });
@@ -78,33 +109,57 @@ export abstract class MatchService {
     const { tripId, riderId, pickupLocation } = tripRequest;
     const traceId = tripRequest.traceId ?? generateTrace();
 
-    try {
-      // Check idempotency
-      const idempotency = getIdempotency();
-      const alreadyProcessed = await idempotency.isProcessed('trip-requested-consumer', tripId);
-      if (alreadyProcessed) {
-        log('info', 'Trip request already processed, skipping', { tripId, traceId });
-        end();
-        return;
-      }
+    const MAX_ATTEMPTS = 12; // 12 * 10s = 2 minutes total search time
+    let selectedDriver: AvailableDriver | null = null;
+    let finalRingK = 0;
 
+    try {
+      // Check idempotency (only for initial request)
+      const idempotency = getIdempotency();
+      
       const centerH3 = latLngToCell(pickupLocation.latitude, pickupLocation.longitude, H3_RESOLUTION);
 
-      // kRing k=1 → 7 cells (center + 6 neighbors)
-      let ringK = 1;
-      let candidates: AvailableDriver[] = await MatchService.getCandidates(gridDisk(centerH3, ringK));
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        // Get excluded drivers (those who rejected this trip)
+        const excludedSet = await redisCluster.smembers(`match:excluded:${tripId}`) || [];
+        const excludedIds = new Set(excludedSet);
 
-      // Expand to k=2 if fewer than MIN_CANDIDATES
-      if (candidates.length < MIN_CANDIDATES) {
-        ringExpansionsTotal.inc();
-        ringK = 2;
-        candidates = await MatchService.getCandidates(gridDisk(centerH3, ringK));
-        log('info', 'Ring expanded to k=2', { tripId, candidatesFound: candidates.length });
+        // Incremental expansion loop within this attempt
+        for (const ringK of SEARCH_RINGS) {
+          finalRingK = ringK;
+          let candidates: AvailableDriver[] = await MatchService.getCandidates(gridDisk(centerH3, ringK));
+          
+          // Filter out excluded drivers and those beyond max radius
+          candidates = candidates.filter(d => {
+              if (excludedIds.has(d.driverId)) return false;
+              const dist = haversineDistance(pickupLocation, { latitude: d.latitude, longitude: d.longitude });
+              return dist <= MAX_SEARCH_RADIUS_M;
+          });
+
+          if (candidates.length > 0) {
+              // Rank by proximity
+              candidates.sort((a, b) => {
+                  const distA = haversineDistance(pickupLocation, { latitude: a.latitude, longitude: a.longitude });
+                  const distB = haversineDistance(pickupLocation, { latitude: b.latitude, longitude: b.longitude });
+                  return distA - distB;
+              });
+              selectedDriver = candidates[0];
+              log('info', `Found ${candidates.length} candidates at ring k=${ringK}`, { tripId, driverId: selectedDriver.driverId });
+              break;
+          }
+        }
+
+        if (selectedDriver) break;
+
+        if (attempt < MAX_ATTEMPTS) {
+          log('info', `No candidates found (Attempt ${attempt}/${MAX_ATTEMPTS}), retrying in 10s...`, { tripId });
+          await new Promise(r => setTimeout(r, 10000));
+        }
       }
 
       const publisher = getPublisher();
 
-      if (candidates.length === 0) {
+      if (!selectedDriver) {
         // Publish trip_no_match event
         const noMatchPayload: TripNoMatchPayload = {
           tripId,
@@ -121,30 +176,25 @@ export abstract class MatchService {
         );
 
         matchAttemptsTotal.inc({ result: 'no_drivers' });
-        log('warn', 'No available drivers for trip', { tripId, riderId, ringK, traceId });
+        log('warn', 'No available drivers for trip within 10km after full search expansion and retries', { tripId, riderId, traceId });
         
-        // Mark as processed
         await idempotency.markProcessed('trip-requested-consumer', tripId);
         end();
         return;
       }
 
-      // Rank by proximity (distance from center H3)
-      // Simple: pick first available; production: sort by ETA, rating, acceptance rate
-      const selected = candidates[0];
-
-      // Publish trip_matched event with proper envelope
+      // Publish trip_matched event
       const matchedPayload: TripMatchedPayload = {
         tripId,
-        driverId: selected.driverId,
-        driverName: 'Driver', // TODO: Get from driver service
-        driverPhone: '+1234567890', // TODO: Get from driver service
-        driverRating: 4.5, // TODO: Get from driver service
-        vehicleMake: 'Toyota', // TODO: Get from driver service
-        vehicleModel: 'Camry', // TODO: Get from driver service
-        vehiclePlate: 'ABC123', // TODO: Get from driver service
-        estimatedArrival: 300, // 5 minutes
-        distance: 1000, // 1km
+        driverId: selectedDriver.driverId,
+        driverName: selectedDriver.driverName ?? 'Driver',
+        driverPhone: selectedDriver.driverPhone ?? '',
+        driverRating: selectedDriver.driverRating ?? 0,
+        vehicleMake: selectedDriver.vehicleMake ?? '',
+        vehicleModel: selectedDriver.vehicleModel ?? '',
+        vehiclePlate: selectedDriver.vehiclePlate ?? '',
+        estimatedArrival: 5,
+        distance: Math.round(haversineDistance(pickupLocation, { latitude: selectedDriver.latitude, longitude: selectedDriver.longitude })),
         matchedAt: new Date().toISOString(),
       };
 
@@ -156,13 +206,13 @@ export abstract class MatchService {
       );
 
       // Remove driver from available pool
-      await MatchService.unregisterDriver(selected.driverId);
+      await MatchService.unregisterDriver(selectedDriver.driverId);
 
       // Mark as processed
       await idempotency.markProcessed('trip-requested-consumer', tripId);
 
       matchAttemptsTotal.inc({ result: 'success' });
-      log('info', 'Trip matched', { tripId, driverId: selected.driverId, ringK, traceId });
+      log('info', 'Trip matched', { tripId, driverId: selectedDriver.driverId, ringK: finalRingK, traceId });
     } catch (error) {
       matchAttemptsTotal.inc({ result: 'error' });
       log('error', 'Match failed', { tripId, error: String(error), traceId });
@@ -173,13 +223,33 @@ export abstract class MatchService {
   }
 
   private static async getCandidates(cells: string[]): Promise<AvailableDriver[]> {
-    const results: AvailableDriver[] = [];
+    const uniqueDrivers = new Map<string, AvailableDriver>();
+
     await Promise.all(
       cells.map(async (cell) => {
         const drivers = await cache.get<AvailableDriver[]>(`h3:cell:${cell}`) ?? [];
-        results.push(...drivers);
+        drivers.forEach(d => {
+            if (!uniqueDrivers.has(d.driverId)) {
+                uniqueDrivers.set(d.driverId, d);
+            }
+        });
       })
     );
-    return results;
+    return Array.from(uniqueDrivers.values());
+  }
+
+  static async getNearbyDrivers(lat: number, lng: number): Promise<Array<{ id: string; lat: number; lng: number }>> {
+    const centerH3 = latLngToCell(lat, lng, H3_RESOLUTION);
+    const cells = gridDisk(centerH3, 4); // Increased to ~3.5km for better visualization
+    const candidates = await MatchService.getCandidates(cells);
+    
+    // Add logging here to debug nearby issues
+    console.log(`[MatchService] Nearby lookup: lat=${lat}, lng=${lng}, cells=${cells.length}, candidates=${candidates.length}`);
+
+    return candidates.map(c => ({
+        id: c.driverId,
+        lat: c.latitude,
+        lng: c.longitude,
+    }));
   }
 }

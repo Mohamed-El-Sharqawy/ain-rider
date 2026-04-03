@@ -394,3 +394,16 @@ services:
       mc anonymous set download myminio/ain-rider"
     networks: [ain-rider-net]
     restart: "no"
+
+  # ── OSRM Backend (Iraq routing engine) ────────────────────────────────────────
+  osrm-backend:
+    image: osrm/osrm-backend:latest
+    container_name: ain-rider-osrm
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data/osrm:/data
+    command: osrm-routed --algorithm mld /data/iraq-latest.osrm
+    networks:
+      - ain-rider-net
+    restart: unless-stopped

@@ -8,8 +8,18 @@ export const TripModel = {
     dropoffLatitude: t.Number(),
     dropoffLongitude: t.Number(),
     dropoffAddress: t.String(),
-    paymentMethod: t.Optional(t.Literal('CASH')), // Currently only CASH is supported
+    estimatedFare: t.Number({ minimum: 0 }),
+    paymentMethod: t.Optional(t.Literal('CASH')),
     promoCode: t.Optional(t.String()),
+  }),
+  estimateBody: t.Object({
+    pickupLatitude: t.Number(),
+    pickupLongitude: t.Number(),
+    dropoffLatitude: t.Number(),
+    dropoffLongitude: t.Number(),
+  }),
+  statusUpdateBody: t.Object({
+    status: t.String(),
   }),
   tripIdParams: t.Object({
     id: t.String(),
@@ -17,3 +27,4 @@ export const TripModel = {
 } as const;
 
 export type TripRequestBody = Static<typeof TripModel.requestBody>;
+export type EstimateRequestBody = Static<typeof TripModel.estimateBody>;

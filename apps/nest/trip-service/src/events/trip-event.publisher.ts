@@ -23,6 +23,7 @@ export const TRIP_SUBJECTS = {
   TRIP_STARTED: 'ain_rider.trip_started',
   TRIP_COMPLETED: 'ain_rider.trip_completed',
   TRIP_CANCELLED: 'ain_rider.trip_cancelled',
+  TRIP_REJECTED: 'ain_rider.trip_rejected',
   TRIP_NO_MATCH: 'ain_rider.trip_no_match',
   SOS_CREATED: 'ain_rider.sos_created',
   SOS_RESOLVED: 'ain_rider.sos_resolved',
@@ -181,6 +182,34 @@ export class TripEventPublisher {
     await this.publisher.publish(
       TRIP_SUBJECTS.TRIP_CANCELLED,
       'trip_cancelled',
+      payload,
+      { traceId }
+    );
+  }
+
+  /**
+   * Publish trip_rejected event when driver rejects a trip
+   */
+  async publishTripRejected(
+    trip: {
+      id: string;
+      driverId: string;
+      riderId: string;
+      reason?: string | null;
+    },
+    traceId?: string
+  ): Promise<void> {
+    const payload = {
+      tripId: trip.id,
+      driverId: trip.driverId,
+      riderId: trip.riderId,
+      reason: trip.reason || 'DRIVER_REJECTED',
+      rejectedAt: new Date().toISOString(),
+    };
+
+    await this.publisher.publish(
+      TRIP_SUBJECTS.TRIP_REJECTED,
+      'trip_rejected',
       payload,
       { traceId }
     );

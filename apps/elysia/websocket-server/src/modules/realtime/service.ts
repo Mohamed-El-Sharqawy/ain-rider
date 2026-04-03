@@ -38,6 +38,7 @@ export abstract class RealtimeService {
   }
 
   static handleSubscribe(key: string, ws: unknown): void {
+    log('info', 'Subscription attempt', { key });
     ConnectionStore.set(key, ws as Parameters<typeof ConnectionStore.set>[1]);
     wsConnectionsTotal.set(ConnectionStore.size());
     log('info', 'Client subscribed', { key, total: ConnectionStore.size() });

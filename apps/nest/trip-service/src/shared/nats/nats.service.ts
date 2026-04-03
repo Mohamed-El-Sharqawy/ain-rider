@@ -8,7 +8,7 @@ import {
 } from '@ain-rider/nats-client';
 import type { NatsPublisher, NatsResponder } from '@ain-rider/nats-client';
 import type { NatsConnection } from 'nats';
-import { createClient } from 'redis';
+import { createRedisCluster } from '@ain-rider/redis-client';
 
 @Injectable()
 export class NatsService implements OnModuleInit, OnModuleDestroy {
@@ -29,12 +29,11 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
     this._responder = createResponder(this.connection);
     this._jsPublisher = new JetStreamPublisher(this.connection, 'trip-service');
     
-    // Initialize idempotency service with Redis
-    const redisClient = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
+    // Initialize idempotency service with Redis Cluster
+    const redisCluster = createRedisCluster({
+      nodes: process.env.REDIS_NODES?.split(',') || ['localhost:6379'],
     });
-    await redisClient.connect();
-    this._idempotency = new IdempotencyService(redisClient);
+    this._idempotency = new IdempotencyService(redisCluster);
     
     console.log('[NATS] trip-service connected');
   }

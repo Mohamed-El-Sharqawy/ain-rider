@@ -5,10 +5,9 @@ import {
   generateTraceId,
 } from '@ain-rider/nats-client';
 import type { NatsConnection } from '@ain-rider/nats-client';
-import { createClient } from 'redis';
+import { redisCluster } from './redis';
 
 const NATS_SERVERS = process.env.NATS_SERVERS?.split(',') || ['nats://localhost:4222'];
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 1000;
 
@@ -24,10 +23,8 @@ export async function initNats(): Promise<void> {
       _nc = await createNatsConnection({ servers: NATS_SERVERS, name: 'match-service' });
       _publisher = new JetStreamPublisher(_nc, 'match-service');
       
-      // Initialize idempotency service
-      const redisClient = createClient({ url: REDIS_URL });
-      await redisClient.connect();
-      _idempotency = new IdempotencyService(redisClient);
+      // Initialize idempotency service with ioredis cluster client
+      _idempotency = new IdempotencyService(redisCluster);
       
       console.log('[NATS] match-service connected to JetStream');
       return;

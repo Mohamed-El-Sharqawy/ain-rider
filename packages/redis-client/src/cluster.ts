@@ -18,12 +18,18 @@ export function createRedisCluster(config: RedisClusterConfig): Cluster {
     natMap: {
       // 3 masters - local development
       "ain-rider-redis-1:6379": { host: "127.0.0.1", port: 6379 },
+      "ain-rider-redis-1:0":    { host: "127.0.0.1", port: 6379 },
       "ain-rider-redis-2:6379": { host: "127.0.0.1", port: 6380 },
+      "ain-rider-redis-2:0":    { host: "127.0.0.1", port: 6380 },
       "ain-rider-redis-3:6379": { host: "127.0.0.1", port: 6381 },
+      "ain-rider-redis-3:0":    { host: "127.0.0.1", port: 6381 },
       // 3 replicas - local development
       "ain-rider-redis-4:6379": { host: "127.0.0.1", port: 6382 },
+      "ain-rider-redis-4:0":    { host: "127.0.0.1", port: 6382 },
       "ain-rider-redis-5:6379": { host: "127.0.0.1", port: 6383 },
+      "ain-rider-redis-5:0":    { host: "127.0.0.1", port: 6383 },
       "ain-rider-redis-6:6379": { host: "127.0.0.1", port: 6384 },
+      "ain-rider-redis-6:0":    { host: "127.0.0.1", port: 6384 },
     },
     redisOptions: {
       password: config.password,

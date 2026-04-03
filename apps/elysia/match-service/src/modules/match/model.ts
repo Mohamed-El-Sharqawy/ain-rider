@@ -6,6 +6,12 @@ export const MatchModel = {
     latitude: t.Number({ minimum: -90, maximum: 90 }),
     longitude: t.Number({ minimum: -180, maximum: 180 }),
     vehicleTypeId: t.String(),
+    driverName: t.Optional(t.String()),
+    driverPhone: t.Optional(t.String()),
+    driverRating: t.Optional(t.Number()),
+    vehicleMake: t.Optional(t.String()),
+    vehicleModel: t.Optional(t.String()),
+    vehiclePlate: t.Optional(t.String()),
   }),
   driverUnavailableBody: t.Object({
     driverId: t.String(),
@@ -29,4 +35,10 @@ export interface AvailableDriver {
   vehicleTypeId: string;
   h3Index: string;
   availableSince: number;
+  driverName?: string;
+  driverPhone?: string;
+  driverRating?: number;
+  vehicleMake?: string;
+  vehicleModel?: string;
+  vehiclePlate?: string;
 }

@@ -7,7 +7,10 @@ import { health } from "./modules/health";
 import { metrics } from "./modules/metrics";
 import { auth } from "./modules/auth";
 import { trips } from "./modules/trips";
+import { locationProxy } from "./modules/location";
+import { matchProxy } from "./modules/match";
 import { admin } from "./modules/admin";
+import { settings } from "./modules/settings";
 import { log } from "./shared/logger";
 import {
   AppError,
@@ -43,12 +46,9 @@ new Elysia()
     let appError: AppError;
     const errorCode = code as string | number;
 
-    // Handle 404 NOT_FOUND
     if (errorCode === "NOT_FOUND") {
       appError = new NotFoundError("Resource");
-    }
-    // Handle Elysia validation errors (code is 'VALIDATION')
-    else if (errorCode === "VALIDATION") {
+    } else if (errorCode === "VALIDATION") {
       const validationError = error as any;
       appError = new ValidationError(
         validationError.summary || "Validation failed",
@@ -57,9 +57,7 @@ new Elysia()
           type: validationError.type,
         },
       );
-    }
-    // Handle numeric HTTP status codes (from status() throws)
-    else if (typeof errorCode === "number") {
+    } else if (typeof errorCode === "number") {
       const message =
         typeof error === "string"
           ? error
@@ -125,7 +123,7 @@ new Elysia()
   .use(
     rateLimit({
       duration: 60_000,
-      max: 200, // Increased for dashboard usage
+      max: 200,
       generator: (req) =>
         req.headers.get("x-forwarded-for") ||
         req.headers.get("x-real-ip") ||
@@ -136,7 +134,10 @@ new Elysia()
   .use(metrics)
   .use(auth)
   .use(trips)
+  .use(locationProxy)
+  .use(matchProxy)
   .use(admin)
+  .use(settings)
   .listen(PORT);
 
 log("info", `API Gateway running`, { port: PORT });

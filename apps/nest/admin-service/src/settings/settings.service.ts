@@ -11,8 +11,25 @@ export class SettingsService {
     });
   }
 
+  findPublic(category?: string) {
+    return this.prisma.setting.findMany({
+      where: {
+        isPublic: true,
+        category: category || undefined,
+      },
+    });
+  }
+
   findByKey(key: string) {
     return this.prisma.setting.findUnique({ where: { key } });
+  }
+
+  async findPublicByKey(key: string) {
+    const setting = await this.prisma.setting.findUnique({ where: { key } });
+    if (setting && setting.isPublic) {
+      return setting;
+    }
+    return null;
   }
 
   upsert(key: string, value: unknown, type?: string, category?: string, description?: string, updatedBy?: string, isPublic?: boolean) {

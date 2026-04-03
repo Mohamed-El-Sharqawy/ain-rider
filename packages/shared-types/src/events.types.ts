@@ -22,6 +22,7 @@ export const NATS_SUBJECTS = {
   WALLET_UPDATED: "ain_rider.wallet_updated",
   WITHDRAWAL_REQUESTED: "ain_rider.withdrawal_requested",
   WITHDRAWAL_PROCESSED: "ain_rider.withdrawal_processed",
+  TRIP_NO_MATCH: "ain_rider.trip_no_match",
   SOS_CREATED: "ain_rider.sos_created",
   SOS_RESOLVED: "ain_rider.sos_resolved",
   COMPLAINT_CREATED: "ain_rider.complaint_created",

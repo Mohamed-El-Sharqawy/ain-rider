@@ -11,11 +11,15 @@ export const realtime = new Elysia()
     message(ws, message: unknown) {
       try {
         // Handle both string and pre-parsed object messages
-        const data = (typeof message === 'string' ? JSON.parse(message) : message) as {
-          type: string;
-          channel?: string;
-          id?: string;
-        };
+        // Handle both string and pre-parsed object or Buffer messages
+        let data: any;
+        if (typeof message === 'string') {
+          data = JSON.parse(message);
+        } else if (Buffer.isBuffer(message)) {
+          data = JSON.parse(message.toString());
+        } else {
+          data = message;
+        }
 
         wsMessagesTotal.inc({ type: data.type, direction: 'inbound' });
 

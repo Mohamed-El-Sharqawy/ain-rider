@@ -18,10 +18,6 @@ export class TripsService {
     this.eventPublisher = new TripEventPublisher();
   }
 
-  /**
-   * Initialize event publisher with NATS connection
-   * Called by module on init
-   */
   initEventPublisher(): void {
     this.eventPublisher.init(this.nats.nc);
   }
@@ -36,7 +32,6 @@ export class TripsService {
       },
     });
 
-    // Publish trip_requested event via JetStream
     await this.eventPublisher.publishTripRequested(trip, traceId);
 
     return trip;
@@ -57,7 +52,6 @@ export class TripsService {
 
     const trip = await this.prisma.trip.update({ where: { id: tripId }, data });
 
-    // Publish appropriate event based on status
     if (status === TripStatus.IN_PROGRESS) {
       await this.eventPublisher.publishTripStarted(trip, traceId);
     } else if (status === TripStatus.COMPLETED) {
@@ -103,12 +97,34 @@ export class TripsService {
       },
     });
 
-    // Publish trip_cancelled event via JetStream
     await this.eventPublisher.publishTripCancelled(
       trip,
       cancelledBy as 'RIDER' | 'DRIVER' | 'SYSTEM',
       reason,
-      traceId
+      traceId,
+    );
+
+    return trip;
+  }
+
+  async rejectTrip(tripId: string, driverId: string, reason?: string, traceId?: string) {
+    // Revert trip status to REQUESTED so matching can continue
+    const trip = await this.prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        status: TripStatus.REQUESTED,
+        driverId: null, // Clear the driver who rejected
+      },
+    });
+
+    await this.eventPublisher.publishTripRejected(
+      {
+        id: trip.id,
+        driverId,
+        riderId: trip.riderId,
+        reason: reason || 'DRIVER_REJECTED',
+      },
+      traceId,
     );
 
     return trip;
@@ -125,15 +141,12 @@ export class TripsService {
     });
 
     console.log(
-      `[TripsService] Driver assigned | tripId=${tripId} | driverId=${driverId} | assignedBy=${assignedBy}`
+      `[TripsService] Driver assigned | tripId=${tripId} | driverId=${driverId} | assignedBy=${assignedBy}`,
     );
 
     return trip;
   }
 
-  /**
-   * Trigger SOS emergency alert
-   */
   async triggerSOS(
     data: {
       tripId?: string;
@@ -143,7 +156,7 @@ export class TripsService {
       lng: number;
       reason?: string;
     },
-    traceId?: string
+    traceId?: string,
   ): Promise<SOS> {
     const sos = await this.prisma.sOS.create({
       data: {
@@ -157,7 +170,6 @@ export class TripsService {
       },
     });
 
-    // Publish sos_created event
     await this.eventPublisher.publishSOSCreated(
       {
         sosId: sos.id,
@@ -167,25 +179,22 @@ export class TripsService {
         location: { lat: sos.lat, lng: sos.lng },
         reason: sos.reason,
       },
-      traceId
+      traceId,
     );
 
     console.log(
-      `[TripsService] SOS triggered | sosId=${sos.id} | userId=${data.userId} | traceId=${traceId}`
+      `[TripsService] SOS triggered | sosId=${sos.id} | userId=${data.userId} | traceId=${traceId}`,
     );
 
     return sos;
   }
 
-  /**
-   * Resolve SOS emergency
-   */
   async resolveSOS(
     sosId: string,
     resolvedBy: string,
     resolution: 'FALSE_ALARM' | 'RESOLVED' | 'ESCALATED_TO_AUTHORITIES',
     notes?: string,
-    traceId?: string
+    traceId?: string,
   ): Promise<SOS> {
     const sos = await this.prisma.sOS.update({
       where: { id: sosId },
@@ -197,7 +206,6 @@ export class TripsService {
       },
     });
 
-    // Publish sos_resolved event
     await this.eventPublisher.publishSOSResolved(
       {
         sosId: sos.id,
@@ -205,11 +213,11 @@ export class TripsService {
         resolution: sos.resolution as 'FALSE_ALARM' | 'RESOLVED' | 'ESCALATED_TO_AUTHORITIES',
         notes,
       },
-      traceId
+      traceId,
     );
 
     console.log(
-      `[TripsService] SOS resolved | sosId=${sosId} | resolvedBy=${resolvedBy} | traceId=${traceId}`
+      `[TripsService] SOS resolved | sosId=${sosId} | resolvedBy=${resolvedBy} | traceId=${traceId}`,
     );
 
     return sos;
@@ -236,10 +244,7 @@ export class TripsService {
       this.prisma.trip.count({ where }),
     ]);
 
-    return {
-      trips,
-      total,
-    };
+    return { trips, total };
   }
 
   async getTripStats() {
@@ -252,13 +257,70 @@ export class TripsService {
       this.prisma.trip.count({ where: { status: TripStatus.CANCELLED } }),
     ]);
 
+    return { total, requested, matched, inProgress, completed, cancelled };
+  }
+
+  async estimateFare(
+    pickupLat: number,
+    pickupLng: number,
+    dropoffLat: number,
+    dropoffLng: number,
+  ) {
+    let distanceMeters: number;
+    let durationSeconds: number;
+    let routeSource: 'osrm' | 'haversine' = 'osrm';
+
+    try {
+      const OSRM_URL = process.env.OSRM_URL || 'http://localhost:5000';
+      const res = await fetch(
+        `${OSRM_URL}/route/v1/driving/${pickupLng},${pickupLat};${dropoffLng},${dropoffLat}?overview=false`,
+      );
+      const data = await res.json() as any;
+
+      if (data.routes && data.routes.length > 0) {
+        distanceMeters = data.routes[0].distance;
+        durationSeconds = data.routes[0].duration;
+      } else {
+        throw new Error('No route found');
+      }
+    } catch {
+      // Fallback: Haversine distance + estimated duration at ~30 km/h
+      routeSource = 'haversine';
+      const R = 6371e3;
+      const toRad = (d: number) => (d * Math.PI) / 180;
+      const dLat = toRad(dropoffLat - pickupLat);
+      const dLon = toRad(dropoffLng - pickupLng);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(pickupLat)) * Math.cos(toRad(dropoffLat)) * Math.sin(dLon / 2) ** 2;
+      distanceMeters = 2 * R * Math.asin(Math.sqrt(a)) * 1.3; // 1.3x for road factor
+      durationSeconds = (distanceMeters / 1000 / 30) * 3600; // 30 km/h avg
+    }
+
+    const distanceKm = distanceMeters / 1000;
+    const durationMin = durationSeconds / 60;
+
+    const baseFare = 2500;
+    const perKmRate = 1000;
+    const perMinRate = 200;
+    const minimumFare = 5000;
+
+    const distanceFare = distanceKm * perKmRate;
+    const timeFare = durationMin * perMinRate;
+    const calculated = baseFare + distanceFare + timeFare;
+    const estimatedFare = Math.max(calculated, minimumFare);
+
     return {
-      total,
-      requested,
-      matched,
-      inProgress,
-      completed,
-      cancelled,
+      estimatedFare: Math.round(estimatedFare),
+      distance: Math.round(distanceMeters),
+      duration: Math.round(durationSeconds),
+      currency: 'IQD',
+      routeSource,
+      breakdown: {
+        baseFare,
+        distanceFare: Math.round(distanceFare),
+        timeFare: Math.round(timeFare),
+      },
     };
   }
 }

@@ -46,9 +46,16 @@ export class IdempotencyService {
    * Connect to Redis if not already connected
    */
   async connect(): Promise<void> {
-    if (!this.redis.isOpen) {
-      await this.redis.connect();
-      console.log('[IdempotencyService] Connected to Redis');
+    // Standard redis client uses isOpen, ioredis uses status
+    const status = (this.redis as any).status || (this.redis as any).isOpen;
+    if (status !== 'ready' && status !== true && typeof this.redis.connect === 'function') {
+      try {
+        await this.redis.connect();
+        console.log('[IdempotencyService] Connected to Redis');
+      } catch (err) {
+        // Ignore "already connected" errors for ioredis
+        if (!String(err).includes('already')) throw err;
+      }
     }
   }
 
@@ -56,9 +63,10 @@ export class IdempotencyService {
    * Disconnect from Redis
    */
   async disconnect(): Promise<void> {
-    if (this.redis.isOpen) {
+    if (typeof this.redis.disconnect === 'function') {
       await this.redis.disconnect();
-      console.log('[IdempotencyService] Disconnected from Redis');
+    } else if (typeof this.redis.quit === 'function') {
+      await this.redis.quit();
     }
   }
 
@@ -72,7 +80,7 @@ export class IdempotencyService {
   async isProcessed(consumerName: string, eventId: string): Promise<boolean> {
     const key = this.buildKey(consumerName, eventId);
     const exists = await this.redis.exists(key);
-    return exists === 1;
+    return exists === 1 || exists === true;
   }
 
   /**
@@ -83,7 +91,17 @@ export class IdempotencyService {
    */
   async markProcessed(consumerName: string, eventId: string): Promise<void> {
     const key = this.buildKey(consumerName, eventId);
-    await this.redis.setEx(key, this.ttlSeconds, '1');
+    
+    // ioredis uses setex(key, ttl, value)
+    // node-redis uses setEx(key, ttl, value)
+    if (typeof this.redis.setEx === 'function') {
+      await this.redis.setEx(key, this.ttlSeconds, '1');
+    } else if (typeof this.redis.setex === 'function') {
+      await this.redis.setex(key, this.ttlSeconds, '1');
+    } else {
+      // Fallback for other potential client versions
+      await this.redis.set(key, '1', 'EX', this.ttlSeconds);
+    }
   }
 
   /**

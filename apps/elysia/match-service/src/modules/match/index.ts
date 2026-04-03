@@ -1,4 +1,4 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 import { MatchService } from './service';
 import { MatchModel } from './model';
 
@@ -18,4 +18,18 @@ export const match = new Elysia({ prefix: '/driver' })
       return { success: true };
     },
     { body: MatchModel.driverUnavailableBody }
+  )
+  .get(
+    '/nearby',
+    async ({ query }) => {
+      const lat = parseFloat(query.latitude as string);
+      const lng = parseFloat(query.longitude as string);
+      return await MatchService.getNearbyDrivers(lat, lng);
+    },
+    {
+        query: t.Object({
+            latitude: t.String(),
+            longitude: t.String(),
+        })
+    }
   );
