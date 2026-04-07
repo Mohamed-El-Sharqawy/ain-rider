@@ -1,7 +1,7 @@
 /**
- * Trip Matched Consumer
+ * Trip Assigned Consumer
  * 
- * Consumes trip_matched events from match-service and updates trip status
+ * Consumes trip_assigned events from match-service and updates trip status to ASSIGNED
  */
 
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
@@ -12,7 +12,7 @@ import { TripsService } from '../trips/trips.service';
 import { NatsService } from '../shared/nats/nats.service';
 
 @Injectable()
-export class TripMatchedConsumer implements OnModuleInit, OnModuleDestroy {
+export class TripAssignedConsumer implements OnModuleInit, OnModuleDestroy {
   private consumer: JetStreamConsumer | null = null;
 
   constructor(
@@ -29,7 +29,7 @@ export class TripMatchedConsumer implements OnModuleInit, OnModuleDestroy {
     }
     
     if (!this.natsService.nc) {
-      console.error('[TripMatchedConsumer] NATS connection not available after 5s');
+      console.error('[TripAssignedConsumer] NATS connection not available after 5s');
       return;
     }
 
@@ -55,28 +55,32 @@ export class TripMatchedConsumer implements OnModuleInit, OnModuleDestroy {
         const payload = envelope.data as TripMatchedPayload;
         
         console.log(
-          `[TripMatchedConsumer] Processing trip_matched | tripId=${payload.tripId} | driverId=${payload.driverId} | traceId=${traceId}`
+          `[TripAssignedConsumer] Processing trip_assigned | tripId=${payload.tripId} | driverId=${payload.driverId} | traceId=${traceId}`
         );
 
-        // Update trip status to MATCHED with driver info
+        // Update trip status to ASSIGNED
         await this.tripsService.updateStatus(
           payload.tripId,
-          'MATCHED' as any,
+          'ASSIGNED' as any,
           payload.driverId,
-          traceId
-        );
-
-        console.log(
-          `[TripMatchedConsumer] Updated trip ${payload.tripId} to MATCHED | traceId=${traceId}`
+          traceId,
+          {
+            driverName: payload.driverName,
+            driverPhone: payload.driverPhone,
+            driverRating: payload.driverRating,
+            vehicleMake: payload.vehicleMake,
+            vehicleModel: payload.vehicleModel,
+            vehiclePlate: payload.vehiclePlate,
+          }
         );
       }
     })(
       this.natsService.nc,
       {
         streamName: 'AIN_RIDER_OPS',
-        consumerName: 'trip-matched-consumer',
+        consumerName: 'trip-assigned-consumer',
         serviceName: 'trip-service',
-        filterSubject: 'ain_rider.trip_matched',
+        filterSubject: 'ain_rider.trip_assigned',
         maxDeliver: 3,
         enableIdempotency: true,
         enableDLQ: true,
@@ -87,13 +91,13 @@ export class TripMatchedConsumer implements OnModuleInit, OnModuleDestroy {
 
     // Start consuming
     await this.consumer.start();
-    console.log('[TripMatchedConsumer] Started');
+    console.log('[TripAssignedConsumer] Started');
   }
 
   async onModuleDestroy() {
     if (this.consumer) {
       await this.consumer.stop();
-      console.log('[TripMatchedConsumer] Stopped');
+      console.log('[TripAssignedConsumer] Stopped');
     }
   }
 }

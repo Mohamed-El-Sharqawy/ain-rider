@@ -54,6 +54,31 @@ export class ComplaintsService {
     return complaint;
   }
 
+  findByComplainantId(complainantId: string) {
+    return this.prisma.complaint.findMany({
+      where: { complainantId },
+      include: {
+        comments: {
+          where: { isInternal: false },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  findByIdPublic(id: string, complainantId: string) {
+    return this.prisma.complaint.findFirst({
+      where: { id, complainantId },
+      include: {
+        comments: {
+          where: { isInternal: false },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+  }
+
   addComment(complaintId: string, userId: string, userRole: string, comment: string, isInternal = false) {
     return this.prisma.complaintComment.create({
       data: { complaintId, userId, userRole, comment, isInternal },

@@ -1,0 +1,16 @@
+{
+  "name": "@ain-rider/internal-api",
+  "version": "1.0.0",
+  "description": "Shared internal service-to-service HTTP client for Ain Rider backend",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "dev": "tsc --build --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "rimraf": "^6.0.1"
+  }
+}

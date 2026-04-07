@@ -147,6 +147,11 @@ exports.Prisma.TripScalarFieldEnum = {
   cancellationReason: 'cancellationReason',
   cancelledBy: 'cancelledBy',
   driverRating: 'driverRating',
+  driverName: 'driverName',
+  driverPhone: 'driverPhone',
+  vehicleMake: 'vehicleMake',
+  vehicleModel: 'vehicleModel',
+  vehiclePlate: 'vehiclePlate',
   riderRating: 'riderRating',
   updatedAt: 'updatedAt'
 };

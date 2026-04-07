@@ -98,6 +98,18 @@ export class UsersController {
   }
 
   @Roles('ADMIN')
+  @Patch(':id/approve-document')
+  @ApiOperation({ summary: 'Approve a driver document stage' })
+  @ApiParam({ name: 'id', type: String })
+  approveDocument(
+    @Param('id') id: string,
+    @Body('stage') stage: 'identity' | 'license' | 'vehicle',
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.usersService.approveDriverDocument(id, stage, user.sub);
+  }
+
+  @Roles('ADMIN')
   @Patch(':id/reset-attempts')
   @ApiOperation({ summary: 'Reset driver document upload attempts' })
   @ApiParam({ name: 'id', type: String })

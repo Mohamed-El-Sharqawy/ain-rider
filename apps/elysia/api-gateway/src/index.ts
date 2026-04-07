@@ -10,8 +10,11 @@ import { trips } from "./modules/trips";
 import { locationProxy } from "./modules/location";
 import { matchProxy } from "./modules/match";
 import { admin } from "./modules/admin";
+import { support } from "./modules/support";
 import { settings } from "./modules/settings";
 import { log } from "./shared/logger";
+import { internalCallsTotal } from "@ain-rider/metrics";
+import { configureFetchInternal } from "@ain-rider/internal-api";
 import {
   AppError,
   normalizeError,
@@ -25,6 +28,27 @@ import {
   generateTraceId,
   extractTraceId,
 } from "@ain-rider/error-handling";
+
+import type { FetchInternalConfig } from "@ain-rider/internal-api";
+
+const fetchInternalConfig: FetchInternalConfig = {
+  serviceName: 'api-gateway',
+  metrics: {
+    inc: (labels: { service: string; status: string }) =>
+      internalCallsTotal.inc({
+        source_service: 'api-gateway',
+        target_service: labels.service,
+        method: 'unknown',
+        status: labels.status
+      })
+  },
+  logger: {
+    error: (message: string, meta?: Record<string, unknown>) => {
+      log('error', message, meta);
+    },
+  },
+};
+configureFetchInternal(fetchInternalConfig);
 
 const PORT = parseInt(process.env.API_GATEWAY_PORT || "3000");
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",") ?? [
@@ -133,10 +157,13 @@ new Elysia()
   .use(health)
   .use(metrics)
   .use(auth)
+// ... (rest)
+
   .use(trips)
   .use(locationProxy)
   .use(matchProxy)
   .use(admin)
+  .use(support)
   .use(settings)
   .listen(PORT);
 

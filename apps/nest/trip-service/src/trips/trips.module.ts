@@ -5,7 +5,7 @@ import { TripsService } from './trips.service';
 import { TripCommandsService } from './trip-commands.service';
 import { NatsService } from '../shared/nats/nats.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { TripMatchedConsumer } from '../consumers/trip-matched.consumer';
+import { TripAssignedConsumer } from '../consumers/trip-matched.consumer';
 import { TripCancelResponder } from '../nats/responders/trip-cancel.responder';
 import { TripAssignDriverResponder } from '../nats/responders/trip-assign-driver.responder';
 import { TripCreateResponder } from '../nats/responders/trip-create.responder';
@@ -29,7 +29,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     TripCommandsService,
     NatsService,
     PrismaService,
-    TripMatchedConsumer,
+    TripAssignedConsumer,
     TripCancelResponder,
     TripAssignDriverResponder,
     TripCreateResponder,

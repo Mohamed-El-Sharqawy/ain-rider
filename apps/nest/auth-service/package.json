@@ -12,8 +12,8 @@
     "start:prod": "node dist/main",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:deploy": "prisma migrate deploy",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@ain-rider/error-handling": "workspace:*",
@@ -21,6 +21,7 @@
     "@ain-rider/nats-client": "workspace:*",
     "@ain-rider/redis-client": "workspace:*",
     "@ain-rider/shared-types": "workspace:*",
+    "@ain-rider/metrics": "workspace:*",
     "@fastify/multipart": "^9.4.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.3",
@@ -41,7 +42,6 @@
     "nats": "^2.29.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "prom-client": "^15.1.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
   },

@@ -34,6 +34,11 @@ model Trip {
   cancellationReason String?
   cancelledBy        String?
   driverRating       Float?
+  driverName         String?
+  driverPhone        String?
+  vehicleMake        String?
+  vehicleModel       String?
+  vehiclePlate       String?
   riderRating        Float?
   updatedAt          DateTime  @updatedAt
 

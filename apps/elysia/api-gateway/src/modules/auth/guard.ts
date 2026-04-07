@@ -23,21 +23,21 @@ export const authGuard = new Elysia({ name: "Auth.Guard" })
     // Resolve token: Bearer header first, then cookie fallback
     const authHeader = request.headers.get("authorization");
     let token: string | undefined;
-    let tokenSource = "none";
+    // let tokenSource = "none";
 
     if (authHeader?.startsWith("Bearer ")) {
       token = authHeader.slice(7);
-      tokenSource = "bearer";
+      // tokenSource = "bearer";
     } else if (cookies.accessToken?.value) {
       token = cookies.accessToken.value as string;
-      tokenSource = "cookie";
+      // tokenSource = "cookie";
     }
 
-    console.log("[AuthGuard] Token resolution:", {
-      source: tokenSource,
-      hasToken: !!token,
-      tokenPreview: token ? token.substring(0, 20) + "..." : "none",
-    });
+    // console.log("[AuthGuard] Token resolution:", {
+    //   source: tokenSource,
+    //   hasToken: !!token,
+    //   tokenPreview: token ? token.substring(0, 20) + "..." : "none",
+    // });
 
     if (!token) {
       throw new UnauthorizedError("Not authenticated - no access token");

@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NatsService } from '../shared/nats/nats.service';
 import { TripEventPublisher } from '../events/trip-event.publisher';
 import { TripStatus } from '@ain-rider/shared-types';
+import { fetchInternal } from '@ain-rider/internal-api';
 import type { CreateTripDto } from './dto/create-trip.dto';
 import type { Prisma } from '../generated/prisma/client';
 import type { SOS } from '../generated/prisma/client';
@@ -37,11 +38,40 @@ export class TripsService {
     return trip;
   }
 
-  async updateStatus(tripId: string, status: TripStatus, driverId?: string, traceId?: string) {
+  async updateStatus(
+    tripId: string, 
+    status: TripStatus, 
+    driverId?: string, 
+    traceId?: string,
+    metadata?: {
+      driverName?: string;
+      driverPhone?: string;
+      driverRating?: number;
+      vehicleMake?: string;
+      vehicleModel?: string;
+      vehiclePlate?: string;
+    }
+  ) {
     const data: Prisma.TripUpdateInput = { status };
-    if (status === TripStatus.MATCHED && driverId) {
+    if (status === 'ASSIGNED' as any && driverId) {
+      data.driverId = driverId;
+      if (metadata) {
+        data.driverName = metadata.driverName;
+        data.driverPhone = metadata.driverPhone;
+        data.driverRating = metadata.driverRating;
+        data.vehicleMake = metadata.vehicleMake;
+        data.vehicleModel = metadata.vehicleModel;
+        data.vehiclePlate = metadata.vehiclePlate;
+      }
+    } else if (status === TripStatus.MATCHED && driverId) {
       data.driverId = driverId;
       data.matchedAt = new Date();
+      // Ensure metadata is saved if provided during final confirmation
+      if (metadata) {
+        data.driverName = metadata.driverName;
+        data.driverPhone = metadata.driverPhone;
+        // ... other fields if needed, but usually redundant
+      }
     } else if (status === TripStatus.IN_PROGRESS) {
       data.startedAt = new Date();
     } else if (status === TripStatus.COMPLETED) {
@@ -67,14 +97,14 @@ export class TripsService {
 
   findByRider(riderId: string) {
     return this.prisma.trip.findMany({
-      where: { riderId },
+      where: { riderId, status: TripStatus.COMPLETED },
       orderBy: { requestedAt: 'desc' },
     });
   }
 
   findByDriver(driverId: string) {
     return this.prisma.trip.findMany({
-      where: { driverId },
+      where: { driverId, status: TripStatus.COMPLETED },
       orderBy: { requestedAt: 'desc' },
     });
   }
@@ -87,6 +117,12 @@ export class TripsService {
   }
 
   async cancelTrip(tripId: string, reason: string, cancelledBy: string, traceId?: string) {
+    const existing = await this.prisma.trip.findUnique({ where: { id: tripId } });
+
+    if (!existing) {
+      throw new Error(`Trip ${tripId} not found`);
+    }
+
     const trip = await this.prisma.trip.update({
       where: { id: tripId },
       data: {
@@ -97,8 +133,13 @@ export class TripsService {
       },
     });
 
+    const driverId = trip.driverId ?? existing.driverId;
+
     await this.eventPublisher.publishTripCancelled(
-      trip,
+      {
+        ...trip,
+        driverId,
+      },
       cancelledBy as 'RIDER' | 'DRIVER' | 'SYSTEM',
       reason,
       traceId,
@@ -108,12 +149,21 @@ export class TripsService {
   }
 
   async rejectTrip(tripId: string, driverId: string, reason?: string, traceId?: string) {
-    // Revert trip status to REQUESTED so matching can continue
+    const existing = await this.prisma.trip.findUnique({ where: { id: tripId } });
+
+    if (!existing) {
+      throw new Error(`Trip ${tripId} not found`);
+    }
+
+    if (existing.status !== TripStatus.REQUESTED && existing.status !== TripStatus.MATCHED) {
+      throw new Error(`Cannot reject trip in status ${existing.status}`);
+    }
+
     const trip = await this.prisma.trip.update({
       where: { id: tripId },
       data: {
         status: TripStatus.REQUESTED,
-        driverId: null, // Clear the driver who rejected
+        driverId: null,
       },
     });
 
@@ -128,6 +178,47 @@ export class TripsService {
     );
 
     return trip;
+  }
+
+  async acceptTrip(tripId: string, driverId: string, traceId?: string) {
+    const trip = await this.prisma.trip.findUnique({ where: { id: tripId } });
+
+    if (!trip) {
+      throw new Error(`Trip ${tripId} not found`);
+    }
+
+    if (trip.status !== 'ASSIGNED' && trip.status !== TripStatus.REQUESTED) {
+      // Allow REQUESTED as fallback if assignment status didn't propagate
+      // throw new Error(`Cannot accept trip in status ${trip.status}`);
+    }
+
+    const updated = await this.prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        status: TripStatus.MATCHED,
+        matchedAt: new Date(),
+        driverId,
+      },
+    });
+
+    // Publish matched event so rider can see driver info
+    await this.eventPublisher.publishTripMatched(
+      {
+        tripId: updated.id,
+        driverId: updated.driverId!,
+        driverName: updated.driverName || 'Driver',
+        driverPhone: updated.driverPhone || '',
+        driverRating: updated.driverRating || 5,
+        vehicleMake: updated.vehicleMake || '',
+        vehicleModel: updated.vehicleModel || '',
+        vehiclePlate: updated.vehiclePlate || '',
+        estimatedArrival: 5,
+        distance: updated.distance || 0,
+      },
+      traceId,
+    );
+
+    return updated;
   }
 
   async assignDriver(tripId: string, driverId: string, assignedBy: string, _traceId?: string) {
@@ -272,9 +363,17 @@ export class TripsService {
 
     try {
       const OSRM_URL = process.env.OSRM_URL || 'http://localhost:5000';
-      const res = await fetch(
+      const res = await fetchInternal(
         `${OSRM_URL}/route/v1/driving/${pickupLng},${pickupLat};${dropoffLng},${dropoffLat}?overview=false`,
+        'GET',
+        undefined,
+        { targetService: 'osrm' }
       );
+      
+      if (!res.ok) {
+        throw new Error(`OSRM fetch failed: ${res.status}`);
+      }
+      
       const data = await res.json() as any;
 
       if (data.routes && data.routes.length > 0) {
@@ -284,7 +383,6 @@ export class TripsService {
         throw new Error('No route found');
       }
     } catch {
-      // Fallback: Haversine distance + estimated duration at ~30 km/h
       routeSource = 'haversine';
       const R = 6371e3;
       const toRad = (d: number) => (d * Math.PI) / 180;
@@ -293,8 +391,8 @@ export class TripsService {
       const a =
         Math.sin(dLat / 2) ** 2 +
         Math.cos(toRad(pickupLat)) * Math.cos(toRad(dropoffLat)) * Math.sin(dLon / 2) ** 2;
-      distanceMeters = 2 * R * Math.asin(Math.sqrt(a)) * 1.3; // 1.3x for road factor
-      durationSeconds = (distanceMeters / 1000 / 30) * 3600; // 30 km/h avg
+      distanceMeters = 2 * R * Math.asin(Math.sqrt(a)) * 1.3;
+      durationSeconds = (distanceMeters / 1000 / 30) * 3600;
     }
 
     const distanceKm = distanceMeters / 1000;

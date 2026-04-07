@@ -14,6 +14,7 @@
     "postinstall": "pnpm prisma:generate",
     "clean": "node scripts/clean.mjs",
     "clean:all": "node scripts/clean.mjs",
+    "create:nats": "node scripts/create-nats.mjs",
     "docker:infra:up": "docker-compose up -d",
     "docker:infra:down": "docker-compose down",
     "docker:infra:clean": "docker-compose down -v",

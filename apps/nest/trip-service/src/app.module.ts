@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
+import { MetricsModule } from '@ain-rider/metrics';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from './prisma/prisma.module';
 import { NatsModule } from './shared/nats/nats.module';
@@ -11,6 +12,7 @@ import { InternalAuthGuard } from './shared/guards/internal-auth.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    MetricsModule.forRoot({ serviceName: 'trip-service' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {

@@ -11,8 +11,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     config: ConfigService,
   ) {
     const secret = config.get<string>('JWT_SECRET') || 'change-me-in-production';
-    console.log('[JwtStrategy] Initializing with secret:', secret.substring(0, 10) + '...', 'Full length:', secret.length);
-    
+    // console.log('[JwtStrategy] Initializing with secret:', secret.substring(0, 10) + '...', 'Full length:', secret.length);
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -21,15 +21,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log('[JwtStrategy] ========== VALIDATE CALLED ==========');
-    console.log('[JwtStrategy] Validating payload:', {
-      sub: payload.sub,
-      type: payload.type,
-      email: payload.email,
-      role: payload.role,
-      exp: payload.exp,
-      iat: payload.iat,
-    });
+    // console.log('[JwtStrategy] ========== VALIDATE CALLED ==========');
+    // console.log('[JwtStrategy] Validating payload:', {
+    //   sub: payload.sub,
+    //   type: payload.type,
+    //   email: payload.email,
+    //   role: payload.role,
+    //   exp: payload.exp,
+    //   iat: payload.iat,
+    // });
 
     if (payload.type !== 'access') {
       console.log('[JwtStrategy] Invalid token type:', payload.type);

@@ -146,6 +146,26 @@ export class UsersService {
     return { success: true, message: `Driver ${stage} rejected`, ...result };
   }
 
+  async approveDriverDocument(userId: string, stage: 'identity' | 'license' | 'vehicle', adminId: string) {
+    // 1. Get previous state
+    const previousUser = await this.findById(userId);
+
+    // 2. Publish NATS command
+    const result = await this.adminNats.approveDriverDocument(userId, stage, adminId);
+
+    // 3. Log to local audit
+    await this.auditLogger.log({
+      adminId,
+      action: 'DRIVER_APPROVE_DOCUMENT',
+      targetType: 'USER',
+      targetId: userId,
+      previousState: previousUser,
+      newState: { ...(previousUser as any), lastApprovedStage: stage },
+    });
+
+    return { success: true, message: `Driver ${stage} approved`, ...result };
+  }
+
   async resetUploadAttempts(userId: string, adminId: string) {
     // 1. Get previous state
     const previousUser = await this.findById(userId);

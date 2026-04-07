@@ -12,6 +12,7 @@ import {
   IdempotencyService,
 } from '@ain-rider/nats-client';
 import type { NatsConnection, JsMsg } from '@ain-rider/nats-client';
+import type { TripMatchedPayload } from '@ain-rider/nats-client';
 import { NATS_SUBJECTS } from '@ain-rider/shared-types';
 import type { LocationUpdate } from '@ain-rider/shared-types';
 import { ConnectionStore } from '../../shared/connections';
@@ -76,7 +77,35 @@ class LocationUpdateConsumer extends JetStreamConsumer {
 }
 
 /**
- * Trip Matched Consumer
+ * Trip Assigned Consumer (from match-service)
+ * Forwards assignment to DRIVER ONLY.
+ */
+class TripAssignedConsumer extends JetStreamConsumer {
+  constructor(nc: NatsConnection, idempotency: IdempotencyService) {
+    super(nc, {
+      streamName: 'AIN_RIDER_OPS',
+      consumerName: 'websocket-server-trip-assigned',
+      serviceName: 'websocket-server',
+      filterSubject: NATS_SUBJECTS.TRIP_ASSIGNED,
+      maxDeliver: 3,
+      enableIdempotency: true,
+      enableDLQ: true,
+    }, { idempotencyService: idempotency });
+  }
+
+  async handleMessage(envelope: EventEnvelope<unknown>, _msg: JsMsg, _traceId: string): Promise<void> {
+    const data = envelope.data as TripMatchedPayload;
+    natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_ASSIGNED });
+
+    // ONLY notify driver for assignment
+    const sent = ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_assigned', data });
+    log('info', 'Trip assigned forwarded to driver', { tripId: data.tripId, driverId: data.driverId, sent });
+  }
+}
+
+/**
+ * Trip Matched Consumer (from trip-service)
+ * Forwards confirmation to RIDER.
  */
 class TripMatchedConsumer extends JetStreamConsumer {
   constructor(nc: NatsConnection, idempotency: IdempotencyService) {
@@ -92,12 +121,12 @@ class TripMatchedConsumer extends JetStreamConsumer {
   }
 
   async handleMessage(envelope: EventEnvelope<unknown>, _msg: JsMsg, _traceId: string): Promise<void> {
-    const data = envelope.data as { tripId: string; driverId: string; estimatedArrival: number };
+    const data = envelope.data as TripMatchedPayload;
     natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_MATCHED });
 
+    // Notify rider that trip is MATCHED
     ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_matched', data });
-    const sent = ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_assigned', data });
-    log('info', 'Trip assigned forwarded to driver', { tripId: data.tripId, driverId: data.driverId, sent });
+    log('info', 'Trip matched forwarded to rider', { tripId: data.tripId });
 
     // Add rider as watcher of this driver
     const watchers = driverWatchers.get(data.driverId) ?? new Set();
@@ -308,11 +337,14 @@ class TripCancelledConsumer extends JetStreamConsumer {
 
     // Notify rider
     ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_cancelled', data });
-    
+
     // Notify driver if assigned
     if (data.driverId) {
       const sent = ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_cancelled', data });
       log('info', 'Trip cancellation forwarded to driver', { tripId: data.tripId, driverId: data.driverId, sent });
+    } else {
+      const fallbackSent = ConnectionStore.send(`trip:${data.tripId}:driver`, { type: 'trip_cancelled', data });
+      log('info', 'Trip cancellation fallback to trip driver channel', { tripId: data.tripId, sent: fallbackSent });
     }
   }
 }
@@ -366,6 +398,7 @@ export async function initNatsConsumers(): Promise<void> {
   // Create and start all consumers
   const consumerClasses = [
     LocationUpdateConsumer,
+    TripAssignedConsumer,
     TripMatchedConsumer,
     TripStartedConsumer,
     TripCompletedConsumer,

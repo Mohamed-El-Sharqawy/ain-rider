@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { health } from './modules/health';
-import { metrics } from './modules/metrics';
+import { metricsPlugin } from '@ain-rider/metrics';
 import { realtime } from './modules/realtime';
 import { RealtimeService } from './modules/realtime/service';
 import { log } from './shared/logger';
@@ -32,7 +32,7 @@ new Elysia()
     })
   )
   .use(health)
-  .use(metrics)
+  .use(metricsPlugin({ serviceName: 'websocket-server' }))
   .use(realtime)
   .listen(PORT);
 

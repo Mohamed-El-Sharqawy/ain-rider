@@ -1,0 +1,45 @@
+{
+  "name": "@ain-rider/metrics",
+  "version": "1.0.0",
+  "description": "Standardized metrics and observability for Ain Rider backend",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./nestjs": "./dist/nest-entry.js",
+    "./elysia": "./dist/elysia-entry.js",
+    "./prisma": "./dist/prisma-extension.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "dev": "tsc --build --watch"
+  },
+  "dependencies": {
+    "prom-client": "^15.1.3"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "elysia": ">=1.0.0",
+    "fastify": "^5.0.0",
+    "rxjs": "^7.8.1"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": { "optional": true },
+    "@nestjs/core": { "optional": true },
+    "elysia": { "optional": true },
+    "fastify": { "optional": true },
+    "rxjs": { "optional": true }
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@types/node": "^22.10.5",
+    "elysia": "^1.2.14",
+    "fastify": "^5.2.1",
+    "rimraf": "^6.0.1",
+    "rxjs": "^7.8.1",
+    "typescript": "^5.7.3"
+  }
+}

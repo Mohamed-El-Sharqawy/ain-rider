@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
+import { MetricsModule } from '@ain-rider/metrics';
 import { PrismaModule } from './prisma/prisma.module';
 import { NatsModule } from './shared/nats/nats.module';
 import { StorageModule } from './shared/storage/storage.module';
@@ -21,6 +22,7 @@ import { HealthController } from './health/health.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    MetricsModule.forRoot({ serviceName: 'admin-service' }),
     TerminusModule,
     PrismaModule,
     AuditModule,

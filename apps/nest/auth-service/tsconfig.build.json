@@ -4,10 +4,30 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "paths": {
-      "@ain-rider/shared-types": ["../../../packages/shared-types/dist"],
-      "@ain-rider/nats-client": ["../../../packages/nats-client/dist"],
-      "@ain-rider/redis-client": ["../../../packages/redis-client/dist"]
+      "@ain-rider/shared-types": [
+        "../../../packages/shared-types/dist"
+      ],
+      "@ain-rider/nats-client": [
+        "../../../packages/nats-client/dist"
+      ],
+      "@ain-rider/redis-client": [
+        "../../../packages/redis-client/dist"
+      ],
+      // "@ain-rider/shared-types": [
+      //   "packages/shared-types/dist"
+      // ],
+      // "@ain-rider/nats-client": [
+      //   "packages/nats-client/dist"
+      // ],
+      // "@ain-rider/redis-client": [
+      //   "packages/redis-client/dist"
+      // ],
     }
   },
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts"
+  ]
 }

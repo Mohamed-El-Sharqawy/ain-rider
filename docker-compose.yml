@@ -397,7 +397,7 @@ services:
 
   # ── OSRM Backend (Iraq routing engine) ────────────────────────────────────────
   osrm-backend:
-    image: osrm/osrm-backend:latest
+    image: ghcr.io/project-osrm/osrm-backend:v6.0.0
     container_name: ain-rider-osrm
     ports:
       - "5000:5000"

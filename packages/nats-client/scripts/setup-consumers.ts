@@ -119,7 +119,7 @@ async function createConsumer(
     await jsm.consumers.info(config.stream, config.name);
     console.log(`[SETUP] Consumer ${config.name} already exists - skipping creation`);
   } catch (err: any) {
-    if (err?.api_error?.err_code === 10014) {
+    if (err?.api_error?.err_code === 10014 || err.message?.includes('consumer not found') || err.code === '404') {
       // Consumer not found - create it
       await jsm.consumers.add(config.stream, {
         durable_name: config.name,

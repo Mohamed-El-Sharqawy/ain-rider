@@ -1,43 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { fetchInternal } from '@ain-rider/internal-api';
 
 @Injectable()
 export class InternalApiClient {
   constructor(
     private configService: ConfigService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
-  /**
-   * Makes an authenticated internal HTTP request to another service.
-   * 
-   * @param url - The full URL of the internal endpoint
-   * @param method - HTTP Method (GET, POST, etc.)
-   * @param body - Optional request body
-   * @returns The parsed JSON response
-   */
-  async fetchInternal(url: string, method: string = 'GET', body?: any) {
+  async fetchInternal(url: string, method: string = 'GET', body?: any): Promise<any> {
     const secret = this.configService.get<string>('INTERNAL_SERVICE_SECRET');
-    
-    // Generate an internal service token
+
     const token = await this.jwtService.signAsync(
       { service: 'admin-service', internal: true },
       { secret, expiresIn: '60s' }
     );
 
-    const headers: Record<string, string> = {
-      'Authorization': `Bearer ${token}`,
-    };
-
-    if (body) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    const response = await fetch(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
+    const response = await fetchInternal(url, method, body, {
+      targetService: 'internal',
+      headers: { 'Authorization': `Bearer ${token}` },
     });
 
     if (!response.ok) {
@@ -45,7 +28,7 @@ export class InternalApiClient {
       try {
         const errorData = await response.json() as any;
         errorMessage = errorData.message || errorMessage;
-      } catch (e) {
+      } catch {
         // Fallback if response is not JSON
       }
       throw new Error(errorMessage);

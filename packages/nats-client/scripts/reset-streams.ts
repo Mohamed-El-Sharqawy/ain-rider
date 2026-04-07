@@ -9,7 +9,7 @@
 
 import { connect, NatsConnection, RetentionPolicy, StorageType } from 'nats';
 
-const STREAMS_TO_DELETE = ['AIN_RIDER', 'AIN_RIDER_OPS', 'AIN_RIDER_FINANCIAL', 'AIN_RIDER_DLQ'];
+const STREAMS_TO_DELETE = ['AIN_RIDER', 'ain_rider', 'AIN_RIDER_OPS', 'AIN_RIDER_FINANCIAL', 'AIN_RIDER_DLQ', 'AIN_RIDER_LOCATION'];
 
 interface StreamConfig {
   name: string;
@@ -27,6 +27,7 @@ const STREAM_CONFIGS: StreamConfig[] = [
       'ain_rider.trip_started',
       'ain_rider.trip_completed',
       'ain_rider.trip_cancelled',
+      'ain_rider.trip_rejected',
       'ain_rider.trip_no_match',
       'ain_rider.sos_created',
       'ain_rider.sos_resolved',
@@ -34,13 +35,21 @@ const STREAM_CONFIGS: StreamConfig[] = [
       'ain_rider.user_updated',
       'ain_rider.user_status_changed',
       'ain_rider.user_deleted',
-      'ain_rider.location_update',
       'ain_rider.notification_sent',
       'ain_rider.complaint_created',
       'ain_rider.complaint_updated',
     ],
     maxAgeDays: 7,
     description: 'Operational events with 7-day retention',
+  },
+  {
+    name: 'AIN_RIDER_LOCATION',
+    subjects: [
+      'ain_rider.location_update',
+      'ain_rider.location_updated',
+    ],
+    maxAgeDays: 1,
+    description: 'High-volume location updates',
   },
   {
     name: 'AIN_RIDER_FINANCIAL',
@@ -83,10 +92,10 @@ async function resetStreams(): Promise<void> {
       await jsm.streams.delete(streamName);
       console.log(`[RESET] Deleted stream: ${streamName}`);
     } catch (err: any) {
-      if (err?.api_error?.err_code === 10059) {
+      if (err?.api_error?.err_code === 10059 || err.message?.includes('stream not found') || err.code === '404' || err.code === 404) {
         console.log(`[RESET] Stream ${streamName} does not exist - skipping`);
       } else {
-        console.log(`[RESET] Could not delete ${streamName}: ${err.message}`);
+        console.log(`[RESET] Could not delete ${streamName}:`, err);
       }
     }
   }

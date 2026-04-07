@@ -20,42 +20,40 @@ const rmDir = (p) => {
   }
 };
 
-// 1. Clean all package dists
+// 1. Clean all workspace packages
 const packages = [
   'error-handling',
   'shared-types',
   'nats-client',
   'redis-client',
   'minio-client',
+  'metrics',
+  'internal-api',
 ];
 
 for (const pkg of packages) {
   run(`pnpm --filter @ain-rider/${pkg} clean`);
 }
 
-// 2. Clean all NestJS apps (dist and prisma generated)
-const nestApps = [
+// 2. Clean all application services
+const apps = [
+  'api-gateway',
+  'location-service',
+  'match-service',
+  'websocket-server',
   'auth-service',
   'trip-service',
   'payment-service',
   'admin-service',
 ];
 
-for (const app of nestApps) {
-  rmDir(`apps/nest/${app}/dist`);
-  rmDir(`apps/nest/${app}/src/generated`);
-}
-
-// 3. Clean all Elysia apps
-const elysiaApps = [
-  'api-gateway',
-  'location-service',
-  'match-service',
-  'websocket-server',
-];
-
-for (const app of elysiaApps) {
+for (const app of apps) {
   run(`pnpm --filter @ain-rider/${app} clean`);
+  
+  // Also clean generated prisma/src/generated files for NestJS apps
+  if (['auth-service', 'trip-service', 'payment-service', 'admin-service'].includes(app)) {
+    rmDir(`apps/nest/${app}/src/generated`);
+  }
 }
 
 console.log('\n✅ Clean complete.');

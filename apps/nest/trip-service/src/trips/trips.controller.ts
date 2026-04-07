@@ -50,6 +50,17 @@ export class TripsController {
     return this.tripsService.cancelTrip(id, body.reason, body.cancelledBy, body.traceId);
   }
 
+  @Patch(':id/accept')
+  @ApiOperation({ summary: 'Accept trip (Driver only)' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiHeader({ name: 'x-driver-id', description: 'ID of the driver accepting the trip' })
+  accept(
+    @Param('id') id: string,
+    @Headers('x-driver-id') driverId: string,
+  ) {
+    return this.tripsService.acceptTrip(id, driverId);
+  }
+
   @Patch(':id/reject')
   @ApiOperation({ summary: 'Reject trip (Driver only)' })
   @ApiParam({ name: 'id', type: String })

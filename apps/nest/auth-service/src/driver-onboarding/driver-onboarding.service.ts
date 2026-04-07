@@ -728,4 +728,54 @@ export class DriverOnboardingService {
 
     return this.prisma.$transaction(updates);
   }
+
+  async approveDocument(
+    userId: string,
+    stage: "identity" | "license" | "vehicle",
+  ) {
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+      include: { document: true, vehicle: true },
+    });
+
+    if (!driver) {
+      throw new NotFoundException("Driver not found");
+    }
+
+    const updates: any[] = [];
+
+    if (stage === "identity" && driver.document) {
+      updates.push(
+        this.prisma.driverDocument.update({
+          where: { id: driver.document.id },
+          data: {
+            identityStatus: DocumentStatus.APPROVED,
+            identityRejectionReason: null,
+          },
+        }),
+      );
+    } else if (stage === "license" && driver.document) {
+      updates.push(
+        this.prisma.driverDocument.update({
+          where: { id: driver.document.id },
+          data: {
+            drivingLicenseStatus: DocumentStatus.APPROVED,
+            drivingLicenseRejectionReason: null,
+          },
+        }),
+      );
+    } else if (stage === "vehicle" && driver.vehicleId) {
+      updates.push(
+        this.prisma.vehicle.update({
+          where: { id: driver.vehicleId },
+          data: {
+            status: DocumentStatus.APPROVED,
+            rejectionReason: null,
+          },
+        }),
+      );
+    }
+
+    return this.prisma.$transaction(updates);
+  }
 }

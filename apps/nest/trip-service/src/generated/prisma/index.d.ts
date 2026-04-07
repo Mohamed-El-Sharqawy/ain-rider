@@ -1024,6 +1024,11 @@ export namespace Prisma {
     cancellationReason: string | null
     cancelledBy: string | null
     driverRating: number | null
+    driverName: string | null
+    driverPhone: string | null
+    vehicleMake: string | null
+    vehicleModel: string | null
+    vehiclePlate: string | null
     riderRating: number | null
     updatedAt: Date | null
   }
@@ -1055,6 +1060,11 @@ export namespace Prisma {
     cancellationReason: string | null
     cancelledBy: string | null
     driverRating: number | null
+    driverName: string | null
+    driverPhone: string | null
+    vehicleMake: string | null
+    vehicleModel: string | null
+    vehiclePlate: string | null
     riderRating: number | null
     updatedAt: Date | null
   }
@@ -1086,6 +1096,11 @@ export namespace Prisma {
     cancellationReason: number
     cancelledBy: number
     driverRating: number
+    driverName: number
+    driverPhone: number
+    vehicleMake: number
+    vehicleModel: number
+    vehiclePlate: number
     riderRating: number
     updatedAt: number
     _all: number
@@ -1147,6 +1162,11 @@ export namespace Prisma {
     cancellationReason?: true
     cancelledBy?: true
     driverRating?: true
+    driverName?: true
+    driverPhone?: true
+    vehicleMake?: true
+    vehicleModel?: true
+    vehiclePlate?: true
     riderRating?: true
     updatedAt?: true
   }
@@ -1178,6 +1198,11 @@ export namespace Prisma {
     cancellationReason?: true
     cancelledBy?: true
     driverRating?: true
+    driverName?: true
+    driverPhone?: true
+    vehicleMake?: true
+    vehicleModel?: true
+    vehiclePlate?: true
     riderRating?: true
     updatedAt?: true
   }
@@ -1209,6 +1234,11 @@ export namespace Prisma {
     cancellationReason?: true
     cancelledBy?: true
     driverRating?: true
+    driverName?: true
+    driverPhone?: true
+    vehicleMake?: true
+    vehicleModel?: true
+    vehiclePlate?: true
     riderRating?: true
     updatedAt?: true
     _all?: true
@@ -1327,6 +1357,11 @@ export namespace Prisma {
     cancellationReason: string | null
     cancelledBy: string | null
     driverRating: number | null
+    driverName: string | null
+    driverPhone: string | null
+    vehicleMake: string | null
+    vehicleModel: string | null
+    vehiclePlate: string | null
     riderRating: number | null
     updatedAt: Date
     _count: TripCountAggregateOutputType | null
@@ -1377,6 +1412,11 @@ export namespace Prisma {
     cancellationReason?: boolean
     cancelledBy?: boolean
     driverRating?: boolean
+    driverName?: boolean
+    driverPhone?: boolean
+    vehicleMake?: boolean
+    vehicleModel?: boolean
+    vehiclePlate?: boolean
     riderRating?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["trip"]>
@@ -1408,6 +1448,11 @@ export namespace Prisma {
     cancellationReason?: boolean
     cancelledBy?: boolean
     driverRating?: boolean
+    driverName?: boolean
+    driverPhone?: boolean
+    vehicleMake?: boolean
+    vehicleModel?: boolean
+    vehiclePlate?: boolean
     riderRating?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["trip"]>
@@ -1439,6 +1484,11 @@ export namespace Prisma {
     cancellationReason?: boolean
     cancelledBy?: boolean
     driverRating?: boolean
+    driverName?: boolean
+    driverPhone?: boolean
+    vehicleMake?: boolean
+    vehicleModel?: boolean
+    vehiclePlate?: boolean
     riderRating?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["trip"]>
@@ -1470,11 +1520,16 @@ export namespace Prisma {
     cancellationReason?: boolean
     cancelledBy?: boolean
     driverRating?: boolean
+    driverName?: boolean
+    driverPhone?: boolean
+    vehicleMake?: boolean
+    vehicleModel?: boolean
+    vehiclePlate?: boolean
     riderRating?: boolean
     updatedAt?: boolean
   }
 
-  export type TripOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "riderId" | "driverId" | "status" | "pickupLat" | "pickupLng" | "pickupAddress" | "dropoffLat" | "dropoffLng" | "dropoffAddress" | "estimatedFare" | "actualFare" | "paymentMethod" | "paymentStatus" | "promoCode" | "promoDiscount" | "distance" | "duration" | "requestedAt" | "matchedAt" | "startedAt" | "completedAt" | "cancelledAt" | "cancellationReason" | "cancelledBy" | "driverRating" | "riderRating" | "updatedAt", ExtArgs["result"]["trip"]>
+  export type TripOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "riderId" | "driverId" | "status" | "pickupLat" | "pickupLng" | "pickupAddress" | "dropoffLat" | "dropoffLng" | "dropoffAddress" | "estimatedFare" | "actualFare" | "paymentMethod" | "paymentStatus" | "promoCode" | "promoDiscount" | "distance" | "duration" | "requestedAt" | "matchedAt" | "startedAt" | "completedAt" | "cancelledAt" | "cancellationReason" | "cancelledBy" | "driverRating" | "driverName" | "driverPhone" | "vehicleMake" | "vehicleModel" | "vehiclePlate" | "riderRating" | "updatedAt", ExtArgs["result"]["trip"]>
 
   export type $TripPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Trip"
@@ -1506,6 +1561,11 @@ export namespace Prisma {
       cancellationReason: string | null
       cancelledBy: string | null
       driverRating: number | null
+      driverName: string | null
+      driverPhone: string | null
+      vehicleMake: string | null
+      vehicleModel: string | null
+      vehiclePlate: string | null
       riderRating: number | null
       updatedAt: Date
     }, ExtArgs["result"]["trip"]>
@@ -1957,6 +2017,11 @@ export namespace Prisma {
     readonly cancellationReason: FieldRef<"Trip", 'String'>
     readonly cancelledBy: FieldRef<"Trip", 'String'>
     readonly driverRating: FieldRef<"Trip", 'Float'>
+    readonly driverName: FieldRef<"Trip", 'String'>
+    readonly driverPhone: FieldRef<"Trip", 'String'>
+    readonly vehicleMake: FieldRef<"Trip", 'String'>
+    readonly vehicleModel: FieldRef<"Trip", 'String'>
+    readonly vehiclePlate: FieldRef<"Trip", 'String'>
     readonly riderRating: FieldRef<"Trip", 'Float'>
     readonly updatedAt: FieldRef<"Trip", 'DateTime'>
   }
@@ -3513,6 +3578,11 @@ export namespace Prisma {
     cancellationReason: 'cancellationReason',
     cancelledBy: 'cancelledBy',
     driverRating: 'driverRating',
+    driverName: 'driverName',
+    driverPhone: 'driverPhone',
+    vehicleMake: 'vehicleMake',
+    vehicleModel: 'vehicleModel',
+    vehiclePlate: 'vehiclePlate',
     riderRating: 'riderRating',
     updatedAt: 'updatedAt'
   };
@@ -3657,6 +3727,11 @@ export namespace Prisma {
     cancellationReason?: StringNullableFilter<"Trip"> | string | null
     cancelledBy?: StringNullableFilter<"Trip"> | string | null
     driverRating?: FloatNullableFilter<"Trip"> | number | null
+    driverName?: StringNullableFilter<"Trip"> | string | null
+    driverPhone?: StringNullableFilter<"Trip"> | string | null
+    vehicleMake?: StringNullableFilter<"Trip"> | string | null
+    vehicleModel?: StringNullableFilter<"Trip"> | string | null
+    vehiclePlate?: StringNullableFilter<"Trip"> | string | null
     riderRating?: FloatNullableFilter<"Trip"> | number | null
     updatedAt?: DateTimeFilter<"Trip"> | Date | string
   }
@@ -3688,6 +3763,11 @@ export namespace Prisma {
     cancellationReason?: SortOrderInput | SortOrder
     cancelledBy?: SortOrderInput | SortOrder
     driverRating?: SortOrderInput | SortOrder
+    driverName?: SortOrderInput | SortOrder
+    driverPhone?: SortOrderInput | SortOrder
+    vehicleMake?: SortOrderInput | SortOrder
+    vehicleModel?: SortOrderInput | SortOrder
+    vehiclePlate?: SortOrderInput | SortOrder
     riderRating?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
   }
@@ -3722,6 +3802,11 @@ export namespace Prisma {
     cancellationReason?: StringNullableFilter<"Trip"> | string | null
     cancelledBy?: StringNullableFilter<"Trip"> | string | null
     driverRating?: FloatNullableFilter<"Trip"> | number | null
+    driverName?: StringNullableFilter<"Trip"> | string | null
+    driverPhone?: StringNullableFilter<"Trip"> | string | null
+    vehicleMake?: StringNullableFilter<"Trip"> | string | null
+    vehicleModel?: StringNullableFilter<"Trip"> | string | null
+    vehiclePlate?: StringNullableFilter<"Trip"> | string | null
     riderRating?: FloatNullableFilter<"Trip"> | number | null
     updatedAt?: DateTimeFilter<"Trip"> | Date | string
   }, "id">
@@ -3753,6 +3838,11 @@ export namespace Prisma {
     cancellationReason?: SortOrderInput | SortOrder
     cancelledBy?: SortOrderInput | SortOrder
     driverRating?: SortOrderInput | SortOrder
+    driverName?: SortOrderInput | SortOrder
+    driverPhone?: SortOrderInput | SortOrder
+    vehicleMake?: SortOrderInput | SortOrder
+    vehicleModel?: SortOrderInput | SortOrder
+    vehiclePlate?: SortOrderInput | SortOrder
     riderRating?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
     _count?: TripCountOrderByAggregateInput
@@ -3792,6 +3882,11 @@ export namespace Prisma {
     cancellationReason?: StringNullableWithAggregatesFilter<"Trip"> | string | null
     cancelledBy?: StringNullableWithAggregatesFilter<"Trip"> | string | null
     driverRating?: FloatNullableWithAggregatesFilter<"Trip"> | number | null
+    driverName?: StringNullableWithAggregatesFilter<"Trip"> | string | null
+    driverPhone?: StringNullableWithAggregatesFilter<"Trip"> | string | null
+    vehicleMake?: StringNullableWithAggregatesFilter<"Trip"> | string | null
+    vehicleModel?: StringNullableWithAggregatesFilter<"Trip"> | string | null
+    vehiclePlate?: StringNullableWithAggregatesFilter<"Trip"> | string | null
     riderRating?: FloatNullableWithAggregatesFilter<"Trip"> | number | null
     updatedAt?: DateTimeWithAggregatesFilter<"Trip"> | Date | string
   }
@@ -3917,6 +4012,11 @@ export namespace Prisma {
     cancellationReason?: string | null
     cancelledBy?: string | null
     driverRating?: number | null
+    driverName?: string | null
+    driverPhone?: string | null
+    vehicleMake?: string | null
+    vehicleModel?: string | null
+    vehiclePlate?: string | null
     riderRating?: number | null
     updatedAt?: Date | string
   }
@@ -3948,6 +4048,11 @@ export namespace Prisma {
     cancellationReason?: string | null
     cancelledBy?: string | null
     driverRating?: number | null
+    driverName?: string | null
+    driverPhone?: string | null
+    vehicleMake?: string | null
+    vehicleModel?: string | null
+    vehiclePlate?: string | null
     riderRating?: number | null
     updatedAt?: Date | string
   }
@@ -3979,6 +4084,11 @@ export namespace Prisma {
     cancellationReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
     driverRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    driverName?: NullableStringFieldUpdateOperationsInput | string | null
+    driverPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleMake?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleModel?: NullableStringFieldUpdateOperationsInput | string | null
+    vehiclePlate?: NullableStringFieldUpdateOperationsInput | string | null
     riderRating?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4010,6 +4120,11 @@ export namespace Prisma {
     cancellationReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
     driverRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    driverName?: NullableStringFieldUpdateOperationsInput | string | null
+    driverPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleMake?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleModel?: NullableStringFieldUpdateOperationsInput | string | null
+    vehiclePlate?: NullableStringFieldUpdateOperationsInput | string | null
     riderRating?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4041,6 +4156,11 @@ export namespace Prisma {
     cancellationReason?: string | null
     cancelledBy?: string | null
     driverRating?: number | null
+    driverName?: string | null
+    driverPhone?: string | null
+    vehicleMake?: string | null
+    vehicleModel?: string | null
+    vehiclePlate?: string | null
     riderRating?: number | null
     updatedAt?: Date | string
   }
@@ -4072,6 +4192,11 @@ export namespace Prisma {
     cancellationReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
     driverRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    driverName?: NullableStringFieldUpdateOperationsInput | string | null
+    driverPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleMake?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleModel?: NullableStringFieldUpdateOperationsInput | string | null
+    vehiclePlate?: NullableStringFieldUpdateOperationsInput | string | null
     riderRating?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4103,6 +4228,11 @@ export namespace Prisma {
     cancellationReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
     driverRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    driverName?: NullableStringFieldUpdateOperationsInput | string | null
+    driverPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleMake?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleModel?: NullableStringFieldUpdateOperationsInput | string | null
+    vehiclePlate?: NullableStringFieldUpdateOperationsInput | string | null
     riderRating?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4336,6 +4466,11 @@ export namespace Prisma {
     cancellationReason?: SortOrder
     cancelledBy?: SortOrder
     driverRating?: SortOrder
+    driverName?: SortOrder
+    driverPhone?: SortOrder
+    vehicleMake?: SortOrder
+    vehicleModel?: SortOrder
+    vehiclePlate?: SortOrder
     riderRating?: SortOrder
     updatedAt?: SortOrder
   }
@@ -4381,6 +4516,11 @@ export namespace Prisma {
     cancellationReason?: SortOrder
     cancelledBy?: SortOrder
     driverRating?: SortOrder
+    driverName?: SortOrder
+    driverPhone?: SortOrder
+    vehicleMake?: SortOrder
+    vehicleModel?: SortOrder
+    vehiclePlate?: SortOrder
     riderRating?: SortOrder
     updatedAt?: SortOrder
   }
@@ -4412,6 +4552,11 @@ export namespace Prisma {
     cancellationReason?: SortOrder
     cancelledBy?: SortOrder
     driverRating?: SortOrder
+    driverName?: SortOrder
+    driverPhone?: SortOrder
+    vehicleMake?: SortOrder
+    vehicleModel?: SortOrder
+    vehiclePlate?: SortOrder
     riderRating?: SortOrder
     updatedAt?: SortOrder
   }

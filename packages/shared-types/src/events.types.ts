@@ -13,10 +13,12 @@ export const NATS_SUBJECTS = {
 
   LOCATION_UPDATE: "ain_rider.location_update",
   TRIP_REQUESTED: "ain_rider.trip_requested",
+  TRIP_ASSIGNED: "ain_rider.trip_assigned",
   TRIP_MATCHED: "ain_rider.trip_matched",
   TRIP_STARTED: "ain_rider.trip_started",
   TRIP_COMPLETED: "ain_rider.trip_completed",
   TRIP_CANCELLED: "ain_rider.trip_cancelled",
+  TRIP_REJECTED: "ain_rider.trip_rejected",
   DRIVER_STATUS_CHANGED: "ain_rider.driver_status_changed",
   PAYMENT_PROCESSED: "ain_rider.payment.processed",
   WALLET_UPDATED: "ain_rider.wallet_updated",

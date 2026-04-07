@@ -1,7 +1,6 @@
-import { proxyRequestsTotal } from '../../shared/metrics';
-import { log } from '../../shared/logger';
+import { fetchInternal } from '@ain-rider/internal-api';
 
-const MATCH_SERVICE_URL = process.env.MATCH_SERVICE_URL || 'http://match-service:3003';
+const MATCH_SERVICE_URL = process.env.MATCH_SERVICE_URL || 'http://localhost:3003';
 
 export abstract class MatchProxyService {
   static async registerAvailable(
@@ -18,51 +17,30 @@ export abstract class MatchProxyService {
       vehiclePlate?: string;
     },
   ): Promise<Response> {
-    proxyRequestsTotal.inc({ service: 'match-service', status: 'attempt' });
-    try {
-      const res = await fetch(`${MATCH_SERVICE_URL}/driver/available`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
-        body: JSON.stringify({ ...body, driverId: userId }),
-      });
-      proxyRequestsTotal.inc({ service: 'match-service', status: res.ok ? 'success' : 'error' });
-      return res;
-    } catch (error) {
-      proxyRequestsTotal.inc({ service: 'match-service', status: 'failed' });
-      log('error', 'Match service available proxy failed', { error: String(error) });
-      throw error;
-    }
+    return fetchInternal(`${MATCH_SERVICE_URL}/driver/available`, 'POST', { ...body, driverId: userId }, {
+      targetService: 'match-service',
+      headers: { 'x-user-id': userId },
+    });
   }
 
   static async unregisterAvailable(userId: string): Promise<Response> {
-    proxyRequestsTotal.inc({ service: 'match-service', status: 'attempt' });
-    try {
-      const res = await fetch(`${MATCH_SERVICE_URL}/driver/unavailable`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
-        body: JSON.stringify({ driverId: userId }),
-      });
-      proxyRequestsTotal.inc({ service: 'match-service', status: res.ok ? 'success' : 'error' });
-      return res;
-    } catch (error) {
-      proxyRequestsTotal.inc({ service: 'match-service', status: 'failed' });
-      log('error', 'Match service unavailable proxy failed', { error: String(error) });
-      throw error;
-    }
+    return fetchInternal(`${MATCH_SERVICE_URL}/driver/unavailable`, 'POST', { driverId: userId }, {
+      targetService: 'match-service',
+      headers: { 'x-user-id': userId },
+    });
+  }
+
+  static async respondToTrip(tripId: string, driverId: string, action: string): Promise<Response> {
+    return fetchInternal(`${MATCH_SERVICE_URL}/driver/respond`, 'POST', { tripId, action, driverId }, {
+      targetService: 'match-service',
+      headers: { 'x-user-id': driverId },
+    });
   }
 
   static async getNearbyDrivers(userId: string, lat: number, lng: number): Promise<Response> {
-    proxyRequestsTotal.inc({ service: 'match-service', status: 'attempt' });
-    try {
-      const res = await fetch(`${MATCH_SERVICE_URL}/driver/nearby?latitude=${lat}&longitude=${lng}`, {
-        headers: { 'x-user-id': userId },
-      });
-      proxyRequestsTotal.inc({ service: 'match-service', status: res.ok ? 'success' : 'error' });
-      return res;
-    } catch (error) {
-      proxyRequestsTotal.inc({ service: 'match-service', status: 'failed' });
-      log('error', 'Match service nearby proxy failed', { error: String(error) });
-      throw error;
-    }
+    return fetchInternal(`${MATCH_SERVICE_URL}/driver/nearby?latitude=${lat}&longitude=${lng}`, 'GET', undefined, {
+      targetService: 'match-service',
+      headers: { 'x-user-id': userId },
+    });
   }
 }

@@ -11,24 +11,33 @@ import {
   availableDriversGauge,
 } from '../../shared/metrics';
 import { log } from '../../shared/logger';
+import { tripLog } from '../../shared/trip-flow-logger';
 import type { AvailableDriver, DriverAvailableBody } from './model';
 
 const H3_RESOLUTION = 9;
 const DRIVER_TTL_SECONDS = 300; // 5 minutes
 const MAX_SEARCH_RADIUS_M = 10000; // 10km
 const SEARCH_RINGS = [1, 2, 4, 8, 16, 24, 35]; // Uber-style incremental rings
+const DRIVER_RESPONSE_TIMEOUT_S = 30; // 30s for driver to accept/reject
+const DRIVER_RESPONSE_POLL_MS = 1000; // poll every 1s
+const MAX_SEARCH_TIME_S = 600; // 2 minutes max before giving up
 
 function haversineDistance(
-  a: { latitude: number; longitude: number },
-  b: { latitude: number; longitude: number },
+  a: { latitude?: number; longitude?: number; lat?: number; lng?: number },
+  b: { latitude?: number; longitude?: number; lat?: number; lng?: number },
 ): number {
   const R = 6371e3; // Earth radius in meters
   const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const dLat = toRad(b.latitude - a.latitude);
-  const dLon = toRad(b.longitude - a.longitude);
+  const latA = a.latitude ?? a.lat ?? 0;
+  const lngA = a.longitude ?? a.lng ?? 0;
+  const latB = b.latitude ?? b.lat ?? 0;
+  const lngB = b.longitude ?? b.lng ?? 0;
+  
+  const dLat = toRad(latB - latA);
+  const dLon = toRad(lngB - lngA);
   const sinLat = Math.sin(dLat / 2);
   const sinLon = Math.sin(dLon / 2);
-  const h = sinLat * sinLat + Math.cos(toRad(a.latitude)) * Math.cos(toRad(b.latitude)) * sinLon * sinLon;
+  const h = sinLat * sinLat + Math.cos(toRad(latA)) * Math.cos(toRad(latB)) * sinLon * sinLon;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
@@ -52,6 +61,19 @@ export abstract class MatchService {
       vehiclePlate: body.vehiclePlate,
     };
 
+    // BUG 4 fix: If driver moved to a new H3 cell, remove from the old one
+    const prev = await cache.get<AvailableDriver>(`driver:available:${driverId}`);
+    if (prev && prev.h3Index !== h3Index) {
+      const oldCellKey = `h3:cell:${prev.h3Index}`;
+      const oldCell = await cache.get<AvailableDriver[]>(oldCellKey) ?? [];
+      const cleaned = oldCell.filter((d) => d.driverId !== driverId);
+      if (cleaned.length > 0) {
+        await cache.set(oldCellKey, cleaned, DRIVER_TTL_SECONDS);
+      } else {
+        await cache.del(oldCellKey);
+      }
+    }
+
     // Store driver in H3 cell set
     const cellKey = `h3:cell:${h3Index}`;
     const existing = await cache.get<AvailableDriver[]>(cellKey) ?? [];
@@ -74,7 +96,10 @@ export abstract class MatchService {
     }, 86400); // 24h metadata TTL
 
     availableDriversGauge.inc();
-    log('info', 'Driver registered as available', { driverId, h3Index });
+    tripLog({ step: 'DRIVER_REGISTERED', driverId, detail: `h3=${h3Index} lat=${latitude} lng=${longitude}`, data: {
+      name: body.driverName, vehicle: `${body.vehicleMake} ${body.vehicleModel}`, plate: body.vehiclePlate,
+      cellDriverCount: filtered.length, movedCell: prev ? prev.h3Index !== h3Index : false,
+    }});
     return { h3Index };
   }
 
@@ -92,7 +117,7 @@ export abstract class MatchService {
       await cache.del(`driver:available:${driverId}`);
       availableDriversGauge.dec();
     }
-    log('info', 'Driver unregistered', { driverId });
+    tripLog({ step: 'DRIVER_UNREGISTERED', driverId, detail: driver ? `was in h3=${driver.h3Index}` : 'no record found' });
   }
 
   /**
@@ -102,120 +127,197 @@ export abstract class MatchService {
   static async matchDriver(tripRequest: {
     tripId: string;
     riderId: string;
-    pickupLocation: { latitude: number; longitude: number };
+    pickupLocation: { latitude?: number; longitude?: number; lat?: number; lng?: number };
+    dropoffLocation?: { latitude?: number; longitude?: number; lat?: number; lng?: number };
+    pickupAddress?: string;
+    dropoffAddress?: string;
+    estimatedFare?: number;
     traceId?: string;
   }): Promise<void> {
     const end = matchDuration.startTimer();
-    const { tripId, riderId, pickupLocation } = tripRequest;
+    const { tripId, riderId } = tripRequest;
+    const pickupLocation = {
+      latitude: tripRequest.pickupLocation.latitude ?? tripRequest.pickupLocation.lat ?? 0,
+      longitude: tripRequest.pickupLocation.longitude ?? tripRequest.pickupLocation.lng ?? 0,
+    };
     const traceId = tripRequest.traceId ?? generateTrace();
 
-    const MAX_ATTEMPTS = 12; // 12 * 10s = 2 minutes total search time
     let selectedDriver: AvailableDriver | null = null;
     let finalRingK = 0;
 
     try {
-      // Check idempotency (only for initial request)
       const idempotency = getIdempotency();
-      
+      const publisher = getPublisher();
       const centerH3 = latLngToCell(pickupLocation.latitude, pickupLocation.longitude, H3_RESOLUTION);
 
-      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-        // Get excluded drivers (those who rejected this trip)
-        const excludedSet = await redisCluster.smembers(`match:excluded:${tripId}`) || [];
-        const excludedIds = new Set(excludedSet);
+      let matched = false;
+      let attempt = 1;
+      const searchDeadline = Date.now() + MAX_SEARCH_TIME_S * 1000;
 
-        // Incremental expansion loop within this attempt
-        for (const ringK of SEARCH_RINGS) {
-          finalRingK = ringK;
-          let candidates: AvailableDriver[] = await MatchService.getCandidates(gridDisk(centerH3, ringK));
-          
-          // Filter out excluded drivers and those beyond max radius
-          candidates = candidates.filter(d => {
-              if (excludedIds.has(d.driverId)) return false;
-              const dist = haversineDistance(pickupLocation, { latitude: d.latitude, longitude: d.longitude });
-              return dist <= MAX_SEARCH_RADIUS_M;
-          });
+      tripLog({ step: 'DRIVER_SEARCH_START', tripId, detail: `centerH3=${centerH3} pickup=(${pickupLocation.latitude},${pickupLocation.longitude}) deadline=${MAX_SEARCH_TIME_S}s` });
 
-          if (candidates.length > 0) {
-              // Rank by proximity
-              candidates.sort((a, b) => {
-                  const distA = haversineDistance(pickupLocation, { latitude: a.latitude, longitude: a.longitude });
-                  const distB = haversineDistance(pickupLocation, { latitude: b.latitude, longitude: b.longitude });
-                  return distA - distB;
-              });
-              selectedDriver = candidates[0];
-              log('info', `Found ${candidates.length} candidates at ring k=${ringK}`, { tripId, driverId: selectedDriver.driverId });
-              break;
+      while (!matched) {
+        if (Date.now() > searchDeadline) {
+          tripLog({ step: 'SEARCH_DEADLINE_HIT', tripId, detail: `Exhausted after ${attempt} attempts, publishing trip_no_match` });
+          const noMatchPayload: TripNoMatchPayload = {
+            tripId,
+            riderId,
+            reason: 'SEARCH_TIMEOUT',
+            searchedAt: new Date().toISOString(),
+          };
+          await publisher.publish('ain_rider.trip_no_match', 'trip_no_match', noMatchPayload, { traceId });
+          tripLog({ step: 'NATS_PUBLISH', tripId, detail: 'Published trip_no_match' });
+          matchAttemptsTotal.inc({ result: 'no_match' });
+          await cache.del(`match:request:${tripId}`);
+          return;
+        }
+
+        const stillActive = await cache.get(`match:request:${tripId}`);
+        const handled = await redisCluster.exists(`match:handled:${tripId}`);
+
+        if (stillActive === null || handled) {
+          await new Promise(r => setTimeout(r, 500));
+          const recheck = await cache.get(`match:request:${tripId}`);
+          const recheckHandled = await redisCluster.exists(`match:handled:${tripId}`);
+
+          if (recheck === null || recheckHandled) {
+            tripLog({ step: 'MATCH_LOOP_EXIT', tripId, detail: handled ? 'Trip already handled by another loop' : 'Trip no longer in cache' });
+            return;
           }
         }
 
-        if (selectedDriver) break;
+        const excludedSet = await redisCluster.smembers(`match:excluded:${tripId}`) || [];
+        const excludedIds = new Set(excludedSet);
+        tripLog({ step: 'DRIVER_SEARCH_RING', tripId, detail: `Attempt #${attempt}, excluded=${excludedSet.length} drivers`, data: { excludedIds: excludedSet } });
 
-        if (attempt < MAX_ATTEMPTS) {
-          log('info', `No candidates found (Attempt ${attempt}/${MAX_ATTEMPTS}), retrying in 10s...`, { tripId });
-          await new Promise(r => setTimeout(r, 10000));
+        selectedDriver = null;
+        for (const ringK of SEARCH_RINGS) {
+          finalRingK = ringK;
+          const cells = gridDisk(centerH3, ringK);
+          let allRaw: AvailableDriver[] = await MatchService.getCandidates(cells);
+          const beforeFilter = allRaw.length;
+          let candidates = allRaw.filter(d => {
+            if (excludedIds.has(d.driverId)) return false;
+            const dist = haversineDistance(pickupLocation, { latitude: d.latitude, longitude: d.longitude });
+            return dist <= MAX_SEARCH_RADIUS_M;
+          });
+
+          if (beforeFilter > 0 || ringK <= 2) {
+            tripLog({ step: 'DRIVER_SEARCH_CANDIDATES', tripId, detail: `ring=${ringK} cells=${cells.length} raw=${beforeFilter} filtered=${candidates.length}`, data: {
+              rawDrivers: allRaw.map(d => ({ id: d.driverId.substring(0,8), lat: d.latitude, lng: d.longitude, dist: Math.round(haversineDistance(pickupLocation, {latitude: d.latitude, longitude: d.longitude})) })),
+            }});
+          }
+
+          if (candidates.length > 0) {
+            candidates.sort((a, b) => {
+              const distA = haversineDistance(pickupLocation, { latitude: a.latitude, longitude: a.longitude });
+              const distB = haversineDistance(pickupLocation, { latitude: b.latitude, longitude: b.longitude });
+              return distA - distB;
+            });
+            selectedDriver = candidates[0];
+            const dist = Math.round(haversineDistance(pickupLocation, { latitude: selectedDriver.latitude, longitude: selectedDriver.longitude }));
+            tripLog({ step: 'DRIVER_SEARCH_CANDIDATES', tripId, driverId: selectedDriver.driverId,
+              detail: `SELECTED closest of ${candidates.length} at ring=${ringK}, dist=${dist}m` });
+            break;
+          }
         }
-      }
 
-      const publisher = getPublisher();
+        if (!selectedDriver) {
+          tripLog({ step: 'DRIVER_SEARCH_NO_CANDIDATES', tripId, detail: `Attempt #${attempt} found nothing across all rings, retrying in 5s...` });
+          await new Promise(r => setTimeout(r, 5000));
+          attempt++;
+          continue;
+        }
 
-      if (!selectedDriver) {
-        // Publish trip_no_match event
-        const noMatchPayload: TripNoMatchPayload = {
+        // ── Driver found: send assignment and wait for response ──
+        const assignPayload: TripMatchedPayload = {
           tripId,
-          riderId,
-          reason: 'NO_DRIVERS_AVAILABLE',
-          searchedAt: new Date().toISOString(),
+          driverId: selectedDriver.driverId,
+          driverName: selectedDriver.driverName ?? 'Driver',
+          driverPhone: selectedDriver.driverPhone ?? '',
+          driverRating: selectedDriver.driverRating ?? 0,
+          vehicleMake: selectedDriver.vehicleMake ?? '',
+          vehicleModel: selectedDriver.vehicleModel ?? '',
+          vehiclePlate: selectedDriver.vehiclePlate ?? '',
+          estimatedArrival: 5,
+          distance: Math.round(haversineDistance(pickupLocation, { latitude: selectedDriver.latitude, longitude: selectedDriver.longitude })),
+          matchedAt: new Date().toISOString(),
+          pickupLocation: {
+            lat: tripRequest.pickupLocation.latitude ?? tripRequest.pickupLocation.lat ?? 0,
+            lng: tripRequest.pickupLocation.longitude ?? tripRequest.pickupLocation.lng ?? 0,
+          },
+          dropoffLocation: tripRequest.dropoffLocation ? {
+            lat: tripRequest.dropoffLocation.latitude ?? tripRequest.dropoffLocation.lat ?? 0,
+            lng: tripRequest.dropoffLocation.longitude ?? tripRequest.dropoffLocation.lng ?? 0,
+          } : undefined,
+          pickupAddress: tripRequest.pickupAddress || '',
+          dropoffAddress: tripRequest.dropoffAddress || '',
+          estimatedFare: tripRequest.estimatedFare || 0,
+          riderId: tripRequest.riderId || '',
         };
 
-        await publisher.publish(
-          'ain_rider.trip_no_match',
-          'trip_no_match',
-          noMatchPayload,
-          { traceId }
+        await redisCluster.del(`match:response:${tripId}`);
+        await publisher.publish('ain_rider.trip_assigned', 'trip_assigned', assignPayload, { traceId });
+        tripLog({ step: 'DRIVER_ASSIGNED', tripId, driverId: selectedDriver.driverId,
+          detail: `Published trip_assigned, waiting up to ${DRIVER_RESPONSE_TIMEOUT_S}s for response...`,
+          data: { distance: assignPayload.distance, pickup: assignPayload.pickupAddress, dropoff: assignPayload.dropoffAddress },
+        });
+
+        // Poll Redis for driver response (accept/reject) up to DRIVER_RESPONSE_TIMEOUT_S
+        // Also respect the overall search deadline
+        const responseDeadline = Math.min(
+          Date.now() + DRIVER_RESPONSE_TIMEOUT_S * 1000,
+          searchDeadline,
         );
+        let response: string | null = null;
 
-        matchAttemptsTotal.inc({ result: 'no_drivers' });
-        log('warn', 'No available drivers for trip within 10km after full search expansion and retries', { tripId, riderId, traceId });
-        
-        await idempotency.markProcessed('trip-requested-consumer', tripId);
-        end();
-        return;
+        while (Date.now() < responseDeadline) {
+          response = await redisCluster.get(`match:response:${tripId}`);
+          if (response) break;
+          // Also check if trip was cancelled while waiting
+          const active = await cache.get(`match:request:${tripId}`);
+          if (active === null) {
+            await new Promise(r => setTimeout(r, 300));
+            const recheck = await cache.get(`match:request:${tripId}`);
+            if (recheck === null) {
+              log('info', 'Trip cancelled while waiting for driver response', { tripId });
+              return;
+            }
+          }
+          await new Promise(r => setTimeout(r, DRIVER_RESPONSE_POLL_MS));
+        }
+
+        if (response === 'accepted') {
+          tripLog({ step: 'DRIVER_ACCEPTED', tripId, driverId: selectedDriver.driverId, detail: 'Driver accepted! Publishing trip_matched to rider' });
+          await publisher.publish('ain_rider.trip_matched', 'trip_matched', assignPayload, { traceId });
+          tripLog({ step: 'TRIP_MATCHED', tripId, driverId: selectedDriver.driverId, detail: `Published trip_matched | ring=${finalRingK} | attempts=${attempt}` });
+          await MatchService.unregisterDriver(selectedDriver.driverId);
+          await redisCluster.set(`match:handled:${tripId}`, '1', 'EX', 3600);
+          await cache.del(`match:request:${tripId}`);
+          await idempotency.markProcessed('trip-requested-consumer', tripId);
+          await redisCluster.del(`match:response:${tripId}`);
+          await redisCluster.del(`match:excluded:${tripId}`);
+          matched = true;
+          matchAttemptsTotal.inc({ result: 'success' });
+        } else if (response === 'rejected') {
+          // Only exclude on explicit reject — timeout might be API/network issue
+          tripLog({ step: 'DRIVER_REJECTED', tripId, driverId: selectedDriver.driverId,
+            detail: 'Driver explicitly rejected, excluding and finding next driver' });
+          await redisCluster.sadd(`match:excluded:${tripId}`, selectedDriver.driverId);
+          await redisCluster.expire(`match:excluded:${tripId}`, 600);
+          await redisCluster.del(`match:response:${tripId}`);
+          attempt++;
+        } else {
+          // Timeout — don't exclude, the driver may retry (API could have failed)
+          tripLog({ step: 'DRIVER_TIMEOUT', tripId, driverId: selectedDriver.driverId,
+            detail: `Driver timed out after ${DRIVER_RESPONSE_TIMEOUT_S}s, will retry same driver` });
+          await redisCluster.del(`match:response:${tripId}`);
+          attempt++;
+        }
       }
-
-      // Publish trip_matched event
-      const matchedPayload: TripMatchedPayload = {
-        tripId,
-        driverId: selectedDriver.driverId,
-        driverName: selectedDriver.driverName ?? 'Driver',
-        driverPhone: selectedDriver.driverPhone ?? '',
-        driverRating: selectedDriver.driverRating ?? 0,
-        vehicleMake: selectedDriver.vehicleMake ?? '',
-        vehicleModel: selectedDriver.vehicleModel ?? '',
-        vehiclePlate: selectedDriver.vehiclePlate ?? '',
-        estimatedArrival: 5,
-        distance: Math.round(haversineDistance(pickupLocation, { latitude: selectedDriver.latitude, longitude: selectedDriver.longitude })),
-        matchedAt: new Date().toISOString(),
-      };
-
-      await publisher.publish(
-        'ain_rider.trip_matched',
-        'trip_matched',
-        matchedPayload,
-        { traceId }
-      );
-
-      // Remove driver from available pool
-      await MatchService.unregisterDriver(selectedDriver.driverId);
-
-      // Mark as processed
-      await idempotency.markProcessed('trip-requested-consumer', tripId);
-
-      matchAttemptsTotal.inc({ result: 'success' });
-      log('info', 'Trip matched', { tripId, driverId: selectedDriver.driverId, ringK: finalRingK, traceId });
     } catch (error) {
       matchAttemptsTotal.inc({ result: 'error' });
-      log('error', 'Match failed', { tripId, error: String(error), traceId });
+      tripLog({ step: 'ERROR', tripId, detail: `Match failed: ${String(error)}` });
       throw error;
     } finally {
       end();
@@ -243,8 +345,7 @@ export abstract class MatchService {
     const cells = gridDisk(centerH3, 4); // Increased to ~3.5km for better visualization
     const candidates = await MatchService.getCandidates(cells);
     
-    // Add logging here to debug nearby issues
-    console.log(`[MatchService] Nearby lookup: lat=${lat}, lng=${lng}, cells=${cells.length}, candidates=${candidates.length}`);
+    tripLog({ step: 'NEARBY_DRIVERS_LOOKUP', detail: `lat=${lat}, lng=${lng}, cells=${cells.length}, candidates=${candidates.length}` });
 
     return candidates.map(c => ({
         id: c.driverId,

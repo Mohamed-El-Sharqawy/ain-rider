@@ -319,7 +319,7 @@ HSET match:driver:available:driver_123
   last_update 1711324800
 
 // Location (Geo)
-GEOADD match:driver:location:driver_123 44.3661 33.3152 driver_123
+GEOADD match:driver:location:driver_123 31.394327 30.147719 driver_123
 ```
 
 ### Matching Algorithm

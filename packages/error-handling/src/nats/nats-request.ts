@@ -43,8 +43,8 @@ export async function createNatsRequest<T>(
 
   try {
     // Create headers with traceId
-    const hdrs = nc.info?.headers ? nc.info.headers : undefined;
-    
+    // const hdrs = nc.info?.headers ? nc.info.headers : undefined;
+
     // Send request with timeout
     const response = await nc.request(
       subject,

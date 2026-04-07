@@ -373,23 +373,10 @@ export const auth = new Elysia({ prefix: "/auth" })
       }
       const token = authHeader.slice(7);
 
-      // Forward raw request with body
       const contentType = request.headers.get("content-type");
       const body = await request.arrayBuffer();
-      
-      console.log(`[Gateway] Forwarding identity upload, Content-Type: ${contentType}, Body size: ${body.byteLength}`);
-      
-      const res = await fetch(`${process.env.AUTH_SERVICE_URL || 'http://localhost:4000'}/auth/rider/documents/identity`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': contentType || 'multipart/form-data',
-        },
-        body: body,
-      });
-      
-      console.log(`[Gateway] Auth service response: ${res.status}`);
-      
+
+      const res = await AuthProxyService.proxyRiderIdentityUpload(token, contentType || 'multipart/form-data', body);
       if (!res.ok) {
         try {
           const errorBody = await res.json();
@@ -425,14 +412,7 @@ export const auth = new Elysia({ prefix: "/auth" })
       
       console.log(`[Gateway] Forwarding profile image upload, Content-Type: ${contentType}, Body size: ${body.byteLength}`);
       
-      const res = await fetch(`${process.env.AUTH_SERVICE_URL || 'http://localhost:4000'}/auth/rider/profile/image`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': contentType || 'multipart/form-data',
-        },
-        body: body,
-      });
+      const res = await AuthProxyService.proxyRiderProfileImage(token, contentType || 'multipart/form-data', body);
       
       console.log(`[Gateway] Auth service response: ${res.status}`);
       

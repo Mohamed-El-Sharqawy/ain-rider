@@ -34,6 +34,26 @@ export const matchProxy = new Elysia({ prefix: '/match' })
       vehiclePlate: t.Optional(t.String()),
     }),
   })
+  .post('/respond', async ({ body, user, set }) => {
+    if (user.role !== 'DRIVER') {
+      set.status = 403;
+      return { error: 'Forbidden' };
+    }
+    const res = await MatchProxyService.respondToTrip(body.tripId, user.id, body.action);
+    if (!res.ok) {
+      try {
+        const errorBody = await res.json();
+        set.status = res.status;
+        return errorBody;
+      } catch {
+        set.status = res.status;
+        return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+      }
+    }
+    return res.json();
+  }, {
+    body: t.Object({ tripId: t.String(), action: t.String() }),
+  })
   .post('/unavailable', async ({ user, set }) => {
     if (user.role !== 'DRIVER') {
       set.status = 403;
@@ -69,7 +89,7 @@ export const matchProxy = new Elysia({ prefix: '/match' })
     return res.json();
   }, {
     query: t.Object({
-        latitude: t.String(),
-        longitude: t.String(),
+      latitude: t.String(),
+      longitude: t.String(),
     })
   });

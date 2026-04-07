@@ -55,11 +55,12 @@ export abstract class LocationService {
       // Publish location update event via JetStream
       await getLocationPublisher().publishLocationUpdate({
         driverId,
-        location: { latitude, longitude },
+        location: { lat: latitude, lng: longitude },
         heading,
         speed,
         isOnline: true,
         h3Index,
+        timestamp: new Date().toISOString(),
       }, traceId);
 
       locationUpdatesTotal.inc({ status: 'success' });

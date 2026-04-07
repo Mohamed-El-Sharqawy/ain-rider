@@ -23,10 +23,12 @@ const STREAM_CONFIGS: StreamConfig[] = [
     name: 'AIN_RIDER_OPS',
     subjects: [
       'ain_rider.trip_requested',
+      'ain_rider.trip_assigned',
       'ain_rider.trip_matched',
       'ain_rider.trip_started',
       'ain_rider.trip_completed',
       'ain_rider.trip_cancelled',
+      'ain_rider.trip_rejected',
       'ain_rider.trip_no_match',
       'ain_rider.sos_created',
       'ain_rider.sos_resolved',
@@ -34,13 +36,21 @@ const STREAM_CONFIGS: StreamConfig[] = [
       'ain_rider.user_updated',
       'ain_rider.user_status_changed',
       'ain_rider.user_deleted',
-      'ain_rider.location_update',
       'ain_rider.notification_sent',
       'ain_rider.complaint_created',
       'ain_rider.complaint_updated',
     ],
     maxAgeDays: 7,
     description: 'Operational events with 7-day retention',
+  },
+  {
+    name: 'AIN_RIDER_LOCATION',
+    subjects: [
+      'ain_rider.location_update',
+      'ain_rider.location_updated',
+    ],
+    maxAgeDays: 1, // Only 1 day for location history in hot stream
+    description: 'High-volume location updates',
   },
   {
     name: 'AIN_RIDER_FINANCIAL',
@@ -88,7 +98,7 @@ async function createStream(
       console.log(`[SETUP] Stream ${config.name} already up-to-date`);
     }
   } catch (err: any) {
-    if (err?.api_error?.err_code === 10059) {
+    if (err?.api_error?.err_code === 10059 || err.message?.includes('stream not found') || err.code === '404') {
       // Stream not found - create it
       await jsm.streams.add(streamConfig);
       console.log(`[SETUP] Created stream ${config.name}: ${config.description}`);

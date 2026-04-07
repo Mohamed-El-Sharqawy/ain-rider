@@ -2,7 +2,7 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { health } from './modules/health';
-import { metrics } from './modules/metrics';
+import { metricsPlugin } from '@ain-rider/metrics';
 import { location } from './modules/location';
 import { initNats } from './shared/nats';
 import { log } from './shared/logger';
@@ -40,7 +40,7 @@ new Elysia()
     })
   )
   .use(health)
-  .use(metrics)
+  .use(metricsPlugin({ serviceName: 'location-service' }))
   .use(location)
   .listen(PORT);
 

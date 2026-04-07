@@ -4,20 +4,19 @@
  * Publishes location update events to NATS JetStream
  */
 
-import { JetStreamPublisher, generateTraceId, createEventEnvelope } from '@ain-rider/nats-client';
-
-export interface Location {
-  latitude: number;
-  longitude: number;
-}
+import { JetStreamPublisher, generateTraceId } from '@ain-rider/nats-client';
 
 export interface LocationUpdatePayload {
   driverId: string;
-  location: Location;
+  location: {
+    lat: number;
+    lng: number;
+  };
   heading?: number;
   speed?: number;
   isOnline: boolean;
   h3Index?: string;
+  timestamp: string; // ISO string
 }
 
 export const LOCATION_SUBJECTS = {
@@ -34,23 +33,13 @@ export class LocationEventPublisher {
     data: LocationUpdatePayload,
     traceId?: string
   ): Promise<void> {
-    const eventId = generateTraceId();
-    const resolvedTraceId = traceId ?? eventId;
+    const resolvedTraceId = traceId ?? generateTraceId();
 
-    const envelope = createEventEnvelope(
-      'location_update',
-      data,
-      {
-        eventId,
-        traceId: resolvedTraceId,
-        source: 'location-service',
-      }
-    );
-
+    // Pass raw data — publisher.publish() wraps it in an EventEnvelope automatically
     await this.publisher.publish(
       LOCATION_SUBJECTS.LOCATION_UPDATE,
       'location_update',
-      envelope,
+      data,
       { traceId: resolvedTraceId }
     );
 

@@ -42,6 +42,23 @@ export const trips = new Elysia({ prefix: '/trips' })
     { body: TripModel.requestBody }
   )
   .get(
+    '/',
+    async ({ user, set }) => {
+      const res = await TripProxyService.getUserTrips(user.id, user.role);
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
+      }
+      return res.json();
+    }
+  )
+  .get(
     '/:id',
     async ({ params, user, set }) => {
       const res = await TripProxyService.getTrip(params.id, user.id);
@@ -82,6 +99,30 @@ export const trips = new Elysia({ prefix: '/trips' })
     {
       params: TripModel.tripIdParams,
       body: TripModel.statusUpdateBody,
+    }
+  )
+  .patch(
+    '/:id/rate',
+    async ({ params, body, user, set }) => {
+      const res = await TripProxyService.rateTrip(params.id, user.id, body.ratedBy, body.rating);
+      if (!res.ok) {
+        try {
+          const errorBody = await res.json();
+          set.status = res.status;
+          return errorBody;
+        } catch {
+          set.status = res.status;
+          return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
+        }
+      }
+      return res.json();
+    },
+    {
+      params: TripModel.tripIdParams,
+      body: t.Object({
+        ratedBy: t.Union([t.Literal('rider'), t.Literal('driver')]),
+        rating: t.Number({ minimum: 1, maximum: 5 }),
+      }),
     }
   )
   .patch(

@@ -2,6 +2,7 @@ import { Coordinates } from './location.types';
 
 export enum TripStatus {
   REQUESTED = 'REQUESTED',
+  ASSIGNED = 'ASSIGNED',
   MATCHED = 'MATCHED',
   DRIVER_ARRIVING = 'DRIVER_ARRIVING',
   IN_PROGRESS = 'IN_PROGRESS',

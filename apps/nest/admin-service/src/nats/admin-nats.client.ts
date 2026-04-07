@@ -134,6 +134,22 @@ export class AdminNatsClient {
   }
 
   /**
+   * Approve a driver document stage via auth-service
+   */
+  async approveDriverDocument(
+    userId: string,
+    stage: "identity" | "license" | "vehicle",
+    adminId: string,
+    traceId?: string,
+  ): Promise<any> {
+    return this.requestClient.request<any, any>(
+      "admin.command.approve_driver_document",
+      { userId, stage, adminId },
+      { traceId, requestedBy: adminId },
+    );
+  }
+
+  /**
    * Update user status generically via auth-service
    */
   async updateUserStatus(

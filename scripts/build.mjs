@@ -12,6 +12,8 @@ const packages = [
   'nats-client',
   'redis-client',
   'minio-client',
+  'metrics',
+  'internal-api',
 ];
 
 for (const pkg of packages) {

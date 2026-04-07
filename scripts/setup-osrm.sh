@@ -2,7 +2,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DATA_DIR="${SCRIPT_DIR}/data/osrm"
+DATA_DIR="$(dirname "${SCRIPT_DIR}")/data/osrm"
 
 mkdir -p "${DATA_DIR}"
 cd "${DATA_DIR}"

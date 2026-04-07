@@ -43,6 +43,13 @@ export interface TripMatchedPayload {
   estimatedArrival: number; // minutes
   distance: number; // meters
   matchedAt: string;
+  // Enriched assignment info
+  pickupLocation?: Location;
+  dropoffLocation?: Location;
+  pickupAddress?: string;
+  dropoffAddress?: string;
+  estimatedFare?: number;
+  riderId?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
