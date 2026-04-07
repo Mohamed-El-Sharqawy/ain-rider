@@ -35,11 +35,38 @@ export default function VehicleInfoScreen() {
   const [isModelsLoading, setIsModelsLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState<'make' | 'model' | 'year' | 'color' | null>(null);
 
-  const { setVehicle } = useOnboardingStore();
+  const { setVehicle, vehicle: storeVehicle } = useOnboardingStore();
+  
+  // Load data from store on mount
+  useEffect(() => {
+    if (storeVehicle) {
+      setPlate(storeVehicle.plateNumber);
+      setYear(storeVehicle.year.toString());
+      setColor(storeVehicle.color);
+    }
+  }, [storeVehicle]);
 
   useEffect(() => {
     fetchMakes();
   }, []);
+
+  // Update selection if they were previously saved
+  useEffect(() => {
+    if (storeVehicle && makes.length > 0 && !selectedMake) {
+      const foundMake = makes.find(m => m.name === storeVehicle.make);
+      if (foundMake) {
+        setSelectedMake(foundMake);
+        fetchModels(foundMake.id);
+      }
+    }
+  }, [makes, storeVehicle]);
+
+  useEffect(() => {
+    if (storeVehicle && models.length > 0 && !selectedModel) {
+      const foundModel = models.find(m => m.name === storeVehicle.model);
+      if (foundModel) setSelectedModel(foundModel);
+    }
+  }, [models, storeVehicle]);
 
   const fetchMakes = async () => {
     try {

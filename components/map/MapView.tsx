@@ -3,7 +3,7 @@ import MapLibreGL from '@maplibre/maplibre-react-native';
 import { View } from 'react-native';
 import mapStyle from '../../assets/map-style.json';
 
-const BAGHDAD = { latitude: 33.3152, longitude: 44.3661 };
+const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
 
 export interface AppMapViewRef {
   flyTo: (center: { latitude: number; longitude: number }, zoom?: number) => void;

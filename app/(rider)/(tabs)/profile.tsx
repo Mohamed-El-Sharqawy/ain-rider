@@ -16,7 +16,7 @@ const menuItems = [
   { id: 'notifications', label: 'Notifications', icon: 'notifications-outline' },
   { id: 'security', label: 'Security', icon: 'shield-checkmark-outline' },
   { id: 'settings', label: 'Settings', icon: 'settings-outline' },
-  { id: 'help', label: 'Help & Support', icon: 'help-circle-outline' },
+  { id: 'help', label: 'Help & Support', icon: 'help-circle-outline', route: '/support/complaints' },
 ];
 
 export default function ProfileScreen() {

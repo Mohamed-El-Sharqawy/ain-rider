@@ -10,7 +10,8 @@ import {
 
 export const DriverApi = {
   async getOnboardingStatus(): Promise<OnboardingStatusResponse> {
-    return ApiClient.get<OnboardingStatusResponse>('/auth/driver/onboarding-status');
+    const raw = await ApiClient.get<{ success?: boolean; data?: OnboardingStatusResponse } & OnboardingStatusResponse>('/auth/driver/onboarding-status');
+    return raw.data ?? raw;
   },
 
   async updateProfile(data: UpdateDriverProfilePayload): Promise<{ success: boolean; data: any }> {

@@ -19,6 +19,10 @@ export const MatchApi = {
     return ApiClient.post<any>('/match/unavailable');
   },
 
+  async respondToTrip(tripId: string, action: 'accept' | 'reject'): Promise<any> {
+    return ApiClient.post<any>(`/match/respond`, { tripId, action });
+  },
+
   async getNearbyDrivers(lat: number, lng: number): Promise<Array<{ id: string; lat: number; lng: number }>> {
     return ApiClient.get<Array<{ id: string; lat: number; lng: number }>>(`/match/nearby?latitude=${lat}&longitude=${lng}`);
   },

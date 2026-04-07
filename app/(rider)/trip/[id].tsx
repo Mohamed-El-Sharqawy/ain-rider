@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Modal, FlatList, Animated, Dimensions } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTripStore } from '../../../stores/trip.store';
@@ -12,22 +12,93 @@ import { LocationMarker } from '../../../components/map/LocationMarker';
 import { RoutePolyline } from '../../../components/map/RoutePolyline';
 import { PickupDropoffPins } from '../../../components/map/PickupDropoffPins';
 import { SettingsApi } from '../../../lib/api/settings.api';
+import { TripApi } from '../../../lib/api/trip.api';
 
 export default function TripScreen() {
   const { id: tripId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const tripStore = useTripStore();
   const { cancelTrip } = useTrip();
-  const { on: wsOn } = useWebSocket(true);
+  const { on: wsOn, subscribe, unsubscribe } = useWebSocket(true);
+
+  useEffect(() => {
+    if (tripId) {
+      console.log('[TripScreen] Subscribing to trip channel:', tripId);
+      subscribe('trip', `${tripId}:rider`);
+    }
+    return () => {
+      if (tripId) {
+        unsubscribe('trip', `${tripId}:rider`);
+      }
+    };
+  }, [tripId, subscribe, unsubscribe]);
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [reasons, setReasons] = useState<string[]>([]);
   const [loadingReasons, setLoadingReasons] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+
+  useEffect(() => {
+    const syncTripState = async () => {
+      if (!tripId) return;
+      try {
+        const trip = await TripApi.getTrip(tripId);
+
+        // Sync trip data to store
+        tripStore.setActiveTrip({
+          tripId: trip.id,
+          status: trip.status,
+          pickupLocation: { latitude: trip.pickupLat, longitude: trip.pickupLng },
+          dropoffLocation: { latitude: trip.dropoffLat, longitude: trip.dropoffLng },
+          estimatedFare: trip.estimatedFare,
+        });
+
+        if (trip.status === 'MATCHED' || trip.status === 'ARRIVING') {
+          tripStore.setPhase('matched');
+          if (trip.driverId && trip.driverName) {
+            tripStore.setDriver({
+              driverId: trip.driverId,
+              name: trip.driverName,
+              phone: trip.driverPhone || '',
+              rating: trip.driverRating || 5,
+              vehicleMake: trip.vehicleMake || '',
+              vehicleModel: trip.vehicleModel || '',
+              vehiclePlate: trip.vehiclePlate || '',
+              estimatedArrival: 5, // Fallback
+              location: null,
+            });
+          }
+        } else if (trip.status === 'IN_PROGRESS') {
+          tripStore.setPhase('in_progress');
+        } else if (trip.status === 'COMPLETED') {
+          tripStore.setPhase('completed');
+        }
+      } catch (err) {
+        console.error('Failed to sync trip state:', err);
+      } finally {
+        setInitializing(false);
+      }
+    };
+    syncTripState();
+  }, [tripId]);
 
   const phase = tripStore.phase;
   const driver = tripStore.driver;
   const activeTrip = tripStore.activeTrip;
   const route = tripStore.route;
+
+  const insets = useSafeAreaInsets();
+  const screenHeight = Dimensions.get('window').height;
+  const slideAnim = useRef(new Animated.Value(300)).current;
+
+  useEffect(() => {
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      tension: 50,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  }, [phase]); // Re-animate slightly on phase change for a "reactive" feel
 
   useEffect(() => {
     const fetchReasons = async () => {
@@ -72,11 +143,8 @@ export default function TripScreen() {
       router.replace('/(rider)/(tabs)/home');
     });
     const u6 = wsOn('trip_no_match', (data: any) => {
-      Alert.alert('No Drivers Available', data?.reason === 'NO_DRIVERS_AVAILABLE'
-        ? 'No drivers are available nearby. Please try again later.'
-        : 'Unable to find a driver for your trip.');
-      tripStore.reset();
-      router.replace('/(rider)/(tabs)/home');
+      console.log('[TripScreen] No match found yet, still searching...', data);
+      // We don't reset or redirect anymore, just let the backend keep looking
     });
     return () => { u1(); u2(); u3(); u4(); u5(); u6(); };
   }, [wsOn]);
@@ -95,7 +163,7 @@ export default function TripScreen() {
     }
   };
 
-  const defaultCenter = { latitude: 33.3152, longitude: 44.3661 };
+  const defaultCenter = { latitude: 30.147719, longitude: 31.394327 };
   const mapCenter = driver?.location || activeTrip?.pickupLocation || defaultCenter;
 
   return (
@@ -113,76 +181,122 @@ export default function TripScreen() {
           {route && <RoutePolyline coordinates={route.coordinates} />}
         </AppMapView>
 
-        <View style={styles.sheet}>
+        <Animated.View
+          style={[
+            styles.sheet,
+            {
+              paddingBottom: (insets.bottom || 24) + 24,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}
+        >
+          <View className="w-12 h-1.5 bg-zinc-800 rounded-full self-center mb-6" />
+
           {phase === 'matching' && (
             <View className="items-center py-4">
-              <ActivityIndicator color="#10b981" size="large" />
-              <Text className="text-white text-lg font-medium mt-4 text-center">Looking for a driver...</Text>
-              <TouchableOpacity onPress={handleCancelClick} className="bg-red-500/20 py-3 rounded-xl mt-4">
-                <Text className="text-red-400 font-medium text-center">Cancel</Text>
+              <View className="relative">
+                <ActivityIndicator color="#10b981" size="large" />
+                <View className="absolute inset-0 items-center justify-center">
+                  <View className="w-10 h-10 rounded-full border-2 border-emerald-500/20" />
+                </View>
+              </View>
+              <Text className="text-white text-xl font-black mt-6 text-center">Finding Your Ride</Text>
+              <Text className="text-zinc-500 text-sm mt-1 text-center">This may take a moment during busy times</Text>
+
+              <TouchableOpacity
+                onPress={handleCancelClick}
+                className="w-full bg-zinc-900 border border-zinc-800 py-4 rounded-2xl mt-8 flex-row items-center justify-center"
+              >
+                <Ionicons name="close-circle-outline" size={20} color="#ef4444" />
+                <Text className="text-zinc-400 font-black ml-2 uppercase tracking-widest text-[10px]">Cancel Search</Text>
               </TouchableOpacity>
             </View>
           )}
 
           {phase === 'matched' && driver && (
             <View>
-              <View className="flex-row items-center mb-3">
-                <View className="bg-zinc-800 p-2 rounded-full mr-3">
-                  <Ionicons name="person" size={20} color="white" />
+              <Text className="text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-1">Driver Found</Text>
+              <Text className="text-white text-xl font-black mb-6">Your ride is on the way</Text>
+
+              <View className="flex-row items-center bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50 mb-6">
+                <View className="w-12 h-12 bg-emerald-500/10 rounded-full items-center justify-center mr-4">
+                  <Ionicons name="person" size={24} color="#10b981" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-bold">{driver.name}</Text>
-                  <View className="flex-row items-center">
+                  <Text className="text-white font-black text-lg">{driver.name}</Text>
+                  <View className="flex-row items-center mt-0.5">
                     <Ionicons name="star" size={14} color="#f59e0b" />
-                    <Text className="text-zinc-400 text-sm ml-1">{driver.rating.toFixed(1)}</Text>
+                    <Text className="text-zinc-400 text-xs ml-1 font-bold">{driver.rating.toFixed(1)} · {driver.vehicleMake} {driver.vehicleModel}</Text>
                   </View>
-                  <Text className="text-zinc-500 text-xs mt-1">
-                    {driver.vehicleMake} {driver.vehicleModel} · {driver.vehiclePlate}
-                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text className="text-white font-black text-lg">{driver.vehiclePlate}</Text>
+                  <Text className="text-zinc-500 text-[10px] font-bold">PLATE NUMBER</Text>
                 </View>
               </View>
-              <View className="flex-row items-center mt-2">
-                <Ionicons name="time" size={14} color="#3b82f6" />
-                <Text className="text-zinc-400 text-xs ml-1">{driver.estimatedArrival} min away</Text>
+
+              <View className="flex-row items-center justify-between mb-8 px-2">
+                <View className="flex-row items-center">
+                  <View className="w-8 h-8 rounded-full bg-blue-500/10 items-center justify-center mr-3">
+                    <Ionicons name="time" size={16} color="#3b82f6" />
+                  </View>
+                  <View>
+                    <Text className="text-zinc-500 text-[10px] font-bold uppercase">Arrival</Text>
+                    <Text className="text-white font-bold">{driver.estimatedArrival} min away</Text>
+                  </View>
+                </View>
+                <TouchableOpacity onPress={() => Alert.alert('Calling', `Calling ${driver.phone}...`)} className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full items-center justify-center">
+                  <Ionicons name="call" size={20} color="#10b981" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity onPress={handleCancelClick} className="bg-red-500/20 py-3 rounded-xl mt-4">
-                <Text className="text-red-400 font-medium text-center">Cancel Ride</Text>
+
+              <TouchableOpacity
+                onPress={handleCancelClick}
+                className="w-full bg-zinc-900 border border-zinc-800 py-4 rounded-2xl items-center"
+              >
+                <Text className="text-red-400/60 font-black uppercase tracking-widest text-[10px]">Cancel Ride</Text>
               </TouchableOpacity>
             </View>
           )}
 
           {phase === 'in_progress' && (
             <View>
-              <Text className="text-emerald-400 font-bold text-sm mb-2">Trip in Progress</Text>
-              <Text className="text-white text-xl font-bold">
-                {(route?.distanceMeters || 0) > 1000
-                  ? `${((route?.distanceMeters || 0) / 1000).toFixed(1)} km`
-                  : `${route?.distanceMeters || 0} m`}
-              </Text>
-              <Text className="text-zinc-400 text-sm">
-                {Math.round((route?.durationSeconds || 0) / 60)} min remaining
-              </Text>
+              <Text className="text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-1">Trip Status</Text>
+              <Text className="text-white text-xl font-black mb-6">Heading to destination</Text>
+
+              <View className="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 mb-6">
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-zinc-500 text-[10px] font-bold uppercase">Estimated Time</Text>
+                  <Text className="text-white font-black text-lg">{Math.round((route?.durationSeconds || 0) / 60)} min</Text>
+                </View>
+                <View className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                  <View className="h-full bg-emerald-500 w-1/3" />
+                </View>
+              </View>
             </View>
           )}
 
           {phase === 'completed' && (
-            <View>
-              <Text className="text-white text-xl font-bold mb-3">Trip Completed</Text>
-              <View className="bg-zinc-800 rounded-2xl p-4 mb-4">
-                <Text className="text-zinc-400 text-sm">Fare</Text>
-                <Text className="text-white text-2xl font-bold">
-                  {activeTrip?.estimatedFare.toLocaleString()} IQD
+            <View className="py-2">
+              <Text className="text-emerald-500 text-[10px] font-black uppercase tracking-widest mb-1">Arrived</Text>
+              <Text className="text-white text-xl font-black mb-6">Trip Completed</Text>
+
+              <View className="bg-emerald-500/5 p-6 rounded-3xl border border-emerald-500/10 mb-8 items-center">
+                <Text className="text-zinc-500 text-xs font-bold mb-1 uppercase tracking-widest">Total Fare</Text>
+                <Text className="text-white text-4xl font-black">
+                  {activeTrip?.estimatedFare.toLocaleString()} <Text className="text-emerald-500 text-lg">IQD</Text>
                 </Text>
               </View>
+
               <TouchableOpacity
                 onPress={() => router.push('/(rider)/trip/rate')}
-                className="bg-emerald-500 py-3 rounded-xl"
+                className="bg-emerald-500 py-4 rounded-2xl items-center shadow-lg shadow-emerald-500/20"
               >
-                <Text className="text-white font-bold text-center">Rate Driver</Text>
+                <Text className="text-white font-black uppercase tracking-widest">Rate Your Driver</Text>
               </TouchableOpacity>
             </View>
           )}
-        </View>
+        </Animated.View>
       </View>
 
       <Modal
@@ -239,8 +353,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#09090b',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
+    borderTopWidth: 1,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    borderColor: '#27272a',
+    padding: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 20,
   },
 });

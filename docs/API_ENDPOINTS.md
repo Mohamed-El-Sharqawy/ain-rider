@@ -245,8 +245,8 @@ Request a new trip (rider only).
 Request:
 {
   "riderId": "rider-uuid",
-  "pickupLat": 33.3152,
-  "pickupLng": 44.3661,
+  "pickupLat": 30.147719,
+  "pickupLng": 31.394327,
   "pickupAddress": "Karrada, Baghdad",
   "dropoffLat": 33.2950,
   "dropoffLng": 44.3773,
@@ -263,8 +263,8 @@ Response 201:
     "riderId": "rider-uuid",
     "driverId": null,
     "status": "REQUESTED",
-    "pickupLat": 33.3152,
-    "pickupLng": 44.3661,
+    "pickupLat": 30.147719,
+    "pickupLng": 31.394327,
     "pickupAddress": "Karrada, Baghdad",
     "dropoffLat": 33.2950,
     "dropoffLng": 44.3773,
@@ -295,8 +295,8 @@ Response 200:
     "riderId": "rider-uuid",
     "driverId": "driver-uuid",
     "status": "MATCHED",
-    "pickupLat": 33.3152,
-    "pickupLng": 44.3661,
+    "pickupLat": 30.147719,
+    "pickupLng": 31.394327,
     "pickupAddress": "Karrada, Baghdad",
     "dropoffLat": 33.2950,
     "dropoffLng": 44.3773,
@@ -419,8 +419,8 @@ Update driver's GPS position (driver only, called every 3 seconds).
 Request:
 {
   "driverId": "driver-uuid",
-  "latitude": 33.3152,
-  "longitude": 44.3661,
+  "latitude": 30.147719,
+  "longitude": 31.394327,
   "heading": 45.0,                  // Degrees (0-360)
   "speed": 35.5                    // km/h
 }
@@ -444,7 +444,7 @@ Backend Side Effects:
 Get nearby available drivers (for rider home screen map preview).
 
 ```
-Query: ?latitude=33.3152&longitude=44.3661
+Query: ?latitude=30.147719&longitude=31.394327
 
 Response 200:
 {
@@ -477,7 +477,7 @@ Query: ?from=2026-03-26T10:00:00Z&to=2026-03-26T10:30:00Z
 
 Response 200:
 [
-  { "latitude": 33.3152, "longitude": 44.3661, "recordedAt": "2026-03-26T10:00:00Z" },
+  { "latitude": 30.147719, "longitude": 31.394327, "recordedAt": "2026-03-26T10:00:00Z" },
   { "latitude": 33.3155, "longitude": 44.3665, "recordedAt": "2026-03-26T10:00:03Z" },
   ...
 ]
@@ -494,8 +494,8 @@ Register driver as available for trips (driver goes online).
 Request:
 {
   "driverId": "driver-uuid",
-  "latitude": 33.3152,
-  "longitude": 44.3661,
+  "latitude": 30.147719,
+  "longitude": 31.394327,
   "vehicleTypeId": "sedan-uuid"
 }
 
@@ -532,8 +532,8 @@ Response 200:
   "drivers": [
     {
       "driverId": "uuid",
-      "latitude": 33.3152,
-      "longitude": 44.3661,
+      "latitude": 30.147719,
+      "longitude": 31.394327,
       "vehicleTypeId": "sedan-uuid",
       "h3Index": "891f8a60007ffff",
       "availableSince": "2026-03-26T10:00:00Z"
@@ -670,8 +670,8 @@ Request:
 {
   "userId": "user-uuid",
   "location": {
-    "latitude": 33.3152,
-    "longitude": 44.3661
+    "latitude": 30.147719,
+    "longitude": 31.394327
   },
   "message": "I feel unsafe"
 }

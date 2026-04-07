@@ -216,6 +216,12 @@ export interface TripResponse {
   matchedAt?: string;
   startedAt?: string;
   completedAt?: string;
+  driverName?: string;
+  driverPhone?: string;
+  driverRating?: number;
+  vehicleMake?: string;
+  vehicleModel?: string;
+  vehiclePlate?: string;
 }
 
 export interface FareEstimate {

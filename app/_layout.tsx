@@ -1,15 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Slot, router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { Platform } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { useAuthCheck } from '../hooks/useAuthCheck';
 import { useAuthStore } from '../stores/auth.store';
 import { useOnboardingStore } from '../stores/onboarding.store';
+import { DriverApi } from '../lib/api/driver';
 import '../global.css';
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
-import { Pressable, Text } from 'react-native';
-import { SecureStorage } from '../lib/storage/secure';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from "expo-status-bar";
 
 // Suppress excessive Reanimated Strict Mode warnings caused by NativeWind v4 transitions
 configureReanimatedLogger({
@@ -23,14 +25,45 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const { isReady, checkAuth } = useAuthCheck();
   const { isAuthenticated, role, isOnboarding } = useAuthStore();
-  const { onboardingStatus, documentsStatus, fetchOnboardingStatus } = useOnboardingStore();
+  const { onboardingStatus, documentsStatus, fetchOnboardingStatus, vehicle: storeVehicle } = useOnboardingStore();
   const segments = useSegments();
+  const segmentsRef = useRef(segments);
+  segmentsRef.current = segments;
 
-  console.log('[LayoutDebug] State:', { isAuthenticated, role, isOnboarding, onboardingStatus, segments });
+  console.log('[LayoutDebug] State:', { isAuthenticated, role, isOnboarding, onboardingStatus, segments, storeVehicle });
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const tripId = response.notification.request.content.data?.tripId;
+      if (tripId) {
+        if (segmentsRef.current[0] === '(driver)') {
+          router.push(`/(driver)/trip/${tripId}`);
+        }
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || role !== 'DRIVER') return;
+    DriverApi.updateStatus(false).catch(() => {});
+  }, [isAuthenticated, role]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('trip-alerts', {
+        name: 'Trip Alerts',
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: 'new_trip.mp3',
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#18181b',
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && role === 'DRIVER' && (isOnboarding || onboardingStatus === null)) {
@@ -68,12 +101,13 @@ export default function RootLayout() {
       } else {
         const inRiderGroup = segments[0] === '(rider)';
         const inDriverGroup = segments[0] === '(driver)';
-        console.log('[LayoutDebug] Normal flow routing:', { role, inRiderGroup, inDriverGroup });
+        const isSharedRoute = ['support', 'offline'].includes(segments[0]);
+        console.log('[LayoutDebug] Normal flow routing:', { role, inRiderGroup, inDriverGroup, isSharedRoute });
 
-        if (role === 'RIDER' && !inRiderGroup) {
+        if (role === 'RIDER' && !inRiderGroup && !isSharedRoute) {
           console.log('[LayoutDebug] Redirecting Rider -> Home');
           router.replace('/(rider)/(tabs)/home');
-        } else if (role === 'DRIVER' && !inDriverGroup) {
+        } else if (role === 'DRIVER' && !inDriverGroup && !isSharedRoute) {
           console.log('[LayoutDebug] Redirecting Driver -> Home');
           router.replace('/(driver)/(tabs)/home');
         }
@@ -108,10 +142,19 @@ export default function RootLayout() {
           router.replace('/(auth)/pending-approval');
         }
       } else if (onboardingStatus === 'PENDING_DOCUMENTS') {
-        console.log('[LayoutDebug] Defaulting to document upload');
-        // Based on documentsStatus, we can be more smart, but driver-documents is the unified hub
-        if (currentAuthStep !== 'driver-documents' && currentAuthStep !== 'vehicle-info') {
-          router.replace('/(auth)/driver-documents');
+        const hasVehicleData = !!storeVehicle?.make;
+        console.log('[LayoutDebug] PENDING_DOCUMENTS flow. hasVehicleData:', hasVehicleData);
+
+        if (!hasVehicleData) {
+          if (currentAuthStep !== 'vehicle-info') {
+            console.log('[LayoutDebug] No vehicle data -> Redirecting to vehicle-info');
+            router.replace('/(auth)/vehicle-info');
+          }
+        } else {
+          console.log('[LayoutDebug] Has vehicle data -> Defaulting to document upload');
+          if (currentAuthStep !== 'driver-documents' && currentAuthStep !== 'vehicle-info') {
+            router.replace('/(auth)/driver-documents');
+          }
         }
       } else {
         console.log('[LayoutDebug] No specific redirection. Current path:', currentAuthStep);
@@ -127,6 +170,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <StatusBar style="light" />
       <Slot />
       {/* {__DEV__ && (
         <Pressable

@@ -1,13 +1,14 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 const availableServices = [
-  { id: 'car', name: 'Car Ride', description: 'Book a comfortable car ride', icon: 'car-sport', color: '#10b981' },
-  { id: 'motorcycle', name: 'Motorcycle', description: 'Quick rides on two wheels', icon: 'bicycle', color: '#f59e0b' },
+  { id: 'car', name: 'Car Ride', description: 'Book a comfortable car ride', icon: 'car-sport', color: '#10b981', href: "/home" },
 ];
 
 const comingSoonServices = [
+  { id: 'motorcycle', name: 'Motorcycle', icon: 'bicycle' },
   { id: 'package', name: 'Package', icon: 'cube' },
   { id: 'food', name: 'Food Delivery', icon: 'restaurant' },
   { id: 'bus', name: 'Bus', icon: 'bus' },
@@ -32,6 +33,7 @@ export default function ServicesScreen() {
                 key={service.id}
                 className="bg-zinc-900 rounded-3xl p-6 flex-row items-center border border-zinc-800/50"
                 activeOpacity={0.7}
+                onPress={() => router.push(service.href)}
               >
                 <View
                   className="w-16 h-16 rounded-2xl items-center justify-center"
@@ -57,7 +59,7 @@ export default function ServicesScreen() {
               <View
                 key={service.id}
                 style={{ width: '48%' }}
-                className="bg-zinc-900/50 rounded-2xl p-5 items-center border border-zinc-800/30"
+                className="bg-zinc-900/50 rounded-2xl p-5 items-center border flex-grow border-zinc-800/30"
               >
                 <View className="relative">
                   <Ionicons name={service.icon as any} color="#52525b" size={28} />

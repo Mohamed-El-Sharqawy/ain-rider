@@ -1,17 +1,18 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, StyleSheet, Animated, Dimensions, Modal } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useKeepAwake } from 'expo-keep-awake';
+import * as ExpoLocation from 'expo-location';
+import * as Notifications from 'expo-notifications';
 import { DriverApi } from '../../../lib/api/driver';
 import { AuthApi } from '../../../lib/api/auth';
 import { useAuthStore } from '../../../stores/auth.store';
 import { useDriverStore } from '../../../stores/driver.store';
 import { useLocation } from '../../../hooks/useLocation';
-import { useWebSocket } from '../../../hooks/useWebSocket';
 import { LocationApi } from '../../../lib/api/location.api';
 import { MatchApi } from '../../../lib/api/match.api';
-import { TripApi } from '../../../lib/api/trip.api';
 import { AppMapView, AppMapViewRef } from '../../../components/map/MapView';
 import { LocationMarker } from '../../../components/map/LocationMarker';
 import { wsService } from '../../../services/websocket.service';
@@ -22,6 +23,7 @@ const WS_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3001/ws';
 export default function DriverHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  useKeepAwake();
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [followUser, setFollowUser] = useState(true);
@@ -29,8 +31,51 @@ export default function DriverHome() {
   const { logout } = useAuthStore();
   const driverStore = useDriverStore();
   const { currentLocation, startTracking, stopTracking } = useLocation();
-  const { on: wsOn } = useWebSocket();
   const mapRef = useRef<AppMapViewRef>(null);
+  const lastMatchUpdateRef = useRef<number>(0);
+  const driverInfoRef = useRef<any>(null);
+  const wsUnsubsRef = useRef<(() => void)[]>([]);
+  const isOnlineRef = useRef(false);
+
+  const screenHeight = Dimensions.get('window').height;
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [showIncoming, setShowIncoming] = useState(false);
+  const [showDisclosureModal, setShowDisclosureModal] = useState(false);
+
+  useEffect(() => {
+    if (incomingTrip) {
+      setShowIncoming(true);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 50,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: screenHeight,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowIncoming(false);
+      });
+    }
+  }, [incomingTrip, screenHeight]);
 
   useEffect(() => {
     if (isOnline && followUser && currentLocation && mapRef.current) {
@@ -39,47 +84,106 @@ export default function DriverHome() {
   }, [currentLocation, isOnline, followUser]);
 
   useEffect(() => {
-    if (!isOnline) return;
-
-    const unsubAssigned = wsOn('trip_assigned', async (data: any) => {
-      try {
-        console.log('[DriverHome] Trip assigned:', data.tripId);
-        const tripData = await TripApi.getTrip(data.tripId);
-        setIncomingTrip(tripData);
-      } catch (error) {
-        console.error('Failed to handle trip_assigned:', error);
+    return () => {
+      if (isOnlineRef.current) {
+        locationService.stopBackgroundTracking().catch(() => {});
+        stopTracking();
+        wsUnsubsRef.current.forEach(fn => fn());
+        wsService.disconnect();
+        isOnlineRef.current = false;
       }
-    });
-
-    const unsubCancelled = wsOn('trip_cancelled', (data: any) => {
-      console.log('[DriverHome] Trip cancelled:', data.tripId);
-      setIncomingTrip(null);
-    });
-
-    return () => { 
-      unsubAssigned();
-      unsubCancelled();
     };
-  }, [isOnline]);
+  }, []);
 
   const goOnline = async () => {
+    try {
+      const { status: bgStatus } = await ExpoLocation.getBackgroundPermissionsAsync();
+      if (bgStatus !== 'granted') {
+        setShowDisclosureModal(true);
+        return;
+      }
+    } catch {
+      setShowDisclosureModal(true);
+      return;
+    }
+    await proceedOnline();
+  };
+
+  const handleDisclosureAccept = async () => {
+    setShowDisclosureModal(false);
+    try {
+      const { status } = await ExpoLocation.requestBackgroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Background location permission is required to receive trip requests while the app is in the background.');
+        return;
+      }
+      await Notifications.requestPermissionsAsync({
+        ios: { allowAlert: true, allowSound: true, allowBadge: false },
+      });
+      await proceedOnline();
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to request permissions');
+    }
+  };
+
+  const handleDisclosureDeny = () => {
+    setShowDisclosureModal(false);
+  };
+
+  const proceedOnline = async () => {
     setIsLoading(true);
     setFollowUser(true);
     try {
+      wsService.connect(WS_URL);
+
       const [, loc, me, onboarding] = await Promise.all([
         DriverApi.updateStatus(true),
         locationService.getCurrentLocation(),
         AuthApi.getMe(),
         DriverApi.getOnboardingStatus(),
       ]);
-      await LocationApi.updateDriverLocation({
+
+      LocationApi.updateDriverLocation({
         latitude: loc.latitude,
         longitude: loc.longitude,
         heading: loc.heading,
         speed: loc.speed,
+      }).catch(() => { });
+
+      await wsService.waitForConnection();
+      console.log('[DriverHome] Subscribing to driver channel with ID:', me.id);
+      wsService.subscribe('driver', me.id);
+
+      wsUnsubsRef.current.forEach(fn => fn());
+      wsUnsubsRef.current = [];
+      const unsubAssigned = wsService.on('trip_assigned', (data: any) => {
+        console.log('[DriverHome] Trip assigned:', data.tripId);
+        setIncomingTrip({
+          id: data.tripId,
+          riderId: data.riderId,
+          pickupLat: data.pickupLocation?.latitude || data.pickupLocation?.lat,
+          pickupLng: data.pickupLocation?.longitude || data.pickupLocation?.lng,
+          dropoffLat: data.dropoffLocation?.latitude || data.dropoffLocation?.lat,
+          dropoffLng: data.dropoffLocation?.longitude || data.dropoffLocation?.lng,
+          pickupAddress: data.pickupAddress,
+          dropoffAddress: data.dropoffAddress,
+          estimatedFare: data.estimatedFare,
+          status: 'ASSIGNED',
+        });
       });
+      const unsubCancelled = wsService.on('trip_cancelled', (data: any) => {
+        console.log('[DriverHome] Trip cancelled:', data.tripId);
+        setIncomingTrip(null);
+      });
+      wsUnsubsRef.current = [unsubAssigned, unsubCancelled];
+
       const vehicle = onboarding.documents?.vehicle?.details;
-      await MatchApi.registerAvailable({
+      console.log('[DriverHome] Vehicle info for matching:', {
+        make: vehicle?.make,
+        model: vehicle?.model,
+        plate: vehicle?.plateNumber,
+      });
+      const matchInfo = {
         latitude: loc.latitude,
         longitude: loc.longitude,
         vehicleTypeId: 'default',
@@ -88,7 +192,10 @@ export default function DriverHome() {
         vehicleMake: vehicle?.make,
         vehicleModel: vehicle?.model,
         vehiclePlate: vehicle?.plateNumber,
-      });
+      };
+      driverInfoRef.current = matchInfo;
+      await MatchApi.registerAvailable(matchInfo);
+      lastMatchUpdateRef.current = Date.now();
       startTracking(async (update) => {
         try {
           await LocationApi.updateDriverLocation({
@@ -97,16 +204,22 @@ export default function DriverHome() {
             heading: update.heading,
             speed: update.speed,
           });
+          const now = Date.now();
+          if (now - lastMatchUpdateRef.current >= 60_000 && driverInfoRef.current) {
+            lastMatchUpdateRef.current = now;
+            await MatchApi.registerAvailable({
+              ...driverInfoRef.current,
+              latitude: update.latitude,
+              longitude: update.longitude,
+            });
+          }
         } catch { }
       });
-      
-      wsService.connect(WS_URL);
-      // Wait 500ms to ensure the connection is stable before subscribing
-      await new Promise(r => setTimeout(r, 500));
-      console.log('[DriverHome] Subscribing to driver channel with ID:', me.id);
-      wsService.subscribe('driver', me.id);
-      
+
+      await locationService.startBackgroundTracking();
+
       setIsOnline(true);
+      isOnlineRef.current = true;
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to go online');
     } finally {
@@ -114,14 +227,39 @@ export default function DriverHome() {
     }
   };
 
+  // Instant re-availability after trip ends
+  useEffect(() => {
+    if (isOnline && !driverStore.currentTrip && driverInfoRef.current) {
+      const triggerAvailability = async () => {
+        try {
+          const loc = await locationService.getCurrentLocation();
+          await MatchApi.registerAvailable({
+            ...driverInfoRef.current,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          });
+          lastMatchUpdateRef.current = Date.now();
+          console.log('[DriverHome] Triggered instant re-availability after trip');
+        } catch (err) {
+          console.error('[DriverHome] Failed instant re-availability:', err);
+        }
+      };
+      triggerAvailability();
+    }
+  }, [driverStore.currentTrip, isOnline]);
+
   const goOffline = async () => {
     setIsLoading(true);
     try {
       await DriverApi.updateStatus(false);
       await MatchApi.unregisterAvailable();
       stopTracking();
+      await locationService.stopBackgroundTracking();
+      wsUnsubsRef.current.forEach(fn => fn());
+      wsUnsubsRef.current = [];
       wsService.disconnect();
       setIsOnline(false);
+      isOnlineRef.current = false;
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to go offline');
     } finally {
@@ -132,6 +270,10 @@ export default function DriverHome() {
   const handleAcceptTrip = async () => {
     if (!incomingTrip) return;
     try {
+      // 1. Tell match-service driver accepted (unblocks the match loop)
+      await MatchApi.respondToTrip(incomingTrip.id, 'accept');
+
+      // 2. Update local state
       driverStore.setCurrentTrip({
         tripId: incomingTrip.id,
         riderId: incomingTrip.riderId,
@@ -139,7 +281,7 @@ export default function DriverHome() {
         dropoffLocation: { latitude: incomingTrip.dropoffLat, longitude: incomingTrip.dropoffLng },
         pickupAddress: incomingTrip.pickupAddress,
         dropoffAddress: incomingTrip.dropoffAddress,
-        status: incomingTrip.status,
+        status: 'MATCHED',
       });
       const tripId = incomingTrip.id;
       setIncomingTrip(null);
@@ -152,7 +294,7 @@ export default function DriverHome() {
   const handleRejectTrip = async () => {
     if (!incomingTrip) return;
     try {
-      await TripApi.rejectTrip(incomingTrip.id, 'DRIVER_DECLINED');
+      await MatchApi.respondToTrip(incomingTrip.id, 'reject');
       setIncomingTrip(null);
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to reject trip');
@@ -235,7 +377,7 @@ export default function DriverHome() {
         </View>
       )}
 
-      <View 
+      <View
         style={{ paddingBottom: insets.bottom || 24 }}
         className="flex-row bg-zinc-900 border-t border-zinc-800 py-6"
       >
@@ -249,9 +391,64 @@ export default function DriverHome() {
         </View>
       </View>
 
-      {incomingTrip && (
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, { marginBottom: insets.bottom + 20 }]}>
+      <Modal
+        visible={showDisclosureModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+      >
+        <View style={styles.disclosureOverlay}>
+          <View style={styles.disclosureContainer}>
+            <View className="w-12 h-1.5 bg-zinc-800 rounded-full self-center mb-6" />
+            <View className="w-14 h-14 rounded-full bg-emerald-500/20 items-center justify-center self-center mb-6">
+              <Ionicons name="location" size={28} color="#10b981" />
+            </View>
+            <Text className="text-white text-xl font-black text-center mb-4">
+              Background Location Required
+            </Text>
+            <Text className="text-zinc-400 text-sm text-center leading-6 mb-8">
+              Ain Rider collects location data to enable tracking your active trips and matching you with new ride requests even when the app is closed or not in use.
+            </Text>
+            <View className="flex-row gap-4">
+              <TouchableOpacity
+                onPress={handleDisclosureDeny}
+                className="flex-1 bg-zinc-900 border border-zinc-800 py-4 rounded-2xl items-center"
+              >
+                <Text className="text-zinc-400 font-bold">DENY</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleDisclosureAccept}
+                className="flex-1 bg-emerald-500 py-4 rounded-2xl items-center shadow-lg shadow-emerald-500/20"
+              >
+                <Text className="text-white font-bold">ACCEPT</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showIncoming}
+        transparent={true}
+        animationType="none"
+        statusBarTranslucent={true}
+      >
+        <Animated.View
+          style={[
+            styles.modalOverlay,
+            { opacity: fadeAnim }
+          ]}
+        >
+          <Animated.View
+            style={[
+              styles.modalContainer,
+              {
+                paddingBottom: (insets.bottom || 24) + 32,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            <View className="w-12 h-1.5 bg-zinc-800 rounded-full self-center mb-8" />
             <Text className="text-zinc-500 text-xs font-black uppercase tracking-widest mb-2">Incoming Trip</Text>
             <Text className="text-white text-2xl font-black mb-6">New Ride Request</Text>
 
@@ -262,7 +459,7 @@ export default function DriverHome() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-zinc-500 text-[10px] font-bold uppercase">Pickup</Text>
-                  <Text className="text-white font-bold" numberOfLines={1}>{incomingTrip.pickupAddress}</Text>
+                  <Text className="text-white font-bold" numberOfLines={1}>{incomingTrip?.pickupAddress}</Text>
                 </View>
               </View>
 
@@ -272,7 +469,7 @@ export default function DriverHome() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-zinc-500 text-[10px] font-bold uppercase">Destination</Text>
-                  <Text className="text-white font-bold" numberOfLines={1}>{incomingTrip.dropoffAddress}</Text>
+                  <Text className="text-white font-bold" numberOfLines={1}>{incomingTrip?.dropoffAddress}</Text>
                 </View>
               </View>
             </View>
@@ -291,9 +488,9 @@ export default function DriverHome() {
                 <Text className="text-white font-bold">ACCEPT</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      )}
+          </Animated.View>
+        </Animated.View>
+      </Modal>
     </View>
   );
 }
@@ -303,15 +500,34 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'flex-end',
-    padding: 20,
     zIndex: 100,
   },
   modalContainer: {
     backgroundColor: '#09090b',
+    borderTopWidth: 1,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    borderColor: '#27272a',
+    padding: 32,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 20,
+  },
+  disclosureOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  disclosureContainer: {
+    backgroundColor: '#09090b',
+    borderRadius: 32,
     borderWidth: 1,
     borderColor: '#27272a',
-    borderRadius: 32,
-    padding: 32,
+    padding: 28,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.5,

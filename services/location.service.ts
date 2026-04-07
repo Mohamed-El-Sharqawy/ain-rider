@@ -1,10 +1,14 @@
 import * as ExpoLocation from 'expo-location';
 import { LatLng } from './map/map.provider';
+import { startBackgroundLocationTask, stopBackgroundLocationTask } from './background-tasks';
 
 interface LocationUpdate extends LatLng {
   heading?: number;
   speed?: number;
 }
+
+// const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
+const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
 
 class LocationService {
   private watchSubscription: ExpoLocation.LocationSubscription | null = null;
@@ -15,16 +19,25 @@ class LocationService {
   }
 
   async getCurrentLocation(): Promise<LocationUpdate> {
-    const location = await ExpoLocation.getCurrentPositionAsync({
-      accuracy: ExpoLocation.Accuracy.Balanced,
-    });
+    try {
+      const location = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: ExpoLocation.Accuracy.Balanced,
+      });
 
-    return {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      heading: location.coords.heading ?? undefined,
-      speed: location.coords.speed ?? undefined,
-    };
+      return {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        heading: location.coords.heading ?? undefined,
+        speed: location.coords.speed ?? undefined,
+      };
+    } catch (error) {
+      console.warn('[LocationService] Failed to get real location, using fallback:', error);
+      return {
+        ...BAGHDAD,
+        heading: 0,
+        speed: 0,
+      };
+    }
   }
 
   async startTracking(
@@ -58,6 +71,18 @@ class LocationService {
       this.watchSubscription.remove();
       this.watchSubscription = null;
     }
+  }
+
+  async startBackgroundTracking(): Promise<void> {
+    const { status } = await ExpoLocation.requestBackgroundPermissionsAsync();
+    if (status !== 'granted') {
+      throw new Error('Background location permission not granted');
+    }
+    await startBackgroundLocationTask();
+  }
+
+  async stopBackgroundTracking(): Promise<void> {
+    await stopBackgroundLocationTask();
   }
 }
 

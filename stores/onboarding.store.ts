@@ -55,7 +55,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
           drivingLicense: statusData.documents.drivingLicense,
           vehicle: statusData.documents.vehicle,
         },
-        vehicle: statusData.documents.vehicle.details || get().vehicle
+        vehicle: statusData.documents?.vehicle?.details || get().vehicle
       });
     } catch (error) {
       console.error('[OnboardingDebug] Failed to fetch onboarding status:', error);

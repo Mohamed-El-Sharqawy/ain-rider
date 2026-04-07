@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useKeepAwake } from 'expo-keep-awake';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +14,7 @@ import { LocationMarker } from '../../../components/map/LocationMarker';
 export default function RiderHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  useKeepAwake();
   const [followUser, setFollowUser] = useState(true);
   const mapRef = useRef<AppMapViewRef>(null);
   const { currentLocation } = useLocation();
@@ -32,7 +34,7 @@ export default function RiderHome() {
       <View className="flex-1">
         <AppMapView
           ref={mapRef}
-          center={currentLocation || { latitude: 33.3152, longitude: 44.3661 }}
+          center={currentLocation || { latitude: 30.147719, longitude: 31.394327 }}
           zoom={14}
           style={StyleSheet.absoluteFill}
           onRegionChange={(e) => {
@@ -73,7 +75,7 @@ export default function RiderHome() {
           </TouchableOpacity>
         )}
 
-        <View 
+        <View
           style={{ bottom: insets.bottom + 20 }}
           className="absolute left-4 right-4 flex-row gap-3"
         >

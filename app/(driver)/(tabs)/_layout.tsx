@@ -10,20 +10,12 @@ export default function DriverTabsLayout() {
         tabBarInactiveTintColor: '#71717a',
         tabBarStyle: {
           backgroundColor: '#09090b',
-          borderTopWidth: 0,
-          height: 64,
-          marginHorizontal: 16,
-          marginBottom: 24,
-          borderRadius: 32,
-          position: 'absolute',
-          bottom: 0,
+          borderTopWidth: 1,
+          borderTopColor: '#18181b',
+          height: 80,
           paddingTop: 12,
-          paddingBottom: 12,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 10,
+          paddingBottom: 28,
+          elevation: 0,
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -55,7 +47,7 @@ export default function DriverTabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "wallet" : "wallet-outline"} color={color} size={24} />
           ),
-          href: null, // Disable for now if file doesn't exist
+          // href: null, // Disable for now if file doesn't exist
         }}
       />
       <Tabs.Screen
@@ -65,7 +57,7 @@ export default function DriverTabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "person" : "person-outline"} color={color} size={24} />
           ),
-          href: null, // Disable for now if file doesn't exist
+          // href: null, // Disable for now if file doesn't exist
         }}
       />
     </Tabs>

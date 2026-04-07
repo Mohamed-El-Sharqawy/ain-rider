@@ -54,4 +54,8 @@ export const TripApi = {
   async rejectTrip(tripId: string, reason?: string): Promise<{ success: boolean }> {
     return ApiClient.patch<{ success: boolean }>(`/trips/${tripId}/reject`, { reason });
   },
+  
+  async acceptTrip(tripId: string): Promise<TripResponse> {
+    return ApiClient.patch<TripResponse>(`/trips/${tripId}/accept`, {});
+  },
 };

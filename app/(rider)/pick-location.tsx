@@ -26,7 +26,7 @@ export default function PickLocationScreen() {
   // Initial center: existing selection > current location > Baghdad
   const initialCenter = (isPickup ? tripStore.selectedPickup?.location : tripStore.selectedDropoff?.location)
     || currentLocation
-    || { latitude: 33.3152, longitude: 44.3661 };
+    || { latitude: 30.147719, longitude: 31.394327 };
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     setResolving(true);
@@ -141,9 +141,8 @@ export default function PickLocationScreen() {
         <TouchableOpacity
           onPress={handleConfirm}
           disabled={!coordinate || resolving}
-          className={`py-4 rounded-xl items-center ${
-            !coordinate || resolving ? 'bg-zinc-700' : isPickup ? 'bg-emerald-500' : 'bg-red-500'
-          }`}
+          className={`py-4 rounded-xl items-center ${!coordinate || resolving ? 'bg-zinc-700' : isPickup ? 'bg-emerald-500' : 'bg-red-500'
+            }`}
         >
           <Text className="text-white text-base font-bold">
             Confirm {label} location
