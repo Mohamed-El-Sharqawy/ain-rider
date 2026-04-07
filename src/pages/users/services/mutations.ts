@@ -72,6 +72,23 @@ export const useRejectDocument = () => {
   });
 };
 
+export const useApproveDocument = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, stage }: { id: string; stage: string }) =>
+      usersApi.approveDocument(id, stage),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      queryClient.invalidateQueries({ queryKey: userKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: userKeys.onboarding(id) });
+      toast.success('تم قبول الوثيقة بنجاح');
+    },
+    onError: (err) => {
+      toast.error(getApiError(err));
+    },
+  });
+};
+
 export const useResetUploadAttempts = () => {
   const queryClient = useQueryClient();
   return useMutation({

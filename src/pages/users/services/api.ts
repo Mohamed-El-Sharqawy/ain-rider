@@ -38,6 +38,9 @@ export const usersApi = {
   rejectDocument: (id: string, stage: string, reason: string) =>
     api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/reject-document`, { stage, reason }),
 
+  approveDocument: (id: string, stage: string) =>
+    api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/approve-document`, { stage }),
+
   create: (data: CreateUserDTO) => {
     // Always use admin endpoint when creating users from dashboard
     // This doesn't store tokens since admin is creating, not logging in

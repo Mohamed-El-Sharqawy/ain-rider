@@ -10,7 +10,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useUpdateUserStatus, useApproveDriver, useRejectDocument, useResetUploadAttempts } from '../services/mutations';
+import { useUpdateUserStatus, useApproveDriver, useRejectDocument, useApproveDocument, useResetUploadAttempts } from '../services/mutations';
 import { useGetOnboardingStatus } from '../services/queries';
 import { formatDate } from '@/lib/utils';
 import { Loader2, Star, Car, Phone, Mail, Calendar, Shield, CheckCircle2, XCircle, Clock, ExternalLink } from 'lucide-react';
@@ -34,6 +34,7 @@ export function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
   );
   const { mutate: approveDriver, isPending: isApproving } = useApproveDriver();
   const { mutate: rejectDocument, isPending: isRejecting } = useRejectDocument();
+  const { mutate: approveDocument, isPending: isApprovingDoc } = useApproveDocument();
   const { mutate: resetAttempts, isPending: isResetting } = useResetUploadAttempts();
 
   if (!user) return null;
@@ -217,7 +218,18 @@ export function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        {stage.data.status === 'UPLOADED' && (
+                        {stage.data.status !== 'APPROVED' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-green-500 hover:text-green-600 hover:bg-green-50"
+                            onClick={() => approveDocument({ id: user.id, stage: stage.id })}
+                            disabled={isApprovingDoc}
+                          >
+                             قبول
+                          </Button>
+                        )}
+                        {stage.data.status !== 'REJECTED' && (
                           <Button
                             variant="ghost"
                             size="sm"
