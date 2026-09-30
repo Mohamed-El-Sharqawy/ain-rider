@@ -8,7 +8,8 @@ import { useAuthStore } from '@/stores/authStore'
 
 export const notificationKeys = {
   all: ['notifications'] as const,
-  byUser: (userId: string) => ['notifications', 'user', userId] as const,
+  me: () => [...notificationKeys.all, 'me'] as const,
+  byUser: (userId: string) => [...notificationKeys.all, 'user', userId] as const,
 }
 
 export const useGetAllNotifications = () => {
@@ -17,15 +18,19 @@ export const useGetAllNotifications = () => {
     queryKey: notificationKeys.all,
     queryFn: () =>
       notificationsApi.getAll().then((r) => r.data.map((dto) => transformNotification(dto, user?.id))),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   })
 }
 
 export const useGetMyNotifications = () => {
   const { user } = useAuthStore()
   return useQuery({
-    queryKey: [...notificationKeys.all, 'me'] as const,
+    queryKey: notificationKeys.me(),
     queryFn: () =>
       notificationsApi.getMyNotifications().then((r) => r.data.map((dto) => transformNotification(dto, user?.id))),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   })
 }
 
@@ -35,5 +40,7 @@ export const useGetUserNotifications = (userId: string) => {
     queryFn: () =>
       notificationsApi.getByUser(userId).then((r) => r.data.map((dto) => transformNotification(dto, userId))),
     enabled: !!userId,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   })
 }

@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useNotificationStore } from '@/stores/notificationStore'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useWebSocket } from '@/providers/WebSocketProvider'
 import { useMarkNotificationRead, useMarkAllNotificationsRead } from '@/pages/notifications/services/mutations'
 import { useGetAllNotifications, notificationKeys } from '@/pages/notifications/services/queries'
 import { formatRelativeTime } from '@/lib/utils'

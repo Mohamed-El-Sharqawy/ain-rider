@@ -4,10 +4,10 @@ import { transformVehicle, transformVehicleType } from './transformers';
 
 export const vehicleKeys = {
   all: ['vehicles'] as const,
-  list: (driverId?: string) => ['vehicles', 'list', { driverId }] as const,
-  types: ['vehicle-types'] as const,
-  makes: (activeOnly?: boolean) => ['vehicle-makes', { activeOnly }] as const,
-  models: (makeId?: string) => ['vehicle-models', { makeId }] as const,
+  list: (driverId?: string) => [...vehicleKeys.all, 'list', { driverId }] as const,
+  types: [...['vehicles'], 'types'] as const,
+  makes: (activeOnly?: boolean) => [...vehicleKeys.all, 'makes', { activeOnly }] as const,
+  models: (makeId?: string) => [...vehicleKeys.all, 'models', { makeId }] as const,
 };
 
 export const useGetVehicles = (driverId?: string) => {
@@ -15,6 +15,8 @@ export const useGetVehicles = (driverId?: string) => {
     queryKey: vehicleKeys.list(driverId),
     queryFn: () => vehiclesApi.getAllVehicles(driverId).then((r) => r.data.map(transformVehicle)),
     placeholderData: keepPreviousData,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 
@@ -23,6 +25,8 @@ export const useGetVehicleTypes = () => {
     queryKey: vehicleKeys.types,
     queryFn: () => vehiclesApi.getAllTypes().then((r) => r.data.map(transformVehicleType)),
     placeholderData: keepPreviousData,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 
@@ -31,6 +35,8 @@ export const useGetVehicleMakes = (activeOnly?: boolean) => {
     queryKey: vehicleKeys.makes(activeOnly),
     queryFn: () => vehiclesApi.getAllMakes(activeOnly).then((r) => r.data),
     placeholderData: keepPreviousData,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 
@@ -39,5 +45,7 @@ export const useGetVehicleModels = (makeId?: string) => {
     queryKey: vehicleKeys.models(makeId),
     queryFn: () => vehiclesApi.getAllModels(makeId).then((r) => r.data),
     placeholderData: keepPreviousData,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };

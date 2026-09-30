@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useGetComplaints } from '@/pages/complaints/services/queries';
 import { useGetPromos } from '@/pages/promos/services/queries';
@@ -18,15 +19,35 @@ export function DashboardPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
-  const { data: complaints, isLoading: complaintsLoading, isError: complaintsError, refetch: refetchComplaints } = useGetComplaints();
-  const { data: promos, isLoading: promosLoading } = useGetPromos();
-  const { data: withdrawals, isLoading: withdrawalsLoading } = useGetWithdrawals();
+  const { data: complaints, isLoading: complaintsLoading, isError: complaintsError, refetch: refetchComplaints } = useGetComplaints({ page: 1, limit: 10 });
+  const { data: promos, isLoading: promosLoading, isError: promosError, refetch: refetchPromos } = useGetPromos();
+  const { data: withdrawals, isLoading: withdrawalsLoading, isError: withdrawalsError, refetch: refetchWithdrawals } = useGetWithdrawals();
 
-  const pendingComplaints = complaints?.filter((c) => c.status === 'PENDING').length ?? 0;
-  const activePromos = promos?.filter((p) => p.status === 'ACTIVE').length ?? 0;
-  const pendingWithdrawals = withdrawals?.filter((w) => w.status === 'PENDING').length ?? 0;
+  const hasAnyError = complaintsError || promosError || withdrawalsError;
 
-  const recentComplaints = complaints?.slice(0, 5) ?? [];
+  const handleRetryAll = () => {
+    refetchComplaints();
+    refetchPromos();
+    refetchWithdrawals();
+  };
+
+  const pendingComplaints = useMemo(
+    () => complaints?.data.filter((c) => c.status === 'PENDING').length ?? 0,
+    [complaints]
+  );
+  const activePromos = useMemo(
+    () => promos?.filter((p) => p.status === 'ACTIVE').length ?? 0,
+    [promos]
+  );
+  const pendingWithdrawals = useMemo(
+    () => withdrawals?.filter((w) => w.status === 'PENDING').length ?? 0,
+    [withdrawals]
+  );
+
+  const recentComplaints = useMemo(
+    () => complaints?.data.slice(0, 5) ?? [],
+    [complaints]
+  );
 
   const columns: Column<Complaint>[] = [
     {
@@ -41,8 +62,8 @@ export function DashboardPage() {
     { key: 'createdAt', label: 'التاريخ', render: (v) => formatDate(String(v)) },
   ];
 
-  if (complaintsError) {
-    return <ErrorState message="فشل تحميل بيانات لوحة التحكم" onRetry={refetchComplaints} />;
+  if (hasAnyError) {
+    return <ErrorState message="فشل تحميل بيانات لوحة التحكم" onRetry={handleRetryAll} />;
   }
 
   return (
@@ -72,8 +93,7 @@ export function DashboardPage() {
 
       <Card className="p-6">
         <h2
-          className="text-lg font-semibold mb-4"
-          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-foreground)' }}
+          className="text-lg font-semibold mb-4 font-display text-foreground"
         >
           أحدث الشكاوى
         </h2>
@@ -83,30 +103,30 @@ export function DashboardPage() {
           <DataTable
             data={recentComplaints}
             columns={columns}
-            onRowClick={(_row) => navigate('/complaints')}
+            onRowClick={() => navigate('/complaints')}
           />
         )}
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-6 cursor-pointer transition-colors hover:bg-muted" onClick={() => navigate('/complaints')}>
-          <MessageSquareWarning size={32} className="mb-3" style={{ color: 'var(--color-primary)' }} />
-          <h3 className="font-semibold mb-1" style={{ color: 'var(--color-foreground)' }}>إدارة الشكاوى</h3>
-          <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
+          <MessageSquareWarning size={32} className="mb-3 text-primary" />
+          <h3 className="font-semibold mb-1 text-foreground">إدارة الشكاوى</h3>
+          <p className="text-sm text-muted-foreground">
             عرض ومعالجة شكاوى الركاب والسائقين
           </p>
         </Card>
         <Card className="p-6 cursor-pointer transition-colors hover:bg-muted" onClick={() => navigate('/promos')}>
-          <TicketPercent size={32} className="mb-3" style={{ color: 'var(--color-primary)' }} />
-          <h3 className="font-semibold mb-1" style={{ color: 'var(--color-foreground)' }}>العروض الترويجية</h3>
-          <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
+          <TicketPercent size={32} className="mb-3 text-primary" />
+          <h3 className="font-semibold mb-1 text-foreground">العروض الترويجية</h3>
+          <p className="text-sm text-muted-foreground">
             إنشاء وإدارة أكواد الخصم
           </p>
         </Card>
         <Card className="p-6 cursor-pointer transition-colors hover:bg-muted" onClick={() => navigate('/wallets')}>
-          <Wallet size={32} className="mb-3" style={{ color: 'var(--color-primary)' }} />
-          <h3 className="font-semibold mb-1" style={{ color: 'var(--color-foreground)' }}>المحافظ والسحوبات</h3>
-          <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
+          <Wallet size={32} className="mb-3 text-primary" />
+          <h3 className="font-semibold mb-1 text-foreground">المحافظ والسحوبات</h3>
+          <p className="text-sm text-muted-foreground">
             إدارة محافظ المستخدمين وطلبات السحب
           </p>
         </Card>

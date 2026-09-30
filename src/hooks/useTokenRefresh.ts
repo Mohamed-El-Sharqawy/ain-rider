@@ -12,6 +12,7 @@ export function useTokenRefresh() {
         await api.post('/auth/refresh');
       } catch (error) {
         console.error('Token refresh failed:', error);
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
       }
     };
 

@@ -18,6 +18,8 @@ export const useGetOnboardingStatus = (id: string) => {
       return res.data.data;
     },
     enabled: !!id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 
@@ -28,6 +30,8 @@ export const useGetAllUsers = (filters: UserFilters) => {
       const { data } = await usersApi.getAll(filters);
       return transformPaginatedUsers(data, { page: filters.page, limit: filters.limit });
     },
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 
@@ -39,6 +43,8 @@ export const useGetUserById = (id: string) => {
       return transformUser(data);
     },
     enabled: !!id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 

@@ -30,7 +30,7 @@ export const usersApi = {
     api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/status`, data),
 
   getOnboardingStatus: (id: string) =>
-    api.get<any>(`/auth/driver/${id}/onboarding-status`),
+    api.get<any>(`/admin/users/${id}/onboarding-status`),
 
   approveDriver: (id: string) =>
     api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/approve-driver`, {}),
@@ -41,11 +41,8 @@ export const usersApi = {
   approveDocument: (id: string, stage: string) =>
     api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/approve-document`, { stage }),
 
-  create: (data: CreateUserDTO) => {
-    // Always use admin endpoint when creating users from dashboard
-    // This doesn't store tokens since admin is creating, not logging in
-    return api.post<UserDTO>('/auth/admin/create-user', data);
-  },
+  create: (data: CreateUserDTO) =>
+    api.post<UserDTO>('/admin/users', data),
   resetUploadAttempts: (id: string) =>
     api.patch<{ success: boolean; message: string }>(`/admin/users/${id}/reset-attempts`, {}),
 };

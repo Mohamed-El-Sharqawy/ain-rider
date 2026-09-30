@@ -7,17 +7,18 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useWebSocket } from '@/providers/WebSocketProvider'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useMarkNotificationRead, useMarkAllNotificationsRead } from './services/mutations'
 import { useGetAllNotifications, useGetMyNotifications, notificationKeys } from './services/queries'
+import type { Notification } from './services/transformers'
 import { formatRelativeTime } from '@/lib/utils'
 import { Bell, MessageSquare, Mail, Wifi, CheckCheck } from 'lucide-react'
 
 export function NotificationsPage() {
   const queryClient = useQueryClient()
   const { on, isConnected } = useWebSocket()
-  const { notifications, unreadCount, markAsRead, markAllAsRead, setNotifications } = useNotificationStore()
+  const { unreadCount, markAsRead, markAllAsRead, setNotifications } = useNotificationStore()
   const { mutate: markRead } = useMarkNotificationRead()
   const { mutate: markAllRead } = useMarkAllNotificationsRead()
   const [activeTab, setActiveTab] = useState<'my' | 'all'>('my')
@@ -87,7 +88,7 @@ export function NotificationsPage() {
     }
   }
 
-  const renderNotificationList = (isLoading: boolean, isError: boolean) => {
+  const renderNotificationList = (isLoading: boolean, isError: boolean, items: Notification[]) => {
     if (isLoading) {
       return (
         <div className="space-y-3">
@@ -115,7 +116,7 @@ export function NotificationsPage() {
       )
     }
 
-    if (notifications.length === 0) {
+    if (items.length === 0) {
       return (
         <div className="py-12 text-center" style={{ color: 'var(--color-muted-foreground)' }}>
           <Bell size={48} className="mx-auto mb-4 opacity-30" />
@@ -127,7 +128,7 @@ export function NotificationsPage() {
 
     return (
       <div className="space-y-2">
-        {notifications.map((notification) => (
+        {items.map((notification) => (
           <div
             key={notification.id}
             className="flex items-start gap-4 p-4 rounded-lg transition-colors"
@@ -283,11 +284,11 @@ export function NotificationsPage() {
           </TabsList>
 
           <TabsContent value="my" className="mt-0">
-            {renderNotificationList(isLoadingMy, isErrorMy)}
+            {renderNotificationList(isLoadingMy, isErrorMy, myNotifications ?? [])}
           </TabsContent>
 
           <TabsContent value="all" className="mt-0">
-            {renderNotificationList(isLoadingAll, isErrorAll)}
+            {renderNotificationList(isLoadingAll, isErrorAll, allNotifications ?? [])}
           </TabsContent>
         </Card>
       </Tabs>

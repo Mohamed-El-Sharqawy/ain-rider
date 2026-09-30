@@ -1,7 +1,5 @@
 import { createBrowserRouter } from 'react-router';
 import { ProtectedAppLayout } from '@/components/layout/ProtectedAppLayout';
-import { GuestRoute } from '@/components/shared/GuestRoute';
-import { LoginPage } from '@/pages/login/LoginPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { UsersPage } from '@/pages/users/UsersPage';
 import { TripsPage } from '@/pages/trips/TripsPage';
@@ -12,15 +10,10 @@ import { VehiclesPage } from '@/pages/vehicles/VehiclesPage';
 import { WalletsPage } from '@/pages/wallets/WalletsPage';
 import { NotificationsPage } from '@/pages/notifications/NotificationsPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
+import { LoginPageGuarded } from './login-page-guarded';
 
 // Wrap LoginPage in GuestRoute to redirect authenticated users
-function LoginPageGuarded() {
-  return (
-    <GuestRoute>
-      <LoginPage />
-    </GuestRoute>
-  );
-}
+
 
 export const router = createBrowserRouter([
   {

@@ -8,7 +8,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useGetProfile } from './services/queries'
 import { useUpdateProfile, useUploadProfileImage, useDeleteProfileImage } from './services/mutations'
+import { validateEmail, validatePhoneNumber, validateRequired, formatPhoneNumber } from '@/lib/validation'
 import { User, Mail, Phone, Upload, Trash2 } from 'lucide-react'
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'] as readonly string[]
+
+function omitKey(obj: Record<string, string>, key: string): Record<string, string> {
+  const copy = { ...obj }
+  delete copy[key]
+  return copy
+}
 
 export function ProfilePage() {
   const { data: profile, isLoading } = useGetProfile()
@@ -25,6 +34,7 @@ export function ProfilePage() {
   })
 
   const [isEditing, setIsEditing] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
   const handleEdit = () => {
     if (profile) {
@@ -39,13 +49,38 @@ export function ProfilePage() {
   }
 
   const handleSave = () => {
-    updateProfile(formData, {
+    const errors: Record<string, string> = {}
+
+    const firstNameError = validateRequired(formData.firstName, 'الاسم الأول')
+    if (firstNameError) errors.firstName = firstNameError
+
+    const lastNameError = validateRequired(formData.lastName, 'الاسم الأخير')
+    if (lastNameError) errors.lastName = lastNameError
+
+    const emailError = validateEmail(formData.email)
+    if (emailError) errors.email = emailError
+
+    const phoneError = validatePhoneNumber(formData.phoneNumber)
+    if (phoneError) errors.phoneNumber = phoneError
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+
+    setValidationErrors({})
+
+    updateProfile({
+      ...formData,
+      phoneNumber: formatPhoneNumber(formData.phoneNumber),
+    }, {
       onSuccess: () => setIsEditing(false),
     })
   }
 
   const handleCancel = () => {
     setIsEditing(false)
+    setValidationErrors({})
     setFormData({
       firstName: '',
       lastName: '',
@@ -61,8 +96,8 @@ export function ProfilePage() {
         alert('حجم الملف يجب أن يكون أقل من 5 ميجابايت')
         return
       }
-      if (!file.type.startsWith('image/')) {
-        alert('يرجى اختيار ملف صورة')
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        alert('يرجى اختيار ملف من نوع JPG, PNG, GIF أو WebP')
         return
       }
       uploadImage(file)
@@ -128,7 +163,7 @@ export function ProfilePage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,.gif,.webp"
                 className="hidden"
                 onChange={handleImageUpload}
                 disabled={isUploading}
@@ -154,7 +189,7 @@ export function ProfilePage() {
                 </Button>
               )}
               <p className="text-xs text-muted-foreground">
-                JPG, PNG أو GIF (حد أقصى 5 ميجابايت)
+                JPG, PNG, GIF أو WebP (حد أقصى 5 ميجابايت)
               </p>
             </div>
           </div>
@@ -169,9 +204,10 @@ export function ProfilePage() {
               <Input
                 id="firstName"
                 value={isEditing ? formData.firstName : profile.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, firstName: e.target.value }); if (validationErrors.firstName) setValidationErrors((prev) => omitKey(prev, 'firstName')); }}
                 disabled={!isEditing}
               />
+              {validationErrors.firstName && <p className="text-sm text-red-500">{validationErrors.firstName}</p>}
             </div>
 
             <div className="space-y-2">
@@ -182,9 +218,10 @@ export function ProfilePage() {
               <Input
                 id="lastName"
                 value={isEditing ? formData.lastName : profile.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, lastName: e.target.value }); if (validationErrors.lastName) setValidationErrors((prev) => omitKey(prev, 'lastName')); }}
                 disabled={!isEditing}
               />
+              {validationErrors.lastName && <p className="text-sm text-red-500">{validationErrors.lastName}</p>}
             </div>
 
             <div className="space-y-2">
@@ -195,10 +232,12 @@ export function ProfilePage() {
               <Input
                 id="email"
                 type="email"
+                dir="ltr"
                 value={isEditing ? formData.email : profile.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (validationErrors.email) setValidationErrors((prev) => omitKey(prev, 'email')); }}
                 disabled={!isEditing}
               />
+              {validationErrors.email && <p className="text-sm text-red-500">{validationErrors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -209,10 +248,12 @@ export function ProfilePage() {
               <Input
                 id="phoneNumber"
                 type="tel"
+                dir="ltr"
                 value={isEditing ? formData.phoneNumber : profile.phoneNumber}
-                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, phoneNumber: e.target.value }); if (validationErrors.phoneNumber) setValidationErrors((prev) => omitKey(prev, 'phoneNumber')); }}
                 disabled={!isEditing}
               />
+              {validationErrors.phoneNumber && <p className="text-sm text-red-500">{validationErrors.phoneNumber}</p>}
             </div>
           </div>
 

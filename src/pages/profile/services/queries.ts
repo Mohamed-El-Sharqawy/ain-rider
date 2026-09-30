@@ -11,5 +11,9 @@ export const useGetProfile = () => {
   return useQuery<ProfileDTO>({
     queryKey: profileKeys.detail(),
     queryFn: () => profileApi.getProfile().then((r) => r.data),
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   })
 }

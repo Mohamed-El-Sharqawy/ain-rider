@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useGetAllTrips, useGetTripStats } from './services/queries'
 import { useTripFilters } from './hooks/useTripFilters'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { useWebSocket } from '@/providers/WebSocketProvider'
 import { tripKeys } from './services/queries'
 import { DataTable, type Column } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -25,7 +25,7 @@ import type { Trip } from './services/transformers'
 
 export function TripsPage() {
   const queryClient = useQueryClient()
-  const { filters, status, setStatus, search, setSearch, clearFilters } = useTripFilters()
+  const { filters, page, setPage, status, setStatus, search, setSearch, clearFilters } = useTripFilters()
   const { data: trips, isLoading, isError, refetch } = useGetAllTrips(filters)
   const { data: stats } = useGetTripStats()
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null)
@@ -78,7 +78,7 @@ export function TripsPage() {
     {
       key: 'paymentMethodLabel',
       label: 'الدفع',
-      render: (v, _row) => (
+      render: (v) => (
         <div className="flex items-center gap-1">
           <Banknote size={14} style={{ color: 'var(--color-success)' }} />
           <span>{String(v)}</span>
@@ -204,6 +204,11 @@ export function TripsPage() {
           data={trips.data}
           columns={columns}
           onRowClick={(row) => setSelectedTrip(row)}
+          pagination={{
+            page,
+            totalPages: trips.totalPages,
+            onPageChange: setPage,
+          }}
         />
       )}
 

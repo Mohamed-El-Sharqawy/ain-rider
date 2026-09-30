@@ -14,8 +14,8 @@ import { formatDate } from '@/lib/utils';
 import type { Complaint } from './services/transformers';
 
 export function ComplaintsPage() {
-  const { filters, status, setStatus, clearFilters } = useComplaintFilters();
-  const { data: complaints, isLoading, isError, refetch } = useGetComplaints(filters.status);
+  const { filters, status, setStatus, page, setPage, clearFilters } = useComplaintFilters();
+  const { data: complaints, isLoading, isError, refetch } = useGetComplaints(filters);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
 
   const columns: Column<Complaint>[] = [
@@ -64,7 +64,7 @@ export function ComplaintsPage() {
 
       {isLoading ? (
         <TableSkeleton rows={10} columns={7} />
-      ) : !complaints || complaints.length === 0 ? (
+      ) : !complaints || complaints.data.length === 0 ? (
         <EmptyState
           icon={MessageSquareWarning}
           title="لا توجد شكاوى"
@@ -73,9 +73,14 @@ export function ComplaintsPage() {
         />
       ) : (
         <DataTable
-          data={complaints}
+          data={complaints.data}
           columns={columns}
           onRowClick={(row) => setSelectedComplaint(row)}
+          pagination={{
+            page,
+            totalPages: complaints.totalPages,
+            onPageChange: setPage,
+          }}
         />
       )}
 

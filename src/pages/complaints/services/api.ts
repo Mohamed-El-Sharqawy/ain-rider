@@ -1,9 +1,15 @@
 import { api } from '@/api/client';
 import type { ComplaintDTO, CreateComplaintDTO, AddComplaintCommentDTO } from './dto';
 
+export interface ComplaintFilters {
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
 export const complaintsApi = {
-  getAll: (status?: string) =>
-    api.get<ComplaintDTO[]>('/admin/complaints', { params: { status } }),
+  getAll: (params: ComplaintFilters) =>
+    api.get<{ data: ComplaintDTO[]; total: number; page: number; limit: number; totalPages: number }>('/admin/complaints', { params }),
 
   getById: (id: string) =>
     api.get<ComplaintDTO>(`/admin/complaints/${id}`),

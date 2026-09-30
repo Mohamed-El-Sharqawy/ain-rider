@@ -16,6 +16,8 @@ export const profileApi = {
   deleteProfileImage: () => api.delete('/admin/profile/image'),
 
   uploadToMinIO: (url: string, file: File) =>
+    // MinIO presigned URL pattern: server generates a PUT-signed URL via generateUploadUrl(),
+    // client uploads directly to MinIO storage bypassing the backend, then confirms completion
     fetch(url, {
       method: 'PUT',
       body: file,

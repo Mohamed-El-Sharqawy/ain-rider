@@ -13,8 +13,14 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { useUpdateComplaintStatus, useAddComplaintComment } from '../services/mutations';
 import { useAuthStore } from '@/stores/authStore';
 import { formatDate } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { validateStatusTransition, validateComplaintResolution } from '@/lib/validation';
 import type { Complaint } from '../services/transformers';
+
+function omitKey(obj: Record<string, string>, key: string): Record<string, string> {
+  const copy = { ...obj };
+  delete copy[key];
+  return copy;
+}
 
 interface ComplaintDetailModalProps {
   complaint: Complaint | null;
@@ -27,6 +33,7 @@ export function ComplaintDetailModal({ complaint, open, onClose }: ComplaintDeta
   const [newStatus, setNewStatus] = useState('');
   const [resolution, setResolution] = useState('');
   const [comment, setComment] = useState('');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateComplaintStatus();
   const { mutate: addComment, isPending: isCommenting } = useAddComplaintComment();
@@ -35,6 +42,22 @@ export function ComplaintDetailModal({ complaint, open, onClose }: ComplaintDeta
 
   const handleUpdateStatus = () => {
     if (!newStatus) return;
+
+    const errors: Record<string, string> = {};
+
+    const transitionError = validateStatusTransition(complaint.status, newStatus);
+    if (transitionError) errors.status = transitionError;
+
+    const resolutionError = validateComplaintResolution(newStatus, resolution);
+    if (resolutionError) errors.resolution = resolutionError;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
+
     updateStatus(
       {
         id: complaint.id,
@@ -55,6 +78,7 @@ export function ComplaintDetailModal({ complaint, open, onClose }: ComplaintDeta
 
   const handleAddComment = () => {
     if (!comment.trim()) return;
+    setValidationErrors({});
     addComment(
       {
         id: complaint.id,
@@ -162,8 +186,7 @@ export function ComplaintDetailModal({ complaint, open, onClose }: ComplaintDeta
               rows={3}
             />
             <Button onClick={handleAddComment} disabled={!comment.trim() || isCommenting} size="sm">
-              {isCommenting && <Loader2 size={14} className="animate-spin" />}
-              إضافة تعليق
+              {isCommenting ? 'جاري الإرسال...' : 'إضافة تعليق'}
             </Button>
           </div>
 
@@ -171,29 +194,35 @@ export function ComplaintDetailModal({ complaint, open, onClose }: ComplaintDeta
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">تحديث الحالة</h3>
-            <Select value={newStatus} onValueChange={setNewStatus}>
+            {validationErrors.status && (
+              <p className="text-sm text-red-500">{validationErrors.status}</p>
+            )}
+            <Select value={newStatus} onValueChange={(v) => { setNewStatus(v); setValidationErrors((prev) => omitKey(prev, 'status')); }}>
               <SelectTrigger>
                 <SelectValue placeholder="اختر حالة جديدة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                <SelectItem value="IN_PROGRESS">قيد المعالجة</SelectItem>
-                <SelectItem value="RESOLVED">محلول</SelectItem>
+                <SelectItem value="IN_PROGRESS" disabled={complaint.status === 'RESOLVED'}>قيد المعالجة</SelectItem>
+                <SelectItem value="RESOLVED" disabled={complaint.status === 'RESOLVED'}>محلول</SelectItem>
               </SelectContent>
             </Select>
 
             {newStatus === 'RESOLVED' && (
-              <Textarea
-                placeholder="ملاحظات الحل..."
-                value={resolution}
-                onChange={(e) => setResolution(e.target.value)}
-                rows={3}
-              />
+              <div>
+                <Textarea
+                  placeholder="ملاحظات الحل..."
+                  value={resolution}
+                  onChange={(e) => { setResolution(e.target.value); setValidationErrors((prev) => omitKey(prev, 'resolution')); }}
+                  rows={3}
+                />
+                {validationErrors.resolution && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.resolution}</p>
+                )}
+              </div>
             )}
 
             <Button onClick={handleUpdateStatus} disabled={!newStatus || isUpdating}>
-              {isUpdating && <Loader2 size={14} className="animate-spin" />}
-              تحديث الحالة
+              {isUpdating ? 'جاري التحديث...' : 'تحديث الحالة'}
             </Button>
           </div>
         </div>

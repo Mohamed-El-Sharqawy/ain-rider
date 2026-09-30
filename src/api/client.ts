@@ -1,6 +1,23 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { ApiConfig } from '@/config/constants';
 
-const baseURL = import.meta.env.VITE_API_GATEWAY_URL ?? 'http://localhost:3000';
+export interface ApiErrorResponse {
+  error?: {
+    message: string | string[];
+    code?: string;
+  };
+  message?: string | string[];
+  [key: string]: unknown;
+}
+
+export interface ApiError {
+  status: number;
+  code?: string;
+  message: string;
+  raw: ApiErrorResponse;
+}
+
+const baseURL = ApiConfig.gatewayUrl;
 
 export const api = axios.create({
   baseURL,
@@ -63,20 +80,22 @@ api.interceptors.response.use(
     try {
       await api.post('/auth/refresh');
       processQueue(null);
+      isRefreshing = false;
       return api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError as AxiosError);
+      isRefreshing = false;
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
       return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
   },
 );
 
+/** Extracts a human-readable Arabic/English error message from an Axios error or generic Error. */
+// TODO: Localize all error messages via i18n (replace hardcoded strings with translation keys)
 export function getApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const errorData = error.response?.data;
+    const errorData = error.response?.data as ApiErrorResponse | undefined;
     
     if (errorData?.error?.message) {
       const message = errorData.error.message;
@@ -96,4 +115,21 @@ export function getApiError(error: unknown): string {
     return error.message;
   }
   return 'An unexpected error occurred';
+}
+
+export function toApiError(error: unknown): ApiError | null {
+  if (!axios.isAxiosError(error)) return null;
+  const errorData = error.response?.data as ApiErrorResponse | undefined;
+  const message = errorData?.error?.message
+    ? (Array.isArray(errorData.error.message) ? errorData.error.message.join(', ') : errorData.error.message)
+    : errorData?.message
+      ? (Array.isArray(errorData.message) ? errorData.message.join(', ') : String(errorData.message))
+      : (error.message ?? 'An unexpected error occurred');
+
+  return {
+    status: error.response?.status ?? 0,
+    code: errorData?.error?.code,
+    message,
+    raw: errorData ?? {},
+  };
 }

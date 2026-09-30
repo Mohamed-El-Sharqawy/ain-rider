@@ -9,6 +9,8 @@ import '@/index.css'
 import '@/stores/authStore'
 import { router } from './router'
 import { DirectionProvider } from './components/ui/direction.tsx'
+import { ErrorBoundary } from './components/common/ErrorBoundary'
+import { WebSocketProvider } from './providers/WebSocketProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,15 +20,19 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <NuqsAdapter>
-        <DirectionProvider dir='rtl' direction='rtl'>
-          <TooltipProvider>
-            <RouterProvider router={router} />
-            <Toaster position="top-right" richColors />
-          </TooltipProvider>
-        </DirectionProvider>
-      </NuqsAdapter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <NuqsAdapter>
+          <WebSocketProvider>
+            <DirectionProvider dir='rtl' direction='rtl'>
+              <TooltipProvider>
+                <RouterProvider router={router} />
+                <Toaster position="top-right" richColors />
+              </TooltipProvider>
+            </DirectionProvider>
+          </WebSocketProvider>
+        </NuqsAdapter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

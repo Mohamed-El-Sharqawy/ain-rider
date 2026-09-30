@@ -8,9 +8,9 @@ import type { TripFilters } from './api'
 
 export const tripKeys = {
   all: ['trips'] as const,
-  list: (filters: TripFilters) => ['trips', 'list', filters] as const,
-  detail: (id: string) => ['trips', 'detail', id] as const,
-  stats: () => ['trips', 'stats'] as const,
+  list: (filters: TripFilters) => [...tripKeys.all, 'list', filters] as const,
+  detail: (id: string) => [...tripKeys.all, 'detail', id] as const,
+  stats: () => [...tripKeys.all, 'stats'] as const,
 }
 
 export const useGetAllTrips = (filters: TripFilters) => {
@@ -21,6 +21,10 @@ export const useGetAllTrips = (filters: TripFilters) => {
         transformPaginatedTrips(r.data, { page: filters.page, limit: filters.limit }),
       ),
     placeholderData: keepPreviousData,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   })
 }
 
@@ -29,6 +33,8 @@ export const useGetTripById = (id: string) => {
     queryKey: tripKeys.detail(id),
     queryFn: () => tripsApi.getById(id).then((r) => transformTrip(r.data)),
     enabled: !!id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   })
 }
 

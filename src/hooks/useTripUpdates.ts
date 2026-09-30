@@ -4,7 +4,7 @@
 
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useWebSocket } from './useWebSocket'
+import { useWebSocket } from '@/providers/WebSocketProvider'
 import { tripKeys } from '@/pages/trips/services/queries'
 
 export function useTripUpdates(tripId?: string) {

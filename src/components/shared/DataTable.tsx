@@ -25,6 +25,7 @@ interface DataTableProps<T> {
     totalPages: number;
     onPageChange: (page: number) => void;
   };
+  emptyMessage?: string;
 }
 
 export function DataTable<T>({
@@ -32,22 +33,30 @@ export function DataTable<T>({
   columns,
   onRowClick,
   pagination,
+  emptyMessage = 'لا توجد بيانات',
 }: DataTableProps<T>) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="table" aria-label="جدول البيانات">
       <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--color-border)' }}>
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key} className={column.className}>
+                <TableHead key={column.key} className={column.className} aria-label={column.label}>
                   {column.label}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row, index) => (
+            {data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center py-12">
+                  <p style={{ color: 'var(--color-muted-foreground)' }}>{emptyMessage}</p>
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((row, index) => (
               <TableRow
                 key={index}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
@@ -59,7 +68,8 @@ export function DataTable<T>({
                   </TableCell>
                 ))}
               </TableRow>
-            ))}
+            ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -75,6 +85,7 @@ export function DataTable<T>({
               size="sm"
               onClick={() => pagination.onPageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
+              aria-label="الصفحة السابقة"
             >
               <ChevronRight size={16} />
               السابق
@@ -84,6 +95,7 @@ export function DataTable<T>({
               size="sm"
               onClick={() => pagination.onPageChange(pagination.page + 1)}
               disabled={pagination.page === pagination.totalPages}
+              aria-label="الصفحة التالية"
             >
               التالي
               <ChevronLeft size={16} />

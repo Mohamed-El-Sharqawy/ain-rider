@@ -20,9 +20,13 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     if (isSuccess && data && !isAuthenticated) {
       if (data.role === 'ADMIN' || data.role === 'SUPPORT') {
         setUser(data);
+      } else {
+        // Invalid role - reject access
+        console.error('[ProtectedRoute] Invalid role:', data.role);
+        clear();
       }
     }
-  }, [isSuccess, data, isAuthenticated, setUser]);
+  }, [isSuccess, data, isAuthenticated, setUser, clear]);
 
   // Clear auth on error
   useEffect(() => {
@@ -50,8 +54,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Not authenticated — redirect to login
-  if (isError || !isAuthenticated) {
+  // Not authenticated or invalid role
+  const validRole = data?.role === 'ADMIN' || data?.role === 'SUPPORT';
+  if (isError || !isAuthenticated || (isSuccess && !validRole)) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
