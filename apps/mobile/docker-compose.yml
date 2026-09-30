@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  # ── Development: Metro bundler + Expo DevTools ──────────────────────────────
+  mobile-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: ain-rider-mobile-dev
+    ports:
+      - '8081:8081'   # Metro bundler
+      - '19000:19000' # Expo Go tunnel
+      - '19001:19001' # Expo Go LAN
+      - '19002:19002' # Expo DevTools UI
+    volumes:
+      - .:/app
+      - mobile_node_modules:/app/node_modules # anonymous volume keeps container's node_modules
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      # Override to your machine's LAN IP when testing on a physical device:
+      # - REACT_NATIVE_PACKAGER_HOSTNAME=192.168.x.x
+    stdin_open: true
+    tty: true
+
+  # ── Production: static web build served by nginx ────────────────────────────
+  mobile-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ain-rider-mobile-web
+    ports:
+      - '3000:80'
+    profiles:
+      - production
+
+volumes:
+  mobile_node_modules:

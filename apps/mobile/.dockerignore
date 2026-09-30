@@ -1,0 +1,21 @@
+node_modules
+.expo
+.expo-shared
+dist
+web-build
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+*.env
+.env*
+
+# VCS
+.git
+.gitignore
+
+# Docker files (no need to copy them into the image)
+Dockerfile
+docker-compose.yml
+.dockerignore
