@@ -135,17 +135,22 @@ Prerequisites: Node 22+, pnpm 10, Bun (runtime for Elysia services), Docker.
 # 1. Install everything (runs prisma generate automatically)
 pnpm install
 
-# 2. Start the platform: Postgres, PgBouncers, Redis Cluster, NATS, MinIO, OSRM
+# 2. Fetch and preprocess the OSRM Egypt map (~170 MB download, one time)
+pwsh apps/backend/scripts/setup-osrm.ps1   # or: bash apps/backend/scripts/setup-osrm.sh
+
+# 3. Start the platform: Postgres, PgBouncers, Redis Cluster, NATS, MinIO, OSRM
 pnpm docker:infra:up
 
-# 3. Copy the .env.example files in each service you run and fill values
+# 4. Copy the .env.example files in each service you run and fill values
 
-# 4. Run all backend services + dashboard (turbo, parallel)
+# 5. Run all backend services + dashboard (turbo, parallel)
 pnpm dev
 
 # Mobile app (separate terminal)
 pnpm -C apps/mobile start
 ```
+
+The OSRM map data is generated from the [Geofabrik](https://download.geofabrik.de/africa/egypt.html) Egypt extract and is not committed to git.
 
 Useful commands:
 

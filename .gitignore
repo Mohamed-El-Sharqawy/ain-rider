@@ -32,3 +32,6 @@ ios/Pods/
 *.log
 .DS_Store
 Thumbs.db
+
+# osrm map data (large, generated - fetch with apps/backend/scripts/setup-osrm)
+data/osrm/
