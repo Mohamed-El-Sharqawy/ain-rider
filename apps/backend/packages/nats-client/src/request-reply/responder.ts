@@ -99,7 +99,8 @@ export class NatsResponder {
       const response = createErrorResponse(
         error.code || 'INTERNAL_ERROR',
         error.message || 'Unknown error',
-        traceId
+        traceId,
+        error.details
       );
       msg.respond(new TextEncoder().encode(JSON.stringify(response)));
     }
