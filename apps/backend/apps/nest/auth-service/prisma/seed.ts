@@ -26,7 +26,7 @@ async function main() {
     update: { passwordHash: adminPasswordHash },
     create: {
       email: adminEmail,
-      phoneNumber: process.env.ADMIN_PHONE || "+9647700000000",
+      phoneNumber: process.env.ADMIN_PHONE || "+201000000000",
       passwordHash: adminPasswordHash,
       firstName: process.env.ADMIN_FIRST_NAME || "Admin",
       lastName: process.env.ADMIN_LAST_NAME || "User",
@@ -49,7 +49,7 @@ async function main() {
       update: { passwordHash: supportPasswordHash },
       create: {
         email: supportEmail,
-        phoneNumber: process.env.SUPPORT_PHONE || "+9647700000001",
+        phoneNumber: process.env.SUPPORT_PHONE || "+201000000001",
         passwordHash: supportPasswordHash,
         firstName: process.env.SUPPORT_FIRST_NAME || "Support",
         lastName: process.env.SUPPORT_LAST_NAME || "User",

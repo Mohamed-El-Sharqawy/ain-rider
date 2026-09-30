@@ -18,9 +18,11 @@ export default function PhoneScreen() {
   const handleNext = async () => {
     if (phoneNumber.length < 8) return;
 
-    const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+964${phoneNumber}`;
+    const formattedPhone = phoneNumber.startsWith('+')
+      ? phoneNumber
+      : `+20${phoneNumber.replace(/^0+/, '')}`;
     if (!isValidPhone(formattedPhone)) {
-      Alert.alert('Invalid Phone', 'Please enter a valid phone number (9-15 digits).');
+      Alert.alert('Invalid Phone', 'Please enter a valid Egyptian phone number (e.g. 010 1234 5678).');
       return;
     }
 
@@ -73,10 +75,10 @@ export default function PhoneScreen() {
       )}
 
       <View className="flex-row items-center border-b-2 border-emerald-500 pb-2 mb-10">
-        <Text className="text-3xl text-zinc-300 font-medium me-4">+964</Text>
+        <Text className="text-3xl text-zinc-300 font-medium me-4">+20</Text>
         <TextInput
           className="flex-1 text-3xl text-white font-medium tracking-wide"
-          placeholder="750 123 4567"
+          placeholder="10 1234 5678"
           placeholderTextColor="#52525b"
           keyboardType="phone-pad"
           value={phoneNumber}

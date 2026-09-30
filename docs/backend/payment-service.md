@@ -390,7 +390,7 @@ Add status index:
 
 ---
 
-### LOW PAY-011: Currency Hardcoded to IQD
+### LOW PAY-011: Currency Hardcoded to EGP
 
 - **File**: `src/payments/payments.service.ts:20`
 - **Category**: code-quality
@@ -399,16 +399,16 @@ Add status index:
 **Description**
 
 ```typescript
-currency: 'IQD',
+currency: 'EGP',
 ```
 
-Currency is hardcoded. While this may be intentional for the Iraqi market, it limits future expansion.
+Currency is hardcoded. While this may be intentional for the Egyptian market, it limits future expansion.
 
 **Recommendation**
 
 Make currency configurable or accept from request:
 ```typescript
-currency: data.currency || 'IQD',
+currency: data.currency || 'EGP',
 ```
 
 ---

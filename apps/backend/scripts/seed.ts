@@ -89,7 +89,7 @@ async function main() {
       data: {
         id: uuid(),
         email: 'admin@ainrider.com',
-        phoneNumber: '+9647700000001',
+        phoneNumber: '+201000000001',
         passwordHash: password,
         firstName: 'مدير',
         lastName: 'النظام',
@@ -103,7 +103,7 @@ async function main() {
       data: {
         id: uuid(),
         email: 'support@ainrider.com',
-        phoneNumber: '+9647700000002',
+        phoneNumber: '+201000000002',
         passwordHash: password,
         firstName: 'دعم',
         lastName: 'فني',
@@ -202,7 +202,7 @@ async function main() {
 
     const settings = [
       { key: 'app.name', value: 'عين رايدر', type: 'STRING', category: 'general', description: 'اسم التطبيق', isPublic: true },
-      { key: 'app.currency', value: 'IQD', type: 'STRING', category: 'general', description: 'العملة الافتراضية', isPublic: true },
+      { key: 'app.currency', value: 'EGP', type: 'STRING', category: 'general', description: 'العملة الافتراضية', isPublic: true },
       { key: 'trip.cancellation_fee', value: '1000', type: 'NUMBER', category: 'trips', description: 'رسوم الإلغاء', isPublic: false },
       { key: 'driver.commission_rate', value: '15', type: 'NUMBER', category: 'drivers', description: 'نسبة العمولة (%)', isPublic: false },
     ];
@@ -219,7 +219,7 @@ async function main() {
 
     const promos = [
       { code: 'WELCOME10', type: 'PERCENTAGE', value: 10, maxDiscount: 5000, description: 'خصم ترحيبي للمستخدمين الجدد' },
-      { code: 'FLAT2000', type: 'FLAT', value: 2000, description: 'خصم ثابت 2000 دينار' },
+      { code: 'FLAT2000', type: 'FLAT', value: 2000, description: 'خصم ثابت 2000 جنيه' },
     ];
 
     for (const promo of promos) {

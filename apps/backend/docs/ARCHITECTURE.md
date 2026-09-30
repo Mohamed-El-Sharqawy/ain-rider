@@ -662,7 +662,7 @@ model Payment {
   riderId         String
   driverId        String
   amount          Float
-  currency        String   @default("IQD")
+  currency        String   @default("EGP")
   paymentMethod   String
   status          String   // PENDING, COMPLETED, FAILED, REFUNDED
   transactionId   String?
@@ -1339,7 +1339,7 @@ async createPayment({ tripId, riderId, driverId, amount, paymentMethod }) {
   const payment = await prisma.payment.create({
     data: {
       tripId, riderId, driverId, amount,
-      currency: 'IQD',
+      currency: 'EGP',
       status: 'PENDING',
       paymentMethod: 'CASH'
     }

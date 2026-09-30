@@ -136,7 +136,7 @@ export class UserEventPublisher {
    *
    * Event payload structure:
    * - subject: `ain_rider.otp_verified`
-   * - phoneNumber: E.164 formatted phone number (e.g., "+9647701234567")
+   * - phoneNumber: E.164 formatted phone number (e.g., "+201001234567")
    * - uid: Firebase Auth user ID
    * - verifiedAt: ISO 8601 timestamp of verification
    *

@@ -124,7 +124,7 @@ export function SendNotificationModal() {
                   id="smsPhone"
                   value={smsPhone}
                   onChange={(e) => setSmsPhone(e.target.value)}
-                  placeholder="+964xxxxxxxxx"
+                  placeholder="+20xxxxxxxxx"
                   required
                 />
               </div>

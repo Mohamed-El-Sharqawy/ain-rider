@@ -556,7 +556,7 @@ Mobile-specific error handling, validation, state management, and UX improvement
 **Tasks**:
 1. Extract `userId` from JWT in `useAuthCheck` and pass to `setAuth()`
 2. Add `isLoading` and `error` states to `useNearbyDrivers` hook
-3. Throw error in location service instead of silently falling back to Baghdad
+3. Throw error in location service instead of silently falling back to Cairo
 4. Add shared `fetchWithTimeout()` helper to OSM provider (default 5s)
 5. Replace `useRef(false)` with `useState(false)` for `isConnected` in `useWebSocket`
 6. (Hardcoded WS URLs centralized in Phase 4 — verify all consumers updated)
@@ -763,7 +763,7 @@ UX polish, developer experience, and low-severity improvements.
 3. Add `tokenExpiry`, `isRefreshing` state to auth store
 4. Remove `[AuthDebug]` console.log or wrap in `__DEV__`
 5. Make `useNearbyDrivers` polling interval configurable via options
-6. Remove duplicate BAGHDAD constant in location service
+6. Remove duplicate CAIRO constant in location service
 7. Increase notification rate limit from 2s to 5s in WebSocket service
 8. Add validation for invalid map provider fallback
 
@@ -849,7 +849,7 @@ UX polish, developer experience, and low-severity improvements.
 **Tasks**:
 1. Document that `DriverMarker` parent must use `driver.id` as React key
 2. Replace NativeWind complex opacity modifiers with `StyleSheet.create()` in RejectionBanner
-3. Create shared `DEFAULT_LOCATION` constant in config (replace duplicate BAGHDAD)
+3. Create shared `DEFAULT_LOCATION` constant in config (replace duplicate CAIRO)
 4. Add `isValidCoordinate()` check in RoutePolyline; return null if < 2 valid coords
 5. (Camera ref typed in Phase 4 — verify `Camera` type import correct)
 6. Add `AppState` listener to stop/start LocationMarker animation on background/active

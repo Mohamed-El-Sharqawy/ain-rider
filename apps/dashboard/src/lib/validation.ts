@@ -21,7 +21,7 @@ export const validatePromoCode = (code: string): string | null => {
   return null;
 };
 
-/** Validates a discount value based on type (PERCENTAGE or FIXED in IQD). */
+/** Validates a discount value based on type (PERCENTAGE or FIXED in EGP). */
 export const validateDiscountValue = (value: number, type: 'PERCENTAGE' | 'FIXED'): string | null => {
   if (isNaN(value) || value <= 0) {
     return 'قيمة الخصم مطلوبة ويجب أن تكون أكبر من صفر';
@@ -30,7 +30,7 @@ export const validateDiscountValue = (value: number, type: 'PERCENTAGE' | 'FIXED
     return 'النسبة المئوية يجب أن لا تتجاوز 100%';
   }
   if (type === 'FIXED' && value > 1000000) {
-    return 'المبلغ يجب أن لا يتجاوز 1,000,000 دينار';
+    return 'المبلغ يجب أن لا يتجاوز 1,000,000 جنيه';
   }
   return null;
 };
@@ -61,15 +61,15 @@ export const validateDateRange = (validFrom?: string, validUntil?: string): stri
   return null;
 };
 
-/** Validates an Iraqi phone number (+964 or local 07xx format). */
+/** Validates an Egyptian phone number (+20 or local 01x format). */
 export const validatePhoneNumber = (phone: string): string | null => {
   if (!phone || phone.trim().length === 0) {
     return 'رقم الهاتف مطلوب';
   }
-  const iraqiPhoneRegex = /^\+964(7[3-9]\d{8})$/;
-  const localPhoneRegex = /^0?(7[3-9]\d{8})$/;
-  if (!iraqiPhoneRegex.test(phone) && !localPhoneRegex.test(phone)) {
-    return 'رقم الهاتف يجب أن يكون رقم عراقي صالح (مثال: +9647901234567)';
+  const egyptPhoneRegex = /^\+20(1[0125]\d{8})$/;
+  const localPhoneRegex = /^0?(1[0125]\d{8})$/;
+  if (!egyptPhoneRegex.test(phone) && !localPhoneRegex.test(phone)) {
+    return 'رقم الهاتف يجب أن يكون رقم مصري صالح (مثال: +201001234567)';
   }
   return null;
 };
@@ -121,14 +121,14 @@ export const validateStatusTransition = (currentStatus: string, newStatus: strin
   return null;
 };
 
-/** Normalizes a phone number to +964 international format. */
+/** Normalizes a phone number to +20 international format. */
 export const formatPhoneNumber = (phone: string): string => {
   let cleaned = phone.replace(/[\s\-()]/g, '');
   if (cleaned.startsWith('0')) {
-    cleaned = '+964' + cleaned.substring(1);
+    cleaned = '+20' + cleaned.substring(1);
   }
   if (!cleaned.startsWith('+')) {
-    cleaned = '+964' + cleaned;
+    cleaned = '+20' + cleaned;
   }
   return cleaned;
 };

@@ -75,7 +75,7 @@ export default function VerifyOtpScreen() {
     setIsResending(true);
     setErrorMessage(null);
     try {
-      const formattedPhone = phone?.startsWith('+') ? phone : `+964${phone}`;
+      const formattedPhone = phone?.startsWith('+') ? phone : `+20${phone.replace(/^0+/, '')}`;
       await AuthApi.requestOtp(formattedPhone);
       setResendTimer(60);
     } catch (err: unknown) {
@@ -109,7 +109,7 @@ export default function VerifyOtpScreen() {
       }
 
       // 1. Verify token with our abstract backend 
-      const formattedPhone = phone?.startsWith('+') ? phone : `+964${phone}`;
+      const formattedPhone = phone?.startsWith('+') ? phone : `+20${phone.replace(/^0+/, '')}`;
       const result = await AuthApi.verifyOtp(formattedPhone, otp);
 
       // 2. Handle based on registration status
@@ -165,7 +165,7 @@ export default function VerifyOtpScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Text className="text-4xl font-extrabold text-white mb-2">Enter the code</Text>
-      <Text className="text-xl text-zinc-400 mb-8">Sent to +964 {phone}</Text>
+      <Text className="text-xl text-zinc-400 mb-8">Sent to +20 {phone}</Text>
 
       {errorMessage && (
         <View className="bg-red-500/10 border border-red-500 p-4 rounded-lg mb-6 mx-6">

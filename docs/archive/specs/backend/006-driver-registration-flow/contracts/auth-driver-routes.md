@@ -18,10 +18,10 @@ Update driver profile fields (non-critical).
   "address": "123 Main St (8-200 chars, optional)",
   "city": "Erbil (2-100 chars, optional)",
   "state": "Kurdistan (2-100 chars, optional)",
-  "country": "Iraq (2-100 chars, optional)",
+  "country": "Egypt (2-100 chars, optional)",
   "dateOfBirth": "1990-01-15 (ISO 8601 date, optional)",
   "emergencyContactName": "Jane Doe (2-100 chars, optional)",
-  "emergencyContactPhone": "+964770123456 (8-15 chars, optional)"
+  "emergencyContactPhone": "+20770123456 (8-15 chars, optional)"
 }
 ```
 
@@ -43,10 +43,10 @@ Update driver profile fields (non-critical).
       "address": "123 Main St",
       "city": "Erbil",
       "state": "Kurdistan",
-      "country": "Iraq",
+      "country": "Egypt",
       "dateOfBirth": "1990-01-15T00:00:00.000Z",
       "emergencyContactName": "Jane Doe",
-      "emergencyContactPhone": "+964770123456"
+      "emergencyContactPhone": "+20770123456"
     }
   }
 }

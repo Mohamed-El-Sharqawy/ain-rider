@@ -107,7 +107,7 @@ The MapView component has no error handling. If the map fails to load (missing s
 
 ```tsx
 export const AppMapView = forwardRef<AppMapViewRef, MapViewProps>(function AppMapView(
-  { center = BAGHDAD, zoom = 13, onPress, onRegionChange, children, style },
+  { center = CAIRO, zoom = 13, onPress, onRegionChange, children, style },
   ref,
 ) {
   // No error boundary
@@ -127,7 +127,7 @@ Wrap in error boundary:
 import { ErrorBoundary } from 'react-error-boundary';
 
 export const AppMapView = forwardRef<AppMapViewRef, MapViewProps>(function AppMapView(
-  { center = BAGHDAD, zoom = 13, onPress, onRegionChange, children, style },
+  { center = CAIRO, zoom = 13, onPress, onRegionChange, children, style },
   ref,
 ) {
   return (
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
 
 ---
 
-### MEDIUM COMP-006: MapView Hardcoded Baghdad Fallback
+### MEDIUM COMP-006: MapView Hardcoded Cairo Fallback
 
 - **File**: `mobile/components/map/MapView.tsx:7`
 - **Category**: bug
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
 **Description**
 
 ```tsx
-const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
+const CAIRO = { latitude: 30.0444, longitude: 31.2357 };
 ```
 
 This is duplicated from `location.service.ts`. If the app is used in other cities, this fallback is wrong.
@@ -282,9 +282,9 @@ Import from a shared config:
 ```tsx
 // lib/config.ts
 export const DEFAULT_LOCATION = { 
-  latitude: 30.147719, 
-  longitude: 31.394327,
-  city: 'Baghdad'
+  latitude: 30.0444, 
+  longitude: 31.2357,
+  city: 'Cairo'
 };
 
 // In MapView.tsx

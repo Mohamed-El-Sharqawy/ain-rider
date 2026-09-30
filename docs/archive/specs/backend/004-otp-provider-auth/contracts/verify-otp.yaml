@@ -37,7 +37,7 @@ paths:
                 $ref: "#/components/schemas/VerifyOtpResponse"
               example:
                 success: true
-                phoneNumber: "+9647701234567"
+                phoneNumber: "+201001234567"
                 uid: "abc123def456"
         "400":
           description: Invalid request
@@ -114,7 +114,7 @@ components:
         phoneNumber:
           type: string
           description: E.164 formatted phone number
-          example: "+9647701234567"
+          example: "+201001234567"
         uid:
           type: string
           description: Firebase Auth user ID

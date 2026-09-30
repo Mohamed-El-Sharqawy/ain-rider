@@ -164,7 +164,7 @@ export function CreatePromoModal() {
 
           <div>
             <Label htmlFor="value">
-              {type === 'PERCENTAGE' ? 'النسبة المئوية (%)' : 'المبلغ (IQD)'}
+              {type === 'PERCENTAGE' ? 'النسبة المئوية (%)' : 'المبلغ (EGP)'}
             </Label>
             <Input
               id="value"

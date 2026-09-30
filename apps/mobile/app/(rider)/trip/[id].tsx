@@ -208,7 +208,7 @@ export default function TripScreen() {
     }
   };
 
-  const defaultCenter = { latitude: 30.147719, longitude: 31.394327 };
+  const defaultCenter = { latitude: 30.0444, longitude: 31.2357 };
   const mapCenter = driver?.location || activeTrip?.pickupLocation || defaultCenter;
 
   return (
@@ -333,7 +333,7 @@ export default function TripScreen() {
               <View className="bg-emerald-500/5 p-6 rounded-3xl border border-emerald-500/10 mb-8 items-center">
                 <Text className="text-zinc-500 text-xs font-bold mb-1 uppercase tracking-widest">Total Fare</Text>
                 <Text className="text-white text-4xl font-black">
-                  {activeTrip?.estimatedFare.toLocaleString()} <Text className="text-emerald-500 text-lg">IQD</Text>
+                  {activeTrip?.estimatedFare.toLocaleString()} <Text className="text-emerald-500 text-lg">EGP</Text>
                 </Text>
               </View>
 

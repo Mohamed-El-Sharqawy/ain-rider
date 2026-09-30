@@ -316,7 +316,7 @@ The phone screen only checks length (`phoneNumber.length < 8`) but doesn't valid
 const handleNext = async () => {
   if (phoneNumber.length < 8) return;
   // No format validation
-  const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+964${phoneNumber}`;
+  const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+20${phoneNumber.replace(/^0+/, '')}`;
 ```
 
 **Recommendation**

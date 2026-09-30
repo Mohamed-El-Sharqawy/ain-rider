@@ -69,7 +69,7 @@ On successful verification, `otp_verified` event is published:
 {
   "subject": "ain_rider.otp_verified",
   "data": {
-    "phoneNumber": "+9647701234567",
+    "phoneNumber": "+201001234567",
     "uid": "abc123def456",
     "verifiedAt": "2026-03-27T10:00:00.000Z"
   }

@@ -374,7 +374,7 @@ if (__DEV__) {
 
 ---
 
-### MEDIUM MOB-HK-008: Location Service Silent Fallback to Baghdad
+### MEDIUM MOB-HK-008: Location Service Silent Fallback to Cairo
 
 - **File**: `mobile/services/location.service.ts:25-35`
 - **Category**: bug
@@ -382,7 +382,7 @@ if (__DEV__) {
 
 **Description**
 
-When location fails, the service silently returns Baghdad coordinates without indicating the failure. The user may not realize their location is wrong.
+When location fails, the service silently returns Cairo coordinates without indicating the failure. The user may not realize their location is wrong.
 
 ```tsx
 async getCurrentLocation(): Promise<LocationUpdate> {
@@ -392,7 +392,7 @@ async getCurrentLocation(): Promise<LocationUpdate> {
   } catch (error) {
     console.warn('[LocationService] Failed to get real location, using fallback:', error);
     return {
-      ...BAGHDAD, // Silent fallback
+      ...CAIRO, // Silent fallback
       heading: 0,
       speed: 0,
     };
@@ -596,7 +596,7 @@ export function useNearbyDrivers(
 
 ---
 
-### LOW MOB-HK-014: OSM Provider Duplicate BAGHDAD Constant
+### LOW MOB-HK-014: OSM Provider Duplicate CAIRO Constant
 
 - **File**: `mobile/services/location.service.ts:10-11`
 - **Category**: code-quality
@@ -605,8 +605,8 @@ export function useNearbyDrivers(
 **Description**
 
 ```tsx
-// const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
-const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
+// const CAIRO = { latitude: 30.0444, longitude: 31.2357 };
+const CAIRO = { latitude: 30.0444, longitude: 31.2357 };
 ```
 
 There's a commented-out duplicate line.

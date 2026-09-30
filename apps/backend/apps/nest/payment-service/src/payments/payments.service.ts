@@ -46,7 +46,7 @@ export class PaymentsService {
     const payment = await this.prisma.payment.create({
       data: {
         ...data,
-        currency: process.env.CURRENCY || 'IQD',
+        currency: process.env.CURRENCY || 'EGP',
         status: PaymentStatus.PENDING,
         paymentMethod: 'CASH',
       },

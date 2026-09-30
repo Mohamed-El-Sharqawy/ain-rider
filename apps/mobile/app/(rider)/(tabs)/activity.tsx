@@ -25,7 +25,7 @@ function formatDate(isoDate: string): string {
 }
 
 function formatFare(fare: number): string {
-  return fare.toLocaleString() + ' IQD';
+  return fare.toLocaleString() + ' EGP';
 }
 
 function formatDistance(km: number | undefined): string {

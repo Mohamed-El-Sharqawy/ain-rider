@@ -439,7 +439,7 @@ export class TripsService {
       estimatedFare: Math.round(estimatedFare),
       distance: Math.round(distanceMeters),
       duration: Math.round(durationSeconds),
-      currency: 'IQD',
+      currency: 'EGP',
       routeSource,
       breakdown: {
         baseFare,

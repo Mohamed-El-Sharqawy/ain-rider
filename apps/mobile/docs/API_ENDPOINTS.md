@@ -36,7 +36,7 @@ Request:
 {
   "email": "user@example.com",
   "password": "StrongP@ss1",
-  "phoneNumber": "+9647701234567",
+  "phoneNumber": "+201001234567",
   "firstName": "Ali",
   "lastName": "Hassan",
   "role": "RIDER"              // "RIDER" | "DRIVER"
@@ -48,7 +48,7 @@ Response 201:
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "phoneNumber": "+9647701234567",
+    "phoneNumber": "+201001234567",
     "firstName": "Ali",
     "lastName": "Hassan",
     "role": "RIDER",
@@ -150,7 +150,7 @@ Response 200:
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "phoneNumber": "+9647701234567",
+    "phoneNumber": "+201001234567",
     "firstName": "Ali",
     "lastName": "Hassan",
     "role": "RIDER",
@@ -171,7 +171,7 @@ Request:
 {
   "firstName": "Ali",
   "lastName": "Hassan",
-  "phoneNumber": "+9647701234567"
+  "phoneNumber": "+201001234567"
 }
 
 Response 200:
@@ -245,13 +245,13 @@ Request a new trip (rider only).
 Request:
 {
   "riderId": "rider-uuid",
-  "pickupLat": 30.147719,
-  "pickupLng": 31.394327,
-  "pickupAddress": "Karrada, Baghdad",
+  "pickupLat": 30.0444,
+  "pickupLng": 31.2357,
+  "pickupAddress": "Maadi, Cairo",
   "dropoffLat": 33.2950,
   "dropoffLng": 44.3773,
-  "dropoffAddress": "Mansour, Baghdad",
-  "estimatedFare": 15000,           // In IQD
+  "dropoffAddress": "Nasr City, Cairo",
+  "estimatedFare": 15000,           // In EGP
   "paymentMethod": "CASH",          // "CASH" | "CARD" | "WALLET"
   "promoCode": "RIDE50"             // Optional
 }
@@ -263,12 +263,12 @@ Response 201:
     "riderId": "rider-uuid",
     "driverId": null,
     "status": "REQUESTED",
-    "pickupLat": 30.147719,
-    "pickupLng": 31.394327,
-    "pickupAddress": "Karrada, Baghdad",
+    "pickupLat": 30.0444,
+    "pickupLng": 31.2357,
+    "pickupAddress": "Maadi, Cairo",
     "dropoffLat": 33.2950,
     "dropoffLng": 44.3773,
-    "dropoffAddress": "Mansour, Baghdad",
+    "dropoffAddress": "Nasr City, Cairo",
     "estimatedFare": 15000,
     "actualFare": null,
     "paymentMethod": "CASH",
@@ -295,12 +295,12 @@ Response 200:
     "riderId": "rider-uuid",
     "driverId": "driver-uuid",
     "status": "MATCHED",
-    "pickupLat": 30.147719,
-    "pickupLng": 31.394327,
-    "pickupAddress": "Karrada, Baghdad",
+    "pickupLat": 30.0444,
+    "pickupLng": 31.2357,
+    "pickupAddress": "Maadi, Cairo",
     "dropoffLat": 33.2950,
     "dropoffLng": 44.3773,
-    "dropoffAddress": "Mansour, Baghdad",
+    "dropoffAddress": "Nasr City, Cairo",
     "estimatedFare": 15000,
     "actualFare": null,
     "paymentMethod": "CASH",
@@ -419,8 +419,8 @@ Update driver's GPS position (driver only, called every 3 seconds).
 Request:
 {
   "driverId": "driver-uuid",
-  "latitude": 30.147719,
-  "longitude": 31.394327,
+  "latitude": 30.0444,
+  "longitude": 31.2357,
   "heading": 45.0,                  // Degrees (0-360)
   "speed": 35.5                    // km/h
 }
@@ -444,7 +444,7 @@ Backend Side Effects:
 Get nearby available drivers (for rider home screen map preview).
 
 ```
-Query: ?latitude=30.147719&longitude=31.394327
+Query: ?latitude=30.0444&longitude=31.2357
 
 Response 200:
 {
@@ -477,7 +477,7 @@ Query: ?from=2026-03-26T10:00:00Z&to=2026-03-26T10:30:00Z
 
 Response 200:
 [
-  { "latitude": 30.147719, "longitude": 31.394327, "recordedAt": "2026-03-26T10:00:00Z" },
+  { "latitude": 30.0444, "longitude": 31.2357, "recordedAt": "2026-03-26T10:00:00Z" },
   { "latitude": 33.3155, "longitude": 44.3665, "recordedAt": "2026-03-26T10:00:03Z" },
   ...
 ]
@@ -494,8 +494,8 @@ Register driver as available for trips (driver goes online).
 Request:
 {
   "driverId": "driver-uuid",
-  "latitude": 30.147719,
-  "longitude": 31.394327,
+  "latitude": 30.0444,
+  "longitude": 31.2357,
   "vehicleTypeId": "sedan-uuid"
 }
 
@@ -532,8 +532,8 @@ Response 200:
   "drivers": [
     {
       "driverId": "uuid",
-      "latitude": 30.147719,
-      "longitude": 31.394327,
+      "latitude": 30.0444,
+      "longitude": 31.2357,
       "vehicleTypeId": "sedan-uuid",
       "h3Index": "891f8a60007ffff",
       "availableSince": "2026-03-26T10:00:00Z"
@@ -559,7 +559,7 @@ Response 200:
     "riderId": "rider-uuid",
     "driverId": "driver-uuid",
     "amount": 14000,
-    "currency": "IQD",
+    "currency": "EGP",
     "paymentMethod": "CASH",
     "status": "PENDING",
     "transactionId": null,
@@ -603,7 +603,7 @@ Response 200:
 {
   "payments": [ ... ],
   "total": 150,
-  "totalAmount": 2100000,           // in IQD
+  "totalAmount": 2100000,           // in EGP
   "page": 1,
   "limit": 20
 }
@@ -626,7 +626,7 @@ Response 200:
       "id": "notif-uuid",
       "userId": "user-uuid",
       "title": "Trip Completed",
-      "body": "Your trip to Mansour has been completed",
+      "body": "Your trip to Nasr City has been completed",
       "type": "TRIP_COMPLETED",
       "data": { "tripId": "trip-uuid" },
       "read": false,
@@ -670,8 +670,8 @@ Request:
 {
   "userId": "user-uuid",
   "location": {
-    "latitude": 30.147719,
-    "longitude": 31.394327
+    "latitude": 30.0444,
+    "longitude": 31.2357
   },
   "message": "I feel unsafe"
 }

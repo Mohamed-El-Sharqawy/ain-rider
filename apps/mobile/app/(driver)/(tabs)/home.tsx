@@ -584,7 +584,7 @@ export default function DriverHome() {
                 <View>
                   <Text className="text-zinc-500 text-[10px] font-bold uppercase">Estimated</Text>
                   <Text className="text-white font-bold">
-                    {incomingTrip?.estimatedDuration ? `${Math.round(incomingTrip.estimatedDuration / 60)} min` : '5 min'} · {incomingTrip?.estimatedFare?.toLocaleString()} IQD
+                    {incomingTrip?.estimatedDuration ? `${Math.round(incomingTrip.estimatedDuration / 60)} min` : '5 min'} · {incomingTrip?.estimatedFare?.toLocaleString()} EGP
                   </Text>
                 </View>
               </View>

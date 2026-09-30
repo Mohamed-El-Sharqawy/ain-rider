@@ -597,8 +597,8 @@ function SearchingPulse() {
 | Trip Matched | "Driver Found!" | "Your driver is on the way" | Open active trip |
 | Trip Assigned (Driver) | "New Trip Request" | "Rider nearby - tap to accept" | Open incoming trip |
 | Trip Started | "Trip Started" | "You're on your way!" | Open active trip |
-| Trip Completed | "Trip Completed" | "IQD{fare} - Rate your ride" | Open rating screen |
-| Payment Received (Driver) | "Payment Received" | "IQD{amount} added to earnings" | Open earnings |
+| Trip Completed | "Trip Completed" | "EGP{fare} - Rate your ride" | Open rating screen |
+| Payment Received (Driver) | "Payment Received" | "EGP{amount} added to earnings" | Open earnings |
 | SOS Alert (Support) | "Emergency SOS" | "Trip #{id} needs help" | Open SOS panel |
 
 ### Implementation

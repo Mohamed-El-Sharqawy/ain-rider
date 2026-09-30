@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDate(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  return new Intl.DateTimeFormat('ar-IQ', {
+  return new Intl.DateTimeFormat('ar-EG', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -16,8 +16,8 @@ export function formatDate(date: string | Date): string {
   }).format(d)
 }
 
-export function formatCurrency(amount: number, currency = 'IQD'): string {
-  return new Intl.NumberFormat('ar-IQ', {
+export function formatCurrency(amount: number, currency = 'EGP'): string {
+  return new Intl.NumberFormat('ar-EG', {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,

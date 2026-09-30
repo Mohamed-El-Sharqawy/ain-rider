@@ -188,7 +188,7 @@ export default function ConfirmScreen() {
             </View>
             <View className="items-end">
               <Text className="text-white text-2xl font-bold">
-                {tripStore.fareEstimate.estimatedFare.toLocaleString()} IQD
+                {tripStore.fareEstimate.estimatedFare.toLocaleString()} EGP
               </Text>
             </View>
           </View>

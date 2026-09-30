@@ -124,18 +124,18 @@ export function TripsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <StatCard
             label="إجمالي الرحلات"
-            value={stats.total.toLocaleString('ar-IQ')}
+            value={stats.total.toLocaleString('ar-EG')}
             icon={Car}
           />
           <StatCard
             label="رحلات مكتملة"
-            value={stats.completed.toLocaleString('ar-IQ')}
+            value={stats.completed.toLocaleString('ar-EG')}
             change={{ value: 12, label: 'مكتملة الآن' }}
             icon={Car}
           />
           <StatCard
             label="رحلات جارية"
-            value={stats.inProgress.toLocaleString('ar-IQ')}
+            value={stats.inProgress.toLocaleString('ar-EG')}
             change={{ value: 12, label: 'جارية الآن' }}
             icon={Car}
           />
@@ -147,13 +147,13 @@ export function TripsPage() {
           />
           <StatCard
             label="مدفوعات معلقة"
-            value={stats.pendingPayments?.toLocaleString('ar-IQ') ?? '0'}
+            value={stats.pendingPayments?.toLocaleString('ar-EG') ?? '0'}
             change={{ value: 12, label: 'معلقة الآن' }}
             icon={Banknote}
           />
           <StatCard
             label="مدفوعات محصلة"
-            value={stats.collectedPayments?.toLocaleString('ar-IQ') ?? '0'}
+            value={stats.collectedPayments?.toLocaleString('ar-EG') ?? '0'}
             change={{ value: 12, label: 'محصلة الآن' }}
             icon={Banknote}
           />

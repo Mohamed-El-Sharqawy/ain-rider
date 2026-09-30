@@ -37,7 +37,7 @@ model Payment {
   riderId         String
   driverId        String
   amount          Float
-  currency        String        @default("IQD")
+  currency        String        @default("EGP")
   status          PaymentStatus @default(PENDING)
   paymentMethod   String
   transactionId   String?

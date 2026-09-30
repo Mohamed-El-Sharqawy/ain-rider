@@ -99,7 +99,7 @@ export function CreateVehicleTypeModal() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="baseFare">الأجرة الأساسية (IQD)</Label>
+              <Label htmlFor="baseFare">الأجرة الأساسية (EGP)</Label>
               <Input
                 id="baseFare"
                 type="number"
@@ -111,7 +111,7 @@ export function CreateVehicleTypeModal() {
               />
             </div>
             <div>
-              <Label htmlFor="minFare">الحد الأدنى للأجرة (IQD)</Label>
+              <Label htmlFor="minFare">الحد الأدنى للأجرة (EGP)</Label>
               <Input
                 id="minFare"
                 type="number"
@@ -125,7 +125,7 @@ export function CreateVehicleTypeModal() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="perKmRate">السعر لكل كم (IQD)</Label>
+              <Label htmlFor="perKmRate">السعر لكل كم (EGP)</Label>
               <Input
                 id="perKmRate"
                 type="number"
@@ -137,7 +137,7 @@ export function CreateVehicleTypeModal() {
               />
             </div>
             <div>
-              <Label htmlFor="perMinuteRate">السعر لكل دقيقة (IQD)</Label>
+              <Label htmlFor="perMinuteRate">السعر لكل دقيقة (EGP)</Label>
               <Input
                 id="perMinuteRate"
                 type="number"

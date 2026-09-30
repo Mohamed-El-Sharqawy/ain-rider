@@ -34,7 +34,7 @@ export default function BasicInfoScreen() {
         lastName,
         email,
         password,
-        phoneNumber: phone?.startsWith('+') ? phone : `+964${phone}`,
+        phoneNumber: phone?.startsWith('+') ? phone : `+20${phone.replace(/^0+/, '')}`,
         role: (role || 'RIDER') as any // Cast to match UserRole enum from types
       });
 

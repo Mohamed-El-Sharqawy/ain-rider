@@ -66,7 +66,7 @@ export default function DriverProfileExtraScreen() {
            <Text className="text-zinc-400 font-bold mb-2 ms-1">City</Text>
           <TextInput
             className="bg-zinc-900 px-5 py-4 rounded-2xl border border-zinc-800 text-white font-medium text-lg"
-            placeholder="Baghdad"
+            placeholder="Cairo"
             placeholderTextColor="#3f3f46"
             value={city}
             onChangeText={setCity}

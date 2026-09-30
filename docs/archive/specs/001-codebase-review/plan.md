@@ -45,7 +45,7 @@ components/services/hooks)
 | IV. Shared Types as Contract | Review MUST flag type mismatches between shared-types and local DTOs/types | ✅ Covered — cross-platform integration review |
 | V. Structured Error Contract | Review MUST verify all error responses follow the unified schema | ✅ Covered — backend and client error handling review |
 | VI. Real-Time by Design | Review MUST verify WebSocket/NATS event handling consistency | ✅ Covered — real-time integration review |
-| VII. Iraq-First Localization | Review MUST flag missing Arabic/RTL/IQD conventions | ✅ Covered — mobile and dashboard UI review |
+| VII. Egypt-First Localization | Review MUST flag missing Arabic/RTL/EGP conventions | ✅ Covered — mobile and dashboard UI review |
 
 **Post-Design Re-check**: ✅ All gates remain satisfied. The documentation
 structure does not introduce any constitution violations.

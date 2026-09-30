@@ -1,6 +1,6 @@
 export function isValidPhone(phone: string): boolean {
-  const digits = phone.replace(/\D/g, '');
-  return digits.length >= 9 && digits.length <= 15;
+  // Egyptian mobile in E.164 format: +20 followed by 10 digits starting with 010/011/012/015
+  return /^\+201[0125]\d{8}$/.test(phone);
 }
 
 export function isValidEmail(email: string): boolean {

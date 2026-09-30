@@ -94,7 +94,7 @@ async debit(userId: string, amount: number, description: string, referenceId?: s
   // No check that wallet.balance >= amount
 ```
 
-A wallet with 1000 IQD could be debited 5000 IQD, resulting in -4000 balance.
+A wallet with 1000 EGP could be debited 5000 EGP, resulting in -4000 balance.
 
 **Recommendation**
 

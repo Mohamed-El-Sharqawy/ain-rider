@@ -211,12 +211,12 @@ model Vehicle {
   @@map("vehicles")
 }
 
-/// Driver wallet for earnings management. All amounts in IQD.
+/// Driver wallet for earnings management. All amounts in EGP.
 model Wallet {
   id           String              @id @default(uuid())
   userId       String              @unique
   balance      Float               @default(0)
-  currency     String              @default("IQD")
+  currency     String              @default("EGP")
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   transactions WalletTransaction[]

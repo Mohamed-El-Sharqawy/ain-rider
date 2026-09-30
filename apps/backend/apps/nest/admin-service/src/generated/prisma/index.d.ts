@@ -43,7 +43,7 @@ export type VehicleModel = $Result.DefaultSelection<Prisma.$VehicleModelPayload>
 export type Vehicle = $Result.DefaultSelection<Prisma.$VehiclePayload>
 /**
  * Model Wallet
- * Driver wallet for earnings management. All amounts in IQD.
+ * Driver wallet for earnings management. All amounts in EGP.
  */
 export type Wallet = $Result.DefaultSelection<Prisma.$WalletPayload>
 /**

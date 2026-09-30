@@ -332,7 +332,7 @@ export default function DriverProfile() {
               {/* Version */}
               <View className="mt-8 items-center mb-6">
                 <Text className="text-zinc-600 text-xs font-bold uppercase tracking-widest">Ain Driver v1.0.0</Text>
-                <Text className="text-zinc-700 text-[10px] mt-1">Made with ❤️ in Baghdad</Text>
+                <Text className="text-zinc-700 text-[10px] mt-1">Made with ❤️ in Cairo</Text>
               </View>
             </>
           )}

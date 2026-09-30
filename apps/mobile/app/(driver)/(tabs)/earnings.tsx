@@ -10,7 +10,7 @@ import { SupportApi } from '../../../lib/api/support.api';
 type Period = 'today' | 'week' | 'month';
 
 function formatFare(fare: number): string {
-  return fare.toLocaleString() + ' IQD';
+  return fare.toLocaleString() + ' EGP';
 }
 
 function formatDate(isoDate: string): string {
@@ -252,7 +252,7 @@ export default function DriverEarnings() {
                   <View className="w-px bg-zinc-800/50" />
                   <View className="flex-1 items-center">
                     <Text className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-1">Avg Fare</Text>
-                    <Text className="text-white font-black text-xl">{stats.tripCount > 0 ? formatFare(Math.round(stats.avgFare)) : '0 IQD'}</Text>
+                    <Text className="text-white font-black text-xl">{stats.tripCount > 0 ? formatFare(Math.round(stats.avgFare)) : '0 EGP'}</Text>
                   </View>
                   <View className="w-px bg-zinc-800/50" />
                   <View className="flex-1 items-center">

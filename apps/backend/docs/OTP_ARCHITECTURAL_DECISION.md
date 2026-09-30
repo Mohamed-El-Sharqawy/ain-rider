@@ -50,7 +50,7 @@ OTP_PROVIDER=firebase   # or twilio / infobip / unifonic
 - Code sent via SMS to real phone
 - Provider manages delivery, retry, and carrier routing
 - Redis TTL and single-use rules remain active as a safety net
-- Preferred provider: **Firebase Auth** (free tier, no sender ID registration required for Iraq/Egypt)
+- Preferred provider: **Firebase Auth** (free tier, no sender ID registration required for Egypt)
 - Fallback if delivery rates are insufficient: **Infobip** or **Unifonic** (better Middle East carrier coverage, requires sender ID approval per country)
  
 ---
@@ -79,7 +79,7 @@ No SMS SDK on the mobile side. No Firebase Auth SDK. No Twilio SDK. If the backe
 1. Implement new provider class against the existing `OtpProvider` interface (`send` + `verify`)
 2. Register it in the provider factory (one line)
 3. Add provider credentials to environment secrets — never in code
-4. Deploy to staging, test real SMS delivery to Iraq (+964) and Egypt (+20) numbers
+4. Deploy to staging, test real SMS delivery to Egyptian (+20) numbers
 5. Confirm `ain_rider.otp_verified` flows through NATS end to end
 6. Set `OTP_PROVIDER=firebase` in production environment
 7. Monitor delivery rates and error logs for 30 minutes post-switch

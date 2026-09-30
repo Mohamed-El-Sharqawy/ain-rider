@@ -106,7 +106,7 @@ export function CreateUserModal({ open, onClose }: CreateUserModalProps) {
             <Input
               id="phoneNumber"
               type="tel"
-              placeholder="+964XXXXXXXXXX"
+              placeholder="+20XXXXXXXXXX"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
               required
