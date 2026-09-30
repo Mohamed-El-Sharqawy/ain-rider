@@ -1,14 +1,14 @@
 import * as ExpoLocation from 'expo-location';
 import { LatLng } from './map/map.provider';
 import { startBackgroundLocationTask, stopBackgroundLocationTask } from './background-tasks';
+import { useAuthStore } from '../stores/auth.store';
+import { DEFAULT_LOCATION, DRIVER_DEFAULT_LOCATION } from '../lib/config/constants';
+import { UserRole } from '../lib/api/types';
 
 interface LocationUpdate extends LatLng {
   heading?: number;
   speed?: number;
 }
-
-// const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
-const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
 
 class LocationService {
   private watchSubscription: ExpoLocation.LocationSubscription | null = null;
@@ -31,12 +31,22 @@ class LocationService {
         speed: location.coords.speed ?? undefined,
       };
     } catch (error) {
-      console.warn('[LocationService] Failed to get real location, using fallback:', error);
-      return {
-        ...BAGHDAD,
-        heading: 0,
-        speed: 0,
-      };
+      if (__DEV__) {
+        console.warn('[LocationService] Failed to get real location, using mock fallback for dev:', error);
+        
+        const role = useAuthStore.getState().role;
+        const fallback = role === UserRole.DRIVER ? DRIVER_DEFAULT_LOCATION : DEFAULT_LOCATION;
+
+        return {
+          latitude: fallback.latitude,
+          longitude: fallback.longitude,
+          heading: 0,
+          speed: 0,
+        };
+      }
+      throw new Error(
+        `Failed to get current location: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

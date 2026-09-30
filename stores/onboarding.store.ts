@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import { AuthApi } from '../lib/api/auth';
+import { devtools } from 'zustand/middleware';
+import { DriverApi } from '../lib/api/driver';
+import { OnboardingStatusResponse } from '../lib/api/types';
 
 interface OnboardingState {
   role: 'RIDER' | 'DRIVER' | null;
@@ -27,38 +29,51 @@ interface OnboardingState {
   fetchOnboardingStatus: () => Promise<void>;
 }
 
-export const useOnboardingStore = create<OnboardingState>((set, get) => ({
-  role: null,
-  phone: '',
-  verificationId: null,
-  vehicle: null,
-  licenseNumber: null,
-  onboardingStatus: null,
-  documentsStatus: null,
-  setRole: (role) => set({ role }),
-  setPhone: (phone) => set({ phone }),
-  setVerificationId: (id) => set({ verificationId: id }),
-  setVehicle: (vehicle) => set({ vehicle }),
-  setLicenseNumber: (licenseNumber) => set({ licenseNumber }),
-  fetchOnboardingStatus: async () => {
-    console.log('[OnboardingDebug] Fetching status...');
-    try {
-      const res: any = await AuthApi.getOnboardingStatus();
-      console.log('[OnboardingDebug] Received status:', res);
-      
-      const statusData = res.data || res; // Handle wrapped or unwrapped response
-      
-      set({ 
-        onboardingStatus: statusData.onboardingStatus,
-        documentsStatus: {
-          identity: statusData.documents.identity,
-          drivingLicense: statusData.documents.drivingLicense,
-          vehicle: statusData.documents.vehicle,
-        },
-        vehicle: statusData.documents?.vehicle?.details || get().vehicle
-      });
-    } catch (error) {
-      console.error('[OnboardingDebug] Failed to fetch onboarding status:', error);
-    }
-  },
-}));
+let fetchPromise: Promise<void> | null = null;
+
+export const useOnboardingStore = create<OnboardingState>()(
+  devtools((set, get) => ({
+    role: null,
+    phone: '',
+    verificationId: null,
+    vehicle: null,
+    licenseNumber: null,
+    onboardingStatus: null,
+    documentsStatus: null,
+    setRole: (role) => set({ role }),
+    setPhone: (phone) => set({ phone }),
+    setVerificationId: (id) => set({ verificationId: id }),
+    setVehicle: (vehicle) => set({ vehicle }),
+    setLicenseNumber: (licenseNumber) => set({ licenseNumber }),
+    fetchOnboardingStatus: async () => {
+      if (fetchPromise) return fetchPromise;
+
+      fetchPromise = (async () => {
+        try {
+          const res: OnboardingStatusResponse = await DriverApi.getOnboardingStatus();
+
+          set({
+            onboardingStatus: res.onboardingStatus,
+            documentsStatus: {
+              identity: res.documents.identity,
+              drivingLicense: res.documents.drivingLicense,
+              vehicle: res.documents.vehicle,
+            },
+            vehicle: res.documents.vehicle?.details || get().vehicle,
+          });
+        } catch (error) {
+          console.error('[OnboardingStore] Failed to fetch onboarding status:', error);
+          // If fetch fails, we don't want to stay in 'null' forever which causes a blank screen.
+          // We'll set a default status if it's currently null to allow the UI to progress.
+          if (get().onboardingStatus === null) {
+            set({ onboardingStatus: 'PENDING_DOCUMENTS' });
+          }
+        } finally {
+          fetchPromise = null;
+        }
+      })();
+
+      return fetchPromise;
+    },
+  }), { name: 'onboarding-store' })
+);

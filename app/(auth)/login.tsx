@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuthStore } from '../../stores/auth.store';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,9 @@ import { ApiError } from '../../lib/api/client';
 import { SecureStorage } from '../../lib/storage/secure';
 import { router } from 'expo-router';
 
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 60_000;
+
 export default function LoginScreen() {
   const { setAuth } = useAuthStore();
   const [email, setEmail] = useState('');
@@ -16,10 +19,19 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const failedAttempts = useRef(0);
+  const lockedUntil = useRef(0);
 
   const handleLogin = async () => {
     if (!email || !password) {
       setErrorMessage('Please enter email and password');
+      return;
+    }
+
+    const now = Date.now();
+    if (now < lockedUntil.current) {
+      const remaining = Math.ceil((lockedUntil.current - now) / 1000);
+      setErrorMessage(`Too many attempts. Try again in ${remaining}s`);
       return;
     }
 
@@ -42,8 +54,13 @@ export default function LoginScreen() {
         router.replace('/(rider)/(tabs)/home');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setErrorMessage(err instanceof ApiError ? err.message : 'Invalid email or password');
+      failedAttempts.current += 1;
+      if (failedAttempts.current >= MAX_ATTEMPTS) {
+        lockedUntil.current = Date.now() + LOCKOUT_MS;
+        setErrorMessage(`Too many failed attempts. Please wait 60 seconds.`);
+      } else {
+        setErrorMessage(err instanceof ApiError ? err.message : 'Invalid email or password');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -75,11 +92,11 @@ export default function LoginScreen() {
               </View>
             )}
 
-            <Text className="text-zinc-400 text-xs font-bold uppercase tracking-[2px] mb-4 ml-1">Email</Text>
+            <Text className="text-zinc-400 text-xs font-bold uppercase tracking-[2px] mb-4 ms-1">Email</Text>
             <View className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-6" style={{ borderWidth: 1, borderColor: 'rgba(39, 39, 42, 0.5)' }}>
               <Ionicons name="mail-outline" size={20} color="#71717a" />
               <TextInput 
-                className="flex-1 text-white text-lg font-medium ml-3"
+                className="flex-1 text-white text-lg font-medium ms-3"
                 placeholder="email@example.com"
                 placeholderTextColor="#3f3f46"
                 keyboardType="email-address"
@@ -93,11 +110,11 @@ export default function LoginScreen() {
               />
             </View>
 
-            <Text className="text-zinc-400 text-xs font-bold uppercase tracking-[2px] mb-4 ml-1">Password</Text>
+            <Text className="text-zinc-400 text-xs font-bold uppercase tracking-[2px] mb-4 ms-1">Password</Text>
             <View className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-10" style={{ borderWidth: 1, borderColor: 'rgba(39, 39, 42, 0.5)' }}>
               <Ionicons name="lock-closed-outline" size={20} color="#71717a" />
               <TextInput 
-                className="flex-1 text-white text-lg font-medium ml-3"
+                className="flex-1 text-white text-lg font-medium ms-3"
                 placeholder="••••••••"
                 placeholderTextColor="#3f3f46"
                 secureTextEntry={!showPassword}

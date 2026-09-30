@@ -7,6 +7,7 @@ import { ApiError } from '../../lib/api/client';
 import { useAuthStore } from '../../stores/auth.store';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL } from '../../lib/validation';
 
 export default function DocumentsScreen() {
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
@@ -67,12 +68,21 @@ export default function DocumentsScreen() {
 
     setIsUploading(true);
     try {
-      // Upload profile image if provided
+      const uris = [frontUri, backUri, profileImageUri].filter(Boolean) as string[];
+      for (const uri of uris) {
+        const fileInfo = await fetch(uri);
+        const blob = await fileInfo.blob();
+        if (blob.size > MAX_FILE_SIZE_BYTES) {
+          Alert.alert('File Too Large', `Each file must be under ${MAX_FILE_SIZE_LABEL}.`);
+          setIsUploading(false);
+          return;
+        }
+      }
+
       if (profileImageUri) {
         await AuthApi.uploadProfileImage(profileImageUri);
       }
       
-      // Upload identity documents
       const result = await AuthApi.uploadIdentityDocuments(frontUri, backUri);
       
       if (result.success) {
@@ -137,7 +147,7 @@ export default function DocumentsScreen() {
                   <Ionicons name="person" size={48} color="#52525b" />
                 )}
               </View>
-              <View className="absolute bottom-0 right-0 bg-emerald-600 w-9 h-9 rounded-full items-center justify-center border-4 border-zinc-950">
+              <View className="absolute bottom-0 end-0 bg-emerald-600 w-9 h-9 rounded-full items-center justify-center border-4 border-zinc-950">
                 <Ionicons name="camera" size={16} color="#fff" />
               </View>
             </TouchableOpacity>
@@ -166,7 +176,7 @@ export default function DocumentsScreen() {
                 ) : (
                   <View className="flex-1 items-center justify-center flex-row">
                     <Ionicons name="image-outline" size={24} color="#3f3f46" />
-                    <Text className="text-zinc-500 font-medium ml-2">Tap to upload front</Text>
+                    <Text className="text-zinc-500 font-medium ms-2">Tap to upload front</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -190,7 +200,7 @@ export default function DocumentsScreen() {
                 ) : (
                   <View className="flex-1 items-center justify-center flex-row">
                     <Ionicons name="image-outline" size={24} color="#3f3f46" />
-                    <Text className="text-zinc-500 font-medium ml-2">Tap to upload back</Text>
+                    <Text className="text-zinc-500 font-medium ms-2">Tap to upload back</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -211,7 +221,7 @@ export default function DocumentsScreen() {
           >
             {isUploading ? (
               <>
-                <ActivityIndicator color="#10b981" className="mr-2" />
+                <ActivityIndicator color="#10b981" className="me-2" />
                 <Text className="text-white text-lg font-bold">Uploading...</Text>
               </>
             ) : (

@@ -150,7 +150,7 @@ export default function VehicleInfoScreen() {
         }}
       >
         <View className="flex-row items-center">
-          {type === 'color' && <View className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: item.hex, borderWidth: item.name === 'White' ? 1 : 0, borderColor: '#3f3f46' }} />}
+          {type === 'color' && <View className="w-4 h-4 rounded-full me-3" style={{ backgroundColor: item.hex, borderWidth: item.name === 'White' ? 1 : 0, borderColor: '#3f3f46' }} />}
           <Text className={`text-lg font-medium ${isSelected ? 'text-emerald-400' : 'text-zinc-300'}`}>{label}</Text>
         </View>
         {isSelected && <Ionicons name="checkmark-circle" size={24} color="#10b981" />}
@@ -173,28 +173,28 @@ export default function VehicleInfoScreen() {
         <Text className="text-xl text-zinc-500 mb-10 font-medium">Please provide accurate vehicle details for approval</Text>
 
         {/* Brand/Make */}
-        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ml-1">Car Brand</Text>
+        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Car Brand</Text>
         <TouchableOpacity
           className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-6 border border-zinc-800/50"
           onPress={() => setModalVisible('make')}
           disabled={isLoading}
         >
           <Ionicons name="business-outline" size={20} color="#71717a" />
-          <Text className={`flex-1 text-lg font-medium ml-3 ${selectedMake ? 'text-white' : 'text-zinc-600'}`}>
+          <Text className={`flex-1 text-lg font-medium ms-3 ${selectedMake ? 'text-white' : 'text-zinc-600'}`}>
             {isLoading ? 'Loading brands...' : selectedMake ? selectedMake.name : 'Select car brand'}
           </Text>
           <Ionicons name="chevron-down" size={20} color="#3f3f46" />
         </TouchableOpacity>
 
         {/* Model */}
-        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ml-1">Car Model</Text>
+        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Car Model</Text>
         <TouchableOpacity
           className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-6 border border-zinc-800/50"
           onPress={() => selectedMake && setModalVisible('model')}
           disabled={!selectedMake || isModelsLoading}
         >
           <Ionicons name="car-outline" size={20} color="#71717a" />
-          <Text className={`flex-1 text-lg font-medium ml-3 ${selectedModel ? 'text-white' : 'text-zinc-600'}`}>
+          <Text className={`flex-1 text-lg font-medium ms-3 ${selectedModel ? 'text-white' : 'text-zinc-600'}`}>
             {isModelsLoading ? 'Loading models...' : selectedModel ? selectedModel.name : selectedMake ? 'Select model' : 'Pick a brand first'}
           </Text>
           {isModelsLoading ? <ActivityIndicator size="small" color="#10b981" /> : <Ionicons name="chevron-down" size={20} color="#3f3f46" />}
@@ -203,7 +203,7 @@ export default function VehicleInfoScreen() {
         <View className="flex-row gap-4 mb-6">
           {/* Year */}
           <View className="flex-1">
-            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ml-1">Year</Text>
+            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Year</Text>
             <TouchableOpacity
               className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 border border-zinc-800/50"
               onPress={() => setModalVisible('year')}
@@ -215,23 +215,23 @@ export default function VehicleInfoScreen() {
 
           {/* Color */}
           <View className="flex-1">
-            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ml-1">Car Color</Text>
+            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Car Color</Text>
             <TouchableOpacity
               className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 border border-zinc-800/50"
               onPress={() => setModalVisible('color')}
             >
-              <View className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: COLORS.find(c => c.name === color)?.hex }} />
+              <View className="w-3 h-3 rounded-full me-2" style={{ backgroundColor: COLORS.find(c => c.name === color)?.hex }} />
               <Text className="flex-1 text-lg font-medium text-white capitalize">{color}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* License Plate */}
-        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ml-1">License Plate</Text>
+        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">License Plate</Text>
         <View className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-12 border border-zinc-800/50">
           <Ionicons name="card-outline" size={20} color="#71717a" />
           <TextInput
-            className="flex-1 text-white text-lg font-bold ml-3"
+            className="flex-1 text-white text-lg font-bold ms-3"
             placeholder="ABC-1234"
             placeholderTextColor="#3f3f46"
             autoCapitalize="characters"

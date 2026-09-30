@@ -15,7 +15,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
@@ -52,7 +54,9 @@
         {
           "icon": "./assets/icon.png",
           "color": "#18181b",
-          "sounds": ["./assets/sounds/new_trip.mp3"]
+          "sounds": [
+            "./assets/sounds/notification.wav"
+          ]
         }
       ],
       [

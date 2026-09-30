@@ -1,10 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { useOnboardingStore } from '../../stores/onboarding.store';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { AuthApi } from '../../lib/api/auth';
 import { ApiError } from '../../lib/api/client';
+import { isValidPhone } from '../../lib/validation';
 
 export default function PhoneScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -17,14 +18,17 @@ export default function PhoneScreen() {
   const handleNext = async () => {
     if (phoneNumber.length < 8) return;
 
+    const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+964${phoneNumber}`;
+    if (!isValidPhone(formattedPhone)) {
+      Alert.alert('Invalid Phone', 'Please enter a valid phone number (9-15 digits).');
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage(null);
     setWaitTime(null);
 
     try {
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+964${phoneNumber}`;
-      
-      // Request abstract OTP from our backend
       await AuthApi.requestOtp(formattedPhone);
       
       // Save global state for the verify and basic info screens
@@ -69,7 +73,7 @@ export default function PhoneScreen() {
       )}
 
       <View className="flex-row items-center border-b-2 border-emerald-500 pb-2 mb-10">
-        <Text className="text-3xl text-zinc-300 font-medium mr-4">+964</Text>
+        <Text className="text-3xl text-zinc-300 font-medium me-4">+964</Text>
         <TextInput
           className="flex-1 text-3xl text-white font-medium tracking-wide"
           placeholder="750 123 4567"
@@ -91,7 +95,7 @@ export default function PhoneScreen() {
         onPress={handleNext}
         disabled={phoneNumber.length <= 8 || isLoading || !!waitTime}
       >
-        {isLoading && <ActivityIndicator color="#10b981" className="mr-2" />}
+        {isLoading && <ActivityIndicator color="#10b981" className="me-2" />}
         <Text className={`text-xl font-bold ${phoneNumber.length > 8 && !isLoading && !waitTime ? 'text-white' : 'text-zinc-600'}`}>
           {isLoading ? 'Requesting...' : waitTime ? `Wait ${waitTime}s` : 'Next'}
         </Text>

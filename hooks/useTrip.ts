@@ -1,13 +1,24 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useTripStore } from '../stores/trip.store';
 import { TripApi } from '../lib/api/trip.api';
 import { wsService } from '../services/websocket.service';
 import { mapProvider } from '../services/map';
+import { ApiConfig } from '../lib/config/constants';
 
-const WS_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3001/ws';
+const WS_URL = ApiConfig.wsUrl;
 
 export function useTrip() {
   const store = useTripStore();
+  const activeTripIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      const tripId = activeTripIdRef.current;
+      if (tripId) {
+        wsService.unsubscribe('trip', `${tripId}:rider`);
+      }
+    };
+  }, []);
 
   const requestTrip = useCallback(
     async (onMatched?: (tripId: string) => void) => {
@@ -40,6 +51,7 @@ export function useTrip() {
 
         wsService.connect(WS_URL);
         wsService.subscribe('trip', `${trip.id}:rider`);
+        activeTripIdRef.current = trip.id;
 
         onMatched?.(trip.id);
       } catch (error) {
@@ -54,6 +66,7 @@ export function useTrip() {
     async (tripId: string, reason: string = 'Rider cancelled') => {
       await TripApi.cancelTrip(tripId, reason);
       wsService.unsubscribe('trip', `${tripId}:rider`);
+      activeTripIdRef.current = null;
       store.reset();
     },
     [store],
@@ -62,6 +75,7 @@ export function useTrip() {
   const rateTrip = useCallback(
     async (tripId: string, rating: number) => {
       await TripApi.rateTrip(tripId, rating, 'rider');
+      activeTripIdRef.current = null;
       store.reset();
     },
     [store],

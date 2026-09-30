@@ -126,7 +126,7 @@ export default function ProfileScreen() {
                 </Text>
                 <View className="flex-row items-center mt-1">
                   <Ionicons name="call-outline" color="#71717a" size={14} />
-                  <Text className="text-zinc-500 font-medium ml-1">{userData?.phoneNumber}</Text>
+                  <Text className="text-zinc-500 font-medium ms-1">{userData?.phoneNumber}</Text>
                 </View>
                 <Text className="text-zinc-600 text-sm mt-0.5">{userData?.email}</Text>
               </>
@@ -142,12 +142,12 @@ export default function ProfileScreen() {
                 activeOpacity={0.7}
                 onPress={() => handleMenuPress(item)}
               >
-                <View className="bg-zinc-800/50 p-2.5 rounded-xl mr-4">
+                <View className="bg-zinc-800/50 p-2.5 rounded-xl me-4">
                   <Ionicons name={item.icon as any} color="#a1a1aa" size={22} />
                 </View>
                 <Text className="flex-1 text-lg text-white/90 font-medium">{item.label}</Text>
                 {item.id === 'documents' && hasDocuments && (
-                  <View className="bg-emerald-600/20 px-2 py-1 rounded-full mr-2">
+                  <View className="bg-emerald-600/20 px-2 py-1 rounded-full me-2">
                     <Text className="text-emerald-400 text-xs font-bold">Verified</Text>
                   </View>
                 )}
@@ -162,7 +162,7 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
             onPress={handleLogout}
           >
-            <View className="bg-red-500/20 p-2.5 rounded-xl mr-4">
+            <View className="bg-red-500/20 p-2.5 rounded-xl me-4">
               <Ionicons name="log-out-outline" color="#ef4444" size={22} />
             </View>
             <Text className="flex-1 text-lg text-red-500 font-bold">Sign Out</Text>

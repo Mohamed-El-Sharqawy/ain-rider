@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, StyleSheet, Animated, Dimensions, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, StyleSheet, Animated, Dimensions, Modal, AppState, type AppStateStatus } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,10 +15,12 @@ import { LocationApi } from '../../../lib/api/location.api';
 import { MatchApi } from '../../../lib/api/match.api';
 import { AppMapView, AppMapViewRef } from '../../../components/map/MapView';
 import { LocationMarker } from '../../../components/map/LocationMarker';
+import { PickupDropoffPins } from '../../../components/map/PickupDropoffPins';
 import { wsService } from '../../../services/websocket.service';
 import { locationService } from '../../../services/location.service';
+import { ApiConfig } from '../../../lib/config/constants';
 
-const WS_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3001/ws';
+const WS_URL = ApiConfig.wsUrl;
 
 export default function DriverHome() {
   const router = useRouter();
@@ -36,12 +38,52 @@ export default function DriverHome() {
   const driverInfoRef = useRef<any>(null);
   const wsUnsubsRef = useRef<(() => void)[]>([]);
   const isOnlineRef = useRef(false);
+  const mountedRef = useRef(true);
 
   const screenHeight = Dimensions.get('window').height;
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [showIncoming, setShowIncoming] = useState(false);
   const [showDisclosureModal, setShowDisclosureModal] = useState(false);
+  const appStateRef = useRef(AppState.currentState);
+
+  // Pause animations when app goes to background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      if (appStateRef.current === 'active' && nextState.match(/inactive|background/)) {
+        // App going to background - animations automatically pause
+      } else if (appStateRef.current.match(/inactive|background/) && nextState === 'active') {
+        // App coming to foreground
+        // If WS died during background and driver has an active trip, reconnect
+        if (!wsService.isConnected() && (isOnlineRef.current || driverStore.currentTrip)) {
+          wsService.reconnect().catch(() => { });
+        }
+
+        // Refresh location and match registration if online
+        if (isOnlineRef.current && driverInfoRef.current) {
+          locationService.getCurrentLocation().then((loc) => {
+            MatchApi.registerAvailable({
+              ...driverInfoRef.current!,
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+            }).catch(() => { });
+            LocationApi.updateDriverLocation({
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+              heading: loc.heading,
+              speed: loc.speed,
+            }).catch(() => { });
+          }).catch(() => { });
+        }
+      }
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
 
   useEffect(() => {
     if (incomingTrip) {
@@ -59,6 +101,26 @@ export default function DriverHome() {
           useNativeDriver: true,
         }),
       ]).start();
+
+      // Fit map to show both driver and pickup
+      if (currentLocation && mapRef.current) {
+        const coords: [number, number][] = [
+          [currentLocation.longitude, currentLocation.latitude],
+          [incomingTrip.pickupLng, incomingTrip.pickupLat],
+        ];
+        // Calculate bounds
+        const lons = coords.map(c => c[0]);
+        const lats = coords.map(c => c[1]);
+        const ne: [number, number] = [Math.max(...lons), Math.max(...lats)];
+        const sw: [number, number] = [Math.min(...lons), Math.min(...lats)];
+
+        // Safety check for valid coordinates and bounds
+        if (!isNaN(ne[0]) && !isNaN(ne[1]) && !isNaN(sw[0]) && !isNaN(sw[1])) {
+          mapRef.current.fitBounds(ne, sw, 100);
+        } else {
+          console.warn('[DriverHome] Invalid coordinates for fitBounds:', { ne, sw });
+        }
+      }
     } else {
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -85,8 +147,10 @@ export default function DriverHome() {
 
   useEffect(() => {
     return () => {
-      if (isOnlineRef.current) {
-        locationService.stopBackgroundTracking().catch(() => {});
+      // Only tear down WS and tracking if the driver does NOT have an active trip.
+      // When navigating to the trip screen, home unmounts but the trip is still live.
+      if (isOnlineRef.current && !useDriverStore.getState().currentTrip) {
+        locationService.stopBackgroundTracking().catch(() => { });
         stopTracking();
         wsUnsubsRef.current.forEach(fn => fn());
         wsService.disconnect();
@@ -118,7 +182,7 @@ export default function DriverHome() {
         return;
       }
       await Notifications.requestPermissionsAsync({
-        ios: { allowAlert: true, allowSound: true, allowBadge: false },
+        ios: { allowAlert: true, allowSound: true, allowBadge: true },
       });
       await proceedOnline();
     } catch (error: any) {
@@ -151,16 +215,16 @@ export default function DriverHome() {
       }).catch(() => { });
 
       await wsService.waitForConnection();
-      console.log('[DriverHome] Subscribing to driver channel with ID:', me.id);
       wsService.subscribe('driver', me.id);
 
       wsUnsubsRef.current.forEach(fn => fn());
       wsUnsubsRef.current = [];
       const unsubAssigned = wsService.on('trip_assigned', (data: any) => {
-        console.log('[DriverHome] Trip assigned:', data.tripId);
         setIncomingTrip({
           id: data.tripId,
           riderId: data.riderId,
+          riderName: data.riderName,
+          riderRating: data.riderRating,
           pickupLat: data.pickupLocation?.latitude || data.pickupLocation?.lat,
           pickupLng: data.pickupLocation?.longitude || data.pickupLocation?.lng,
           dropoffLat: data.dropoffLocation?.latitude || data.dropoffLocation?.lat,
@@ -168,21 +232,17 @@ export default function DriverHome() {
           pickupAddress: data.pickupAddress,
           dropoffAddress: data.dropoffAddress,
           estimatedFare: data.estimatedFare,
+          estimatedDuration: data.estimatedDuration,
+          riderPhone: data.riderPhone,
           status: 'ASSIGNED',
         });
       });
-      const unsubCancelled = wsService.on('trip_cancelled', (data: any) => {
-        console.log('[DriverHome] Trip cancelled:', data.tripId);
+      const unsubCancelled = wsService.on('trip_cancelled', () => {
         setIncomingTrip(null);
       });
       wsUnsubsRef.current = [unsubAssigned, unsubCancelled];
 
       const vehicle = onboarding.documents?.vehicle?.details;
-      console.log('[DriverHome] Vehicle info for matching:', {
-        make: vehicle?.make,
-        model: vehicle?.model,
-        plate: vehicle?.plateNumber,
-      });
       const matchInfo = {
         latitude: loc.latitude,
         longitude: loc.longitude,
@@ -239,7 +299,6 @@ export default function DriverHome() {
             longitude: loc.longitude,
           });
           lastMatchUpdateRef.current = Date.now();
-          console.log('[DriverHome] Triggered instant re-availability after trip');
         } catch (err) {
           console.error('[DriverHome] Failed instant re-availability:', err);
         }
@@ -251,6 +310,20 @@ export default function DriverHome() {
   const goOffline = async () => {
     setIsLoading(true);
     try {
+      try {
+        const me = await AuthApi.getMe();
+        if (me.status === 'SUSPENDED' || me.status === 'DELETED') {
+          if (mountedRef.current) {
+            Alert.alert('تم تعليق الحساب', 'لا يمكنك تغيير الحالة. يرجى التواصل مع الدعم.');
+            setIsOnline(false);
+          }
+          isOnlineRef.current = false;
+          return;
+        }
+      } catch {
+        // If getMe fails (network), proceed with offline anyway
+      }
+
       await DriverApi.updateStatus(false);
       await MatchApi.unregisterAvailable();
       stopTracking();
@@ -258,12 +331,18 @@ export default function DriverHome() {
       wsUnsubsRef.current.forEach(fn => fn());
       wsUnsubsRef.current = [];
       wsService.disconnect();
-      setIsOnline(false);
+      if (mountedRef.current) {
+        setIsOnline(false);
+      }
       isOnlineRef.current = false;
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to go offline');
+      if (mountedRef.current) {
+        Alert.alert('Error', error.message || 'Failed to go offline');
+      }
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -282,6 +361,10 @@ export default function DriverHome() {
         pickupAddress: incomingTrip.pickupAddress,
         dropoffAddress: incomingTrip.dropoffAddress,
         status: 'MATCHED',
+        estimatedDuration: incomingTrip.estimatedDuration || 0,
+        estimatedFare: incomingTrip.estimatedFare || 0,
+        riderName: incomingTrip.riderName || 'Rider',
+        riderPhone: incomingTrip.riderPhone || '',
       });
       const tripId = incomingTrip.id;
       setIncomingTrip(null);
@@ -307,7 +390,7 @@ export default function DriverHome() {
         <View>
           <Text className="text-zinc-500 text-xs font-black uppercase tracking-widest">Status</Text>
           <View className="flex-row items-center mt-1">
-            <View className={`w-2 h-2 rounded-full mr-2 ${isOnline ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
+            <View className={`w-2 h-2 rounded-full me-2 ${isOnline ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
             <Text className="text-white font-bold text-lg">{isOnline ? 'ONLINE' : 'OFFLINE'}</Text>
           </View>
         </View>
@@ -321,7 +404,7 @@ export default function DriverHome() {
           <AppMapView
             ref={mapRef}
             zoom={14}
-            style={StyleSheet.absoluteFill}
+            style={StyleSheet.absoluteFillObject}
             onRegionChange={(e) => {
               if (e.properties.isUserInteraction) {
                 setFollowUser(false);
@@ -329,6 +412,12 @@ export default function DriverHome() {
             }}
           >
             {currentLocation && <LocationMarker coordinate={currentLocation} type="driver" />}
+            {incomingTrip && (
+              <PickupDropoffPins
+                pickup={{ latitude: incomingTrip.pickupLat, longitude: incomingTrip.pickupLng, address: 'Pickup' }}
+                dropoff={{ latitude: incomingTrip.dropoffLat, longitude: incomingTrip.dropoffLng, address: 'Dropoff' }}
+              />
+            )}
           </AppMapView>
 
           <TouchableOpacity
@@ -337,7 +426,7 @@ export default function DriverHome() {
             className="absolute top-4 right-4 bg-zinc-900/90 px-3 py-2 rounded-xl border border-zinc-800"
           >
             <Ionicons name="power" size={20} color="#ef4444" />
-            <Text className="text-red-400 text-xs font-medium ml-1">Go Offline</Text>
+            <Text className="text-red-400 text-xs font-medium ms-1">Go Offline</Text>
           </TouchableOpacity>
 
           {!followUser && (
@@ -427,21 +516,21 @@ export default function DriverHome() {
         </View>
       </Modal>
 
-      <Modal
-        visible={showIncoming}
-        transparent={true}
-        animationType="none"
-        statusBarTranslucent={true}
-      >
-        <Animated.View
-          style={[
-            styles.modalOverlay,
-            { opacity: fadeAnim }
-          ]}
-        >
+      {showIncoming && (
+        <>
+          {/* Semi-transparent overlay — lets map show through */}
           <Animated.View
             style={[
-              styles.modalContainer,
+              styles.incomingOverlay,
+              { opacity: fadeAnim }
+            ]}
+            pointerEvents="none"
+          />
+
+          {/* Bottom sheet — slides up from below */}
+          <Animated.View
+            style={[
+              styles.incomingSheet,
               {
                 paddingBottom: (insets.bottom || 24) + 32,
                 transform: [{ translateY: slideAnim }]
@@ -452,9 +541,22 @@ export default function DriverHome() {
             <Text className="text-zinc-500 text-xs font-black uppercase tracking-widest mb-2">Incoming Trip</Text>
             <Text className="text-white text-2xl font-black mb-6">New Ride Request</Text>
 
+            <View className="flex-row items-center bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50 mb-6">
+              <View className="w-12 h-12 bg-emerald-500/10 rounded-full items-center justify-center me-4">
+                <Ionicons name="person" size={24} color="#10b981" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-black text-lg">{incomingTrip?.riderName || 'Rider'}</Text>
+                <View className="flex-row items-center mt-0.5">
+                  <Ionicons name="star" size={14} color="#f59e0b" />
+                  <Text className="text-zinc-400 text-xs ms-1 font-bold">{(incomingTrip?.riderRating ?? 5.0).toFixed(1)} Rating</Text>
+                </View>
+              </View>
+            </View>
+
             <View className="mb-8">
               <View className="flex-row items-center mb-4">
-                <View className="w-8 h-8 rounded-full bg-emerald-500/20 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-full bg-emerald-500/20 items-center justify-center me-3">
                   <Ionicons name="location" size={16} color="#10b981" />
                 </View>
                 <View className="flex-1">
@@ -464,12 +566,26 @@ export default function DriverHome() {
               </View>
 
               <View className="flex-row items-center">
-                <View className="w-8 h-8 rounded-full bg-blue-500/20 items-center justify-center mr-3">
+                <View className="w-8 h-8 rounded-full bg-blue-500/20 items-center justify-center me-3">
                   <Ionicons name="arrow-forward" size={16} color="#3b82f6" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-zinc-500 text-[10px] font-bold uppercase">Destination</Text>
                   <Text className="text-white font-bold" numberOfLines={1}>{incomingTrip?.dropoffAddress}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View className="flex-row items-center justify-between mb-8 px-2">
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 rounded-full bg-blue-500/10 items-center justify-center me-3">
+                  <Ionicons name="time" size={16} color="#3b82f6" />
+                </View>
+                <View>
+                  <Text className="text-zinc-500 text-[10px] font-bold uppercase">Estimated</Text>
+                  <Text className="text-white font-bold">
+                    {incomingTrip?.estimatedDuration ? `${Math.round(incomingTrip.estimatedDuration / 60)} min` : '5 min'} · {incomingTrip?.estimatedFare?.toLocaleString()} IQD
+                  </Text>
                 </View>
               </View>
             </View>
@@ -489,20 +605,23 @@ export default function DriverHome() {
               </TouchableOpacity>
             </View>
           </Animated.View>
-        </Animated.View>
-      </Modal>
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  incomingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    justifyContent: 'flex-end',
-    zIndex: 100,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    zIndex: 90,
   },
-  modalContainer: {
+  incomingSheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#09090b',
     borderTopWidth: 1,
     borderTopLeftRadius: 40,
@@ -515,6 +634,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 20,
+    zIndex: 100,
   },
   disclosureOverlay: {
     flex: 1,

@@ -1,10 +1,10 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { DriverApi } from '../../lib/api/driver';
-import { ApiError } from '../../lib/api/client';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { isValidDate } from '../../lib/validation';
 
 export default function DriverProfileExtraScreen() {
   const [address, setAddress] = useState('');
@@ -18,6 +18,11 @@ export default function DriverProfileExtraScreen() {
 
   const handleNext = async () => {
     if (!isFormValid) return;
+
+    if (!isValidDate(dob)) {
+      Alert.alert('Invalid Date', 'Please enter a valid date of birth in YYYY-MM-DD format that is in the past.');
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -47,7 +52,7 @@ export default function DriverProfileExtraScreen() {
         <Text className="text-zinc-500 text-lg mb-10">We need a few more details for verification.</Text>
 
         <View className="mb-6">
-          <Text className="text-zinc-400 font-bold mb-2 ml-1">Address</Text>
+          <Text className="text-zinc-400 font-bold mb-2 ms-1">Address</Text>
           <TextInput
             className="bg-zinc-900 px-5 py-4 rounded-2xl border border-zinc-800 text-white font-medium text-lg"
             placeholder="Street address"
@@ -58,7 +63,7 @@ export default function DriverProfileExtraScreen() {
         </View>
 
         <View className="mb-6 text-zinc-400">
-           <Text className="text-zinc-400 font-bold mb-2 ml-1">City</Text>
+           <Text className="text-zinc-400 font-bold mb-2 ms-1">City</Text>
           <TextInput
             className="bg-zinc-900 px-5 py-4 rounded-2xl border border-zinc-800 text-white font-medium text-lg"
             placeholder="Baghdad"
@@ -69,7 +74,7 @@ export default function DriverProfileExtraScreen() {
         </View>
 
         <View className="mb-6 text-zinc-400">
-           <Text className="text-zinc-400 font-bold mb-2 ml-1">Date of Birth</Text>
+           <Text className="text-zinc-400 font-bold mb-2 ms-1">Date of Birth</Text>
           <TextInput
             className="bg-zinc-900 px-5 py-4 rounded-2xl border border-zinc-800 text-white font-medium text-lg"
             placeholder="YYYY-MM-DD"

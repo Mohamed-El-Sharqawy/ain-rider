@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage, devtools } from 'zustand/middleware';
+import { useShallow } from 'zustand/shallow';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LatLng, RouteResult } from '../services/map/map.provider';
 
 export type TripPhase =
@@ -12,6 +15,19 @@ export type TripPhase =
   | 'in_progress'
   | 'completed'
   | 'rating';
+
+const VALID_PHASE_TRANSITIONS: Record<TripPhase, Set<TripPhase>> = {
+  idle: new Set(['searching_destination', 'requesting']),
+  searching_destination: new Set(['idle', 'confirming']),
+  confirming: new Set(['idle', 'searching_destination', 'requesting']),
+  requesting: new Set(['idle', 'matching']),
+  matching: new Set(['idle', 'matched']),
+  matched: new Set(['driver_arriving', 'in_progress', 'idle']),
+  driver_arriving: new Set(['in_progress', 'idle']),
+  in_progress: new Set(['completed']),
+  completed: new Set(['rating', 'idle']),
+  rating: new Set(['idle']),
+};
 
 interface FareEstimate {
   estimatedFare: number;
@@ -38,6 +54,8 @@ interface DriverInfo {
   vehiclePlate: string;
   estimatedArrival: number;
   location: LatLng | null;
+  distance?: number;
+  duration?: number;
 }
 
 interface TripState {
@@ -56,7 +74,7 @@ interface TripState {
   setFareEstimate: (fare: FareEstimate) => void;
   setActiveTrip: (trip: ActiveTrip) => void;
   setDriver: (driver: DriverInfo) => void;
-  updateDriverLocation: (location: LatLng) => void;
+  updateDriverLocation: (location: LatLng, distance?: number, duration?: number) => void;
   reset: () => void;
 }
 
@@ -70,21 +88,55 @@ const initialState = {
   driver: null,
 };
 
-export const useTripStore = create<TripState>((set) => ({
-  ...initialState,
+export const useTripStore = create<TripState>()(
+  devtools(
+    persist(
+      (set) => ({
+        ...initialState,
 
-  setPhase: (phase) => set({ phase }),
-  setPickup: (pickup) => set({ selectedPickup: pickup }),
-  setDropoff: (dropoff) => set({ selectedDropoff: dropoff }),
-  setRoute: (route) => set({ route }),
-  setFareEstimate: (fare) => set({ fareEstimate: fare }),
-  setActiveTrip: (trip) => set({ activeTrip: trip }),
-  setDriver: (driver) => set({ driver }),
+        setPhase: (phase) =>
+          set((state) => {
+            if (state.phase === phase) return state;
 
-  updateDriverLocation: (location) =>
-    set((state) => ({
-      driver: state.driver ? { ...state.driver, location } : null,
-    })),
+            const allowed = VALID_PHASE_TRANSITIONS[state.phase];
+            if (__DEV__ && allowed && !allowed.has(phase)) {
+              console.warn(
+                `[TripStore] Invalid phase transition: ${state.phase} → ${phase}`
+              );
+            }
+            return { phase };
+          }),
+        setPickup: (pickup) => set({ selectedPickup: pickup }),
+        setDropoff: (dropoff) => set({ selectedDropoff: dropoff }),
+        setRoute: (route) => set({ route }),
+        setFareEstimate: (fare) => set({ fareEstimate: fare }),
+        setActiveTrip: (trip) => set({ activeTrip: trip }),
+        setDriver: (driver) => set({ driver }),
 
-  reset: () => set(initialState),
-}));
+        updateDriverLocation: (location, distance, duration) =>
+          set((state) => ({
+            driver: state.driver ? { ...state.driver, location, distance, duration } : null,
+          })),
+
+        reset: () => set(initialState),
+      }),
+      {
+        name: 'trip-store',
+        storage: createJSONStorage(() => AsyncStorage),
+        partialize: (state) => ({
+          activeTrip: state.activeTrip,
+          phase: state.phase,
+          driver: state.driver,
+        }),
+      }
+    ),
+    { name: 'trip-store' }
+  )
+);
+
+export const useTripPhase = () => useTripStore((s) => s.phase);
+export const useActiveTrip = () => useTripStore((s) => s.activeTrip);
+export const useTripDriver = () => useTripStore((s) => s.driver);
+export const useTripRoute = () => useTripStore(useShallow((s) => s.route));
+export const useTripLocations = () =>
+  useTripStore(useShallow((s) => ({ pickup: s.selectedPickup, dropoff: s.selectedDropoff })));

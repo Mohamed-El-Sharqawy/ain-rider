@@ -7,10 +7,12 @@ interface LocationState {
   speed: number | null;
   isTracking: boolean;
   permissionGranted: boolean;
+  error: string | null;
 
   setLocation: (loc: LatLng, heading?: number, speed?: number) => void;
   setTracking: (isTracking: boolean) => void;
   setPermission: (granted: boolean) => void;
+  clearError: () => void;
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -19,6 +21,7 @@ export const useLocationStore = create<LocationState>((set) => ({
   speed: null,
   isTracking: false,
   permissionGranted: false,
+  error: null,
 
   setLocation: (loc, heading, speed) =>
     set({ currentLocation: loc, heading: heading ?? null, speed: speed ?? null }),
@@ -26,4 +29,6 @@ export const useLocationStore = create<LocationState>((set) => ({
   setTracking: (isTracking) => set({ isTracking }),
 
   setPermission: (granted) => set({ permissionGranted: granted }),
+
+  clearError: () => set({ error: null }),
 }));

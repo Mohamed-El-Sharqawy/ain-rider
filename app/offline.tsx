@@ -1,7 +1,23 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
 import { router } from 'expo-router';
+import NetInfo from '@react-native-community/netinfo';
 
 export default function OfflineScreen() {
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      const state = await NetInfo.fetch();
+      if (state.isConnected && state.isInternetReachable) {
+        router.replace('/');
+      }
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
   return (
     <View className="flex-1 items-center justify-center bg-zinc-900 px-8">
       <Text className="text-5xl mb-6">📶</Text>
@@ -11,10 +27,15 @@ export default function OfflineScreen() {
       </Text>
       
       <TouchableOpacity 
-        className="bg-white py-4 px-8 rounded-full items-center active:opacity-80 w-full max-w-xs shadow-lg"
-        onPress={() => router.replace('/')}
+        className="bg-white py-4 px-8 rounded-full items-center active:opacity-80 w-full max-w-xs shadow-lg flex-row justify-center"
+        onPress={handleRetry}
+        disabled={isRetrying}
       >
-        <Text className="text-zinc-900 text-lg font-bold">Retry Connection</Text>
+        {isRetrying ? (
+          <ActivityIndicator color="#18181b" size="small" />
+        ) : (
+          <Text className="text-zinc-900 text-lg font-bold">Retry Connection</Text>
+        )}
       </TouchableOpacity>
     </View>
   );

@@ -29,6 +29,9 @@ export const SettingsApi = {
       if (!setting || !setting.value) return this.getDefaultReasons(lang);
       
       const reasons = JSON.parse(setting.value);
+      if (typeof reasons !== 'object' || reasons === null || Array.isArray(reasons)) {
+        return this.getDefaultReasons(lang);
+      }
       return reasons[lang] || reasons['en'] || this.getDefaultReasons(lang);
     } catch (err) {
       console.warn('[SettingsApi] Failed to parse cancellation reasons, using defaults:', err);

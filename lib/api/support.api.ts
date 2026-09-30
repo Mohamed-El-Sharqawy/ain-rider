@@ -37,8 +37,8 @@ export interface ComplaintResponse {
 }
 
 export const SupportApi = {
-  async getMyComplaints(): Promise<ComplaintResponse[]> {
-    return ApiClient.get<ComplaintResponse[]>('/support/complaints');
+  async getMyComplaints(page: number = 1, limit: number = 20): Promise<ComplaintResponse[]> {
+    return ApiClient.get<ComplaintResponse[]>(`/support/complaints?page=${page}&limit=${limit}`);
   },
 
   async getComplaint(id: string): Promise<ComplaintResponse> {

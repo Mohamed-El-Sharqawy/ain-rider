@@ -1,35 +1,36 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { wsService } from '../services/websocket.service';
+import { ApiConfig } from '../lib/config/constants';
 
-const WS_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3001/ws';
+const WS_URL = ApiConfig.wsUrl;
 
 export function useWebSocket(autoConnect: boolean = false) {
-  const connected = useRef(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     if (autoConnect) {
       wsService.connect(WS_URL);
-      connected.current = true;
+      setIsConnected(true);
     }
 
     return () => {
       if (autoConnect) {
         wsService.disconnect();
-        connected.current = false;
+        setIsConnected(false);
       }
     };
   }, [autoConnect]);
 
   const connect = useCallback(() => {
-    if (!connected.current) {
+    if (!isConnected) {
       wsService.connect(WS_URL);
-      connected.current = true;
+      setIsConnected(true);
     }
-  }, []);
+  }, [isConnected]);
 
   const disconnect = useCallback(() => {
     wsService.disconnect();
-    connected.current = false;
+    setIsConnected(false);
   }, []);
 
   const subscribe = useCallback((channel: string, id: string) => {
@@ -50,6 +51,6 @@ export function useWebSocket(autoConnect: boolean = false) {
     subscribe,
     unsubscribe,
     on,
-    isConnected: connected,
+    isConnected,
   };
 }

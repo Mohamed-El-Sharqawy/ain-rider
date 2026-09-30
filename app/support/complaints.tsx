@@ -107,7 +107,7 @@ export default function ComplaintsScreen() {
         >
           {/* Header */}
           <View className="px-6 pt-4 pb-3 flex-row items-center border-b border-zinc-800/50">
-            <TouchableOpacity onPress={() => setSelectedComplaint(null)} className="mr-3 p-1">
+            <TouchableOpacity onPress={() => setSelectedComplaint(null)} className="me-3 p-1">
               <Ionicons name="arrow-back" color="#a1a1aa" size={24} />
             </TouchableOpacity>
             <View className="flex-1">
@@ -126,11 +126,11 @@ export default function ComplaintsScreen() {
             {/* Original complaint */}
             <View className="bg-zinc-900 rounded-2xl border border-zinc-800/50 p-4 mb-4">
               <View className="flex-row items-center mb-2">
-                <View className="bg-emerald-500/20 w-8 h-8 rounded-full items-center justify-center mr-2">
+                <View className="bg-emerald-500/20 w-8 h-8 rounded-full items-center justify-center me-2">
                   <Ionicons name="person" color="#10b981" size={16} />
                 </View>
                 <Text className="text-emerald-400 text-xs font-bold">You</Text>
-                <Text className="text-zinc-600 text-xs ml-2">{formatDate(selectedComplaint.createdAt)}</Text>
+                <Text className="text-zinc-600 text-xs ms-2">{formatDate(selectedComplaint.createdAt)}</Text>
               </View>
               <Text className="text-white/90 text-sm leading-5">{selectedComplaint.description}</Text>
             </View>
@@ -140,7 +140,7 @@ export default function ComplaintsScreen() {
               <View className="bg-emerald-500/10 rounded-2xl border border-emerald-500/20 p-4 mb-4">
                 <View className="flex-row items-center mb-2">
                   <Ionicons name="checkmark-circle" color="#10b981" size={16} />
-                  <Text className="text-emerald-400 text-xs font-bold ml-1">Resolution</Text>
+                  <Text className="text-emerald-400 text-xs font-bold ms-1">Resolution</Text>
                 </View>
                 <Text className="text-white/80 text-sm leading-5">{selectedComplaint.resolution}</Text>
               </View>
@@ -155,13 +155,13 @@ export default function ComplaintsScreen() {
                   className={`${isAdmin ? 'bg-zinc-800/80 border-blue-500/20' : 'bg-zinc-900 border-zinc-800/50'} rounded-2xl border p-4 mb-3`}
                 >
                   <View className="flex-row items-center mb-2">
-                    <View className={`${isAdmin ? 'bg-blue-500/20' : 'bg-emerald-500/20'} w-8 h-8 rounded-full items-center justify-center mr-2`}>
+                    <View className={`${isAdmin ? 'bg-blue-500/20' : 'bg-emerald-500/20'} w-8 h-8 rounded-full items-center justify-center me-2`}>
                       <Ionicons name={isAdmin ? 'headset' : 'person'} color={isAdmin ? '#3b82f6' : '#10b981'} size={16} />
                     </View>
                     <Text className={`${isAdmin ? 'text-blue-400' : 'text-emerald-400'} text-xs font-bold`}>
                       {isAdmin ? 'Support Team' : 'You'}
                     </Text>
-                    <Text className="text-zinc-600 text-xs ml-2">{formatDate(comment.createdAt)}</Text>
+                    <Text className="text-zinc-600 text-xs ms-2">{formatDate(comment.createdAt)}</Text>
                   </View>
                   <Text className="text-white/90 text-sm leading-5">{comment.comment}</Text>
                 </View>
@@ -172,7 +172,7 @@ export default function ComplaintsScreen() {
             {selectedComplaint.status !== 'RESOLVED' && selectedComplaint.status !== 'REJECTED' && (
               <View className="bg-zinc-900/40 rounded-xl p-3 flex-row items-center mt-2 mb-4">
                 <Ionicons name="time-outline" color="#71717a" size={14} />
-                <Text className="text-zinc-500 text-xs ml-1.5">
+                <Text className="text-zinc-500 text-xs ms-1.5">
                   Support typically replies within 1-24 hours
                 </Text>
               </View>
@@ -231,7 +231,7 @@ export default function ComplaintsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
       <View className="px-6 pt-4 pb-3 flex-row items-center border-b border-zinc-800/50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1">
+        <TouchableOpacity onPress={() => router.back()} className="me-3 p-1">
           <Ionicons name="arrow-back" color="#a1a1aa" size={24} />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-white">Support Tickets</Text>
@@ -268,7 +268,7 @@ export default function ComplaintsScreen() {
                   onPress={() => handleOpenComplaint(complaint)}
                 >
                   <View className="flex-row justify-between items-start mb-2">
-                    <View className="flex-1 mr-3">
+                    <View className="flex-1 me-3">
                       <Text className="text-white font-bold text-sm" numberOfLines={1}>{complaint.subject}</Text>
                       <Text className="text-zinc-500 text-xs mt-0.5">{getTypeLabel(complaint.type)}</Text>
                     </View>
@@ -287,7 +287,7 @@ export default function ComplaintsScreen() {
                       {adminReplies > 0 && (
                         <View className="bg-blue-500/20 px-2 py-0.5 rounded-full flex-row items-center">
                           <Ionicons name="chatbubble" color="#3b82f6" size={10} />
-                          <Text className="text-blue-400 text-[10px] font-bold ml-1">{adminReplies}</Text>
+                          <Text className="text-blue-400 text-[10px] font-bold ms-1">{adminReplies}</Text>
                         </View>
                       )}
                       <Ionicons name="chevron-forward" color="#3f3f46" size={16} />

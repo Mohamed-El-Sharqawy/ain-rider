@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Modal, FlatList, Animated, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Modal, FlatList, Animated } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,10 @@ import { RoutePolyline } from '../../../components/map/RoutePolyline';
 import { PickupDropoffPins } from '../../../components/map/PickupDropoffPins';
 import { SettingsApi } from '../../../lib/api/settings.api';
 import { TripApi } from '../../../lib/api/trip.api';
+import { AppMapViewRef } from '../../../components/map/MapView';
+import { haversineDistance } from '../../../lib/utils/location';
+import { mapProvider } from '../../../services/map';
+import { LatLng } from '../../../services/map/map.provider';
 
 export default function TripScreen() {
   const { id: tripId } = useLocalSearchParams<{ id: string }>();
@@ -23,7 +27,6 @@ export default function TripScreen() {
 
   useEffect(() => {
     if (tripId) {
-      console.log('[TripScreen] Subscribing to trip channel:', tripId);
       subscribe('trip', `${tripId}:rider`);
     }
     return () => {
@@ -36,7 +39,8 @@ export default function TripScreen() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [reasons, setReasons] = useState<string[]>([]);
   const [loadingReasons, setLoadingReasons] = useState(false);
-  const [initializing, setInitializing] = useState(true);
+  const [driverRouteCoords, setDriverRouteCoords] = useState<LatLng[]>([]);
+  const lastRouteFetchRef = useRef<number>(0);
 
   useEffect(() => {
     const syncTripState = async () => {
@@ -53,7 +57,7 @@ export default function TripScreen() {
           estimatedFare: trip.estimatedFare,
         });
 
-        if (trip.status === 'MATCHED' || trip.status === 'ARRIVING') {
+        if (trip.status === 'MATCHED' || trip.status === 'DRIVER_ARRIVING') {
           tripStore.setPhase('matched');
           if (trip.driverId && trip.driverName) {
             tripStore.setDriver({
@@ -73,10 +77,7 @@ export default function TripScreen() {
         } else if (trip.status === 'COMPLETED') {
           tripStore.setPhase('completed');
         }
-      } catch (err) {
-        console.error('Failed to sync trip state:', err);
-      } finally {
-        setInitializing(false);
+      } catch {
       }
     };
     syncTripState();
@@ -88,7 +89,6 @@ export default function TripScreen() {
   const route = tripStore.route;
 
   const insets = useSafeAreaInsets();
-  const screenHeight = Dimensions.get('window').height;
   const slideAnim = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
@@ -106,8 +106,7 @@ export default function TripScreen() {
       try {
         const list = await SettingsApi.getCancellationReasons('en'); // Default to English
         setReasons(list);
-      } catch (err) {
-        console.error('Failed to fetch reasons:', err);
+      } catch {
       } finally {
         setLoadingReasons(false);
       }
@@ -131,10 +130,14 @@ export default function TripScreen() {
       tripStore.setPhase('matched');
     });
     const u2 = wsOn('driver_location_update', (data: any) => {
-      tripStore.updateDriverLocation({
-        latitude: data.location.latitude,
-        longitude: data.location.longitude,
-      });
+      tripStore.updateDriverLocation(
+        {
+          latitude: data.location.latitude || data.location.lat,
+          longitude: data.location.longitude || data.location.lng,
+        },
+        data.distanceMeters,
+        data.durationSeconds
+      );
     });
     const u3 = wsOn('trip_started', () => tripStore.setPhase('in_progress'));
     const u4 = wsOn('trip_completed', () => tripStore.setPhase('completed'));
@@ -142,12 +145,54 @@ export default function TripScreen() {
       tripStore.reset();
       router.replace('/(rider)/(tabs)/home');
     });
-    const u6 = wsOn('trip_no_match', (data: any) => {
-      console.log('[TripScreen] No match found yet, still searching...', data);
-      // We don't reset or redirect anymore, just let the backend keep looking
-    });
-    return () => { u1(); u2(); u3(); u4(); u5(); u6(); };
+
+    return () => { u1(); u2(); u3(); u4(); u5(); };
   }, [wsOn]);
+
+  // Fetch route between driver and target destination
+  useEffect(() => {
+    if (!driver?.location || !activeTrip) return;
+
+    const target = phase === 'matched' ? activeTrip.pickupLocation : activeTrip.dropoffLocation;
+    if (!target) return;
+
+    // Debounce/Throttle: Only fetch route once every 10 seconds to avoid overloading OSRM.
+    // However, if we have no coordinates yet, fetch immediately.
+    const now = Date.now();
+    const shouldThrottle = driverRouteCoords.length > 0 && (now - lastRouteFetchRef.current < 10000);
+    if (shouldThrottle) return;
+
+    const fetchDriverRoute = async () => {
+      try {
+        lastRouteFetchRef.current = Date.now();
+        const result = await mapProvider.getRoute(driver.location!, target);
+        setDriverRouteCoords(result.coordinates);
+      } catch (err) {
+        console.warn('[TripScreen] Failed to fetch driver route:', err);
+      }
+    };
+
+    fetchDriverRoute();
+  }, [driver?.location?.latitude, driver?.location?.longitude, phase, activeTrip]);
+
+  const mapRef = useRef<AppMapViewRef>(null);
+
+  useEffect(() => {
+    if (driver?.location && mapRef.current) {
+      const target = phase === 'matched' ? activeTrip?.pickupLocation : activeTrip?.dropoffLocation;
+      if (target) {
+        const coords: [number, number][] = [
+          [driver.location.longitude, driver.location.latitude],
+          [target.longitude, target.latitude],
+        ];
+        const lons = coords.map(c => c[0]);
+        const lats = coords.map(c => c[1]);
+        const ne: [number, number] = [Math.max(...lons), Math.max(...lats)];
+        const sw: [number, number] = [Math.min(...lons), Math.min(...lats)];
+        mapRef.current.fitBounds(ne, sw, 100);
+      }
+    }
+  }, [driver?.location, phase]);
 
   const handleCancelClick = () => {
     setShowCancelModal(true);
@@ -169,7 +214,7 @@ export default function TripScreen() {
   return (
     <SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
       <View className="flex-1">
-        <AppMapView center={mapCenter} zoom={12} style={StyleSheet.absoluteFill}>
+        <AppMapView ref={mapRef} center={mapCenter} zoom={12} style={StyleSheet.absoluteFill}>
           {activeTrip && (
             <PickupDropoffPins
               pickup={{ ...activeTrip.pickupLocation, address: 'Pickup' }}
@@ -177,8 +222,8 @@ export default function TripScreen() {
             />
           )}
           <LocationMarker coordinate={activeTrip?.pickupLocation || defaultCenter} />
-          {driver?.location && <DriverMarker id="active-driver" coordinate={driver.location} />}
-          {route && <RoutePolyline coordinates={route.coordinates} />}
+          {driver?.location && <DriverMarker coordinate={driver.location} />}
+          {driverRouteCoords.length > 0 && <RoutePolyline coordinates={driverRouteCoords} />}
         </AppMapView>
 
         <Animated.View
@@ -208,7 +253,7 @@ export default function TripScreen() {
                 className="w-full bg-zinc-900 border border-zinc-800 py-4 rounded-2xl mt-8 flex-row items-center justify-center"
               >
                 <Ionicons name="close-circle-outline" size={20} color="#ef4444" />
-                <Text className="text-zinc-400 font-black ml-2 uppercase tracking-widest text-[10px]">Cancel Search</Text>
+                <Text className="text-zinc-400 font-black ms-2 uppercase tracking-widest text-[10px]">Cancel Search</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -219,14 +264,14 @@ export default function TripScreen() {
               <Text className="text-white text-xl font-black mb-6">Your ride is on the way</Text>
 
               <View className="flex-row items-center bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50 mb-6">
-                <View className="w-12 h-12 bg-emerald-500/10 rounded-full items-center justify-center mr-4">
+                <View className="w-12 h-12 bg-emerald-500/10 rounded-full items-center justify-center me-4">
                   <Ionicons name="person" size={24} color="#10b981" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-white font-black text-lg">{driver.name}</Text>
                   <View className="flex-row items-center mt-0.5">
                     <Ionicons name="star" size={14} color="#f59e0b" />
-                    <Text className="text-zinc-400 text-xs ml-1 font-bold">{driver.rating.toFixed(1)} · {driver.vehicleMake} {driver.vehicleModel}</Text>
+                    <Text className="text-zinc-400 text-xs ms-1 font-bold">{driver.rating.toFixed(1)} · {driver.vehicleMake} {driver.vehicleModel}</Text>
                   </View>
                 </View>
                 <View className="items-end">
@@ -237,12 +282,16 @@ export default function TripScreen() {
 
               <View className="flex-row items-center justify-between mb-8 px-2">
                 <View className="flex-row items-center">
-                  <View className="w-8 h-8 rounded-full bg-blue-500/10 items-center justify-center mr-3">
+                  <View className="w-8 h-8 rounded-full bg-blue-500/10 items-center justify-center me-3">
                     <Ionicons name="time" size={16} color="#3b82f6" />
                   </View>
                   <View>
-                    <Text className="text-zinc-500 text-[10px] font-bold uppercase">Arrival</Text>
-                    <Text className="text-white font-bold">{driver.estimatedArrival} min away</Text>
+                    <Text className="text-zinc-500 text-[10px] font-bold uppercase">Approach</Text>
+                    <Text className="text-white font-bold">
+                      {driver.distance ? `${(driver.distance / 1000).toFixed(1)} km · ` :
+                        driver.location && activeTrip?.pickupLocation ? `${(haversineDistance(driver.location, activeTrip.pickupLocation) / 1000).toFixed(1)} km · ` : ''}
+                      {driver.duration ? Math.round(driver.duration / 60) : driver.estimatedArrival} min away
+                    </Text>
                   </View>
                 </View>
                 <TouchableOpacity onPress={() => Alert.alert('Calling', `Calling ${driver.phone}...`)} className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full items-center justify-center">

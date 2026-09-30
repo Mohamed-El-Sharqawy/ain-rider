@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -36,7 +36,7 @@ export default function WelcomeScreen() {
 
   return (
     <View className="flex-1 bg-zinc-950 pt-16">
-      <View className="absolute top-16 right-6 z-10">
+      <View className="absolute top-16 end-6 z-10">
         <TouchableOpacity onPress={() => router.push('/(auth)/role-selection')}>
           <Text className="text-zinc-600 font-bold tracking-wider text-sm px-4 py-2 uppercase">SKIP</Text>
         </TouchableOpacity>

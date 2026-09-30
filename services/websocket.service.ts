@@ -1,6 +1,7 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { AppState, type AppStateStatus } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { SecureStorage } from '../lib/storage/secure';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -22,15 +23,28 @@ class WebSocketService {
   private activeSubscriptions: Map<string, string> = new Map();
   private openResolvers: (() => void)[] = [];
   private lastNotificationTime = 0;
+  private isAuthenticated = false;
+  private authErrorHandlers: Set<(code: number, message: string) => void> = new Set();
 
-  connect(wsUrl: string): void {
+  async connect(wsUrl: string): Promise<void> {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       return;
     }
 
     this.currentUrl = wsUrl;
+    this.isAuthenticated = false;
 
-    this.ws = new ReconnectingWebSocket(wsUrl, [], {
+    // Get auth token
+    const token = await SecureStorage.getAccessToken();
+    const { isTokenExpired } = await import('../lib/utils/jwt');
+
+    // Append token to URL as query param only if it's NOT expired.
+    // If it is expired, we connect without it and let the onopen fresh fetch handle it.
+    const urlWithAuth = (token && !isTokenExpired(token))
+      ? `${wsUrl}${wsUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
+      : wsUrl;
+
+    this.ws = new ReconnectingWebSocket(urlWithAuth, [], {
       maxRetries: Infinity,
       reconnectionDelayGrowFactor: 1.5,
       maxReconnectionDelay: 10000,
@@ -40,13 +54,34 @@ class WebSocketService {
     this.ws.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
+
+        if (message.type === 'ping') {
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+          }
+          return;
+        }
+
+        if (message.type === 'auth_success') {
+          this.isAuthenticated = true;
+          this.resubscribeAll();
+          this.flushQueue();
+          return;
+        }
+
+        if (message.type === 'auth_error') {
+          this.isAuthenticated = false;
+          this.authErrorHandlers.forEach(h => h(message.code, message.message));
+          return;
+        }
+
         const handlers = this.handlers.get(message.type);
         if (handlers) {
           handlers.forEach((handler) => handler(message.data));
         }
         if (message.type === 'trip_assigned' && AppState.currentState !== 'active') {
           const now = Date.now();
-          if (now - this.lastNotificationTime > 2000) {
+          if (now - this.lastNotificationTime > 5000) {
             this.presentLocalNotification(
               'New Trip!',
               'You have been assigned a new trip request.',
@@ -60,18 +95,22 @@ class WebSocketService {
       }
     };
 
-    this.ws.onopen = () => {
-      console.log('[WebSocketService] Connected');
+    this.ws.onopen = async () => {
+      const freshToken = await SecureStorage.getAccessToken();
+      if (freshToken) {
+        this.send({ type: 'auth', token: freshToken });
+      }
       this.startHeartbeat();
-      this.resubscribeAll();
-      this.flushQueue();
       this.openResolvers.forEach(r => r());
       this.openResolvers = [];
     };
 
-    this.ws.onclose = () => {
-      console.log('[WebSocketService] Disconnected, will auto-reconnect');
+    this.ws.onclose = (event: any) => {
       this.stopHeartbeat();
+      if (event.code === 4001 || event.code === 4002) {
+        this.isAuthenticated = false;
+        this.authErrorHandlers.forEach(h => h(event.code, event.reason || 'Authentication failed'));
+      }
     };
 
     this.setupAppStateListener();
@@ -85,11 +124,11 @@ class WebSocketService {
     return this.currentUrl;
   }
 
-  reconnect(): void {
+  async reconnect(): Promise<void> {
     if (this.ws) {
       this.ws.reconnect();
     } else if (this.currentUrl) {
-      this.connect(this.currentUrl);
+      await this.connect(this.currentUrl);
     }
   }
 
@@ -155,6 +194,17 @@ class WebSocketService {
     }
   }
 
+  onAuthError(handler: (code: number, message: string) => void): () => void {
+    this.authErrorHandlers.add(handler);
+    return () => {
+      this.authErrorHandlers.delete(handler);
+    };
+  }
+
+  isAuth(): boolean {
+    return this.isAuthenticated;
+  }
+
   private async presentLocalNotification(title: string, body: string, data?: Record<string, any>): Promise<void> {
     const notificationData: Record<string, unknown> | null = data ?? null;
 
@@ -177,7 +227,7 @@ class WebSocketService {
     };
 
     try {
-      await scheduleWithChannel('new_trip.mp3');
+      await scheduleWithChannel('notification.wav');
     } catch {
       try {
         await scheduleWithChannel('default');
@@ -188,24 +238,19 @@ class WebSocketService {
   }
 
   private send(message: Record<string, any>): void {
-    console.log('[WebSocketService] Attempting to send:', message.type, message);
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
-      console.log('[WebSocketService] Sent immediately');
     } else {
-      console.log('[WebSocketService] Connection not open, queuing message. State:', this.ws?.readyState);
       this.messageQueue.push(message);
     }
   }
 
   private flushQueue(): void {
-    console.log('[WebSocketService] Flushing queue, items:', this.messageQueue.length);
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
     while (this.messageQueue.length > 0) {
       const msg = this.messageQueue.shift();
       if (msg) {
-        console.log('[WebSocketService] Sending queued message:', msg.type);
         this.ws.send(JSON.stringify(msg));
       }
     }
@@ -227,7 +272,6 @@ class WebSocketService {
 
   private resubscribeAll(): void {
     for (const [channel, id] of this.activeSubscriptions) {
-      console.log('[WebSocketService] Re-subscribing:', channel, id);
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.ws.send(JSON.stringify({ type: 'subscribe', channel, id }));
       }
@@ -239,8 +283,14 @@ class WebSocketService {
     this.appStateSubscription = AppState.addEventListener(
       'change',
       (nextState: AppStateStatus) => {
-        if (nextState === 'active' && this.ws && this.ws.readyState !== WebSocket.OPEN) {
-          this.ws.reconnect();
+        if (nextState === 'background') {
+          this.stopHeartbeat();
+        } else if (nextState === 'active') {
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.startHeartbeat();
+          } else if (this.ws) {
+            this.ws.reconnect();
+          }
         }
       },
     );

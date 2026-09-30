@@ -1,6 +1,13 @@
 import { ApiClient } from './client';
-import { OtpRequestPayload, OtpVerifyPayload, PhoneVerificationResult, RegisterPayload, RegisterResponse, IdentityUploadResponse, LoginPayload, LoginResponse, ProfileImageResponse, MeResponse, OnboardingStatusResponse } from './types';
+import { OtpRequestPayload, OtpVerifyPayload, PhoneVerificationResult, RegisterPayload, RegisterResponse, IdentityUploadResponse, LoginPayload, LoginResponse, ProfileImageResponse, MeResponse } from './types';
 
+/**
+ * Authentication API client for the mobile app.
+ *
+ * Token delivery: Mobile receives access/refresh tokens in the response body
+ * and stores them in device secure storage. Tokens are sent via Authorization
+ * header on subsequent requests (unlike the dashboard which uses httpOnly cookies).
+ */
 export const AuthApi = {
   async login(email: string, password: string): Promise<LoginResponse> {
     const payload: LoginPayload = { email, password };
@@ -45,8 +52,7 @@ export const AuthApi = {
     ]);
   },
 
-  async getOnboardingStatus(): Promise<OnboardingStatusResponse> {
-    const raw = await ApiClient.get<{ success?: boolean; data?: OnboardingStatusResponse } & OnboardingStatusResponse>('/auth/driver/onboarding-status');
-    return raw.data ?? raw;
-  }
+  async logout(): Promise<void> {
+    await ApiClient.post('/auth/logout');
+  },
 };

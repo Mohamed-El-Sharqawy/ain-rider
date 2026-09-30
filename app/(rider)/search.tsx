@@ -29,6 +29,15 @@ export default function SearchScreen() {
   const pickupRef = useRef<TextInput>(null);
   const dropoffRef = useRef<TextInput>(null);
   const initialMount = useRef(true);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   // Re-sync from store when screen regains focus (e.g. returning from pick-location)
   useFocusEffect(
@@ -75,18 +84,29 @@ export default function SearchScreen() {
       setResults([]);
       return;
     }
-    const timer = setTimeout(async () => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(async () => {
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       setLoading(true);
       try {
         const data = await mapProvider.searchPlaces(q, currentLocation || undefined);
-        setResults(data);
+        if (!controller.signal.aborted) {
+          setResults(data);
+        }
       } catch {
         // ignore
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      abortControllerRef.current?.abort();
+    };
   }, [activeQuery, activeField, pickupSet, dropoffSet]);
 
   // Navigate to confirm when both are set (skip initial mount)
@@ -211,14 +231,14 @@ export default function SearchScreen() {
         <TouchableOpacity onPress={() => router.back()} className="p-2">
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text className="text-white font-bold text-lg ml-2">Plan your trip</Text>
+        <Text className="text-white font-bold text-lg ms-2">Plan your trip</Text>
       </View>
 
       {/* Input fields */}
       <View className="px-4 pb-2">
         <View className="flex-row items-center">
           {/* Route dots + line */}
-          <View className="items-center mr-3 py-1">
+          <View className="items-center me-3 py-1">
             <View className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             <View className="w-0.5 flex-1 bg-zinc-700 my-1" />
             <View className="w-2.5 h-2.5 rounded-full bg-red-500" />
@@ -278,7 +298,7 @@ export default function SearchScreen() {
           </View>
 
           {/* Swap button */}
-          <TouchableOpacity onPress={handleSwap} className="ml-3 bg-zinc-800 p-2 rounded-full">
+          <TouchableOpacity onPress={handleSwap} className="ms-3 bg-zinc-800 p-2 rounded-full">
             <Ionicons name="swap-vertical" size={20} color="white" />
           </TouchableOpacity>
         </View>
@@ -292,7 +312,7 @@ export default function SearchScreen() {
             className="flex-row items-center bg-zinc-900 rounded-xl px-4 py-3 mb-2 border border-zinc-800"
           >
             <Ionicons name="locate" size={18} color="#10b981" />
-            <Text className="text-emerald-400 text-sm font-medium ml-2">Use my current location</Text>
+            <Text className="text-emerald-400 text-sm font-medium ms-2">Use my current location</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
@@ -300,7 +320,7 @@ export default function SearchScreen() {
           className="flex-row items-center bg-zinc-900 rounded-xl px-4 py-3 mb-2 border border-zinc-800"
         >
           <Ionicons name="map" size={18} color="#3b82f6" />
-          <Text className="text-blue-400 text-sm font-medium ml-2">Choose on map</Text>
+          <Text className="text-blue-400 text-sm font-medium ms-2">Choose on map</Text>
         </TouchableOpacity>
       </View>
 
@@ -315,7 +335,7 @@ export default function SearchScreen() {
           >
             <View className="flex-row items-center">
               <Ionicons name="location" size={18} color="#a1a1aa" />
-              <View className="ml-2 flex-1">
+              <View className="ms-2 flex-1">
                 <Text className="text-white text-sm" numberOfLines={2}>
                   {place.displayName}
                 </Text>

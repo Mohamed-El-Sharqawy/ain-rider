@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, AppState, type AppStateStatus } from 'react-native';
 import MapLibreGL from '@maplibre/maplibre-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -17,9 +17,32 @@ interface LocationMarkerProps {
 
 export function LocationMarker({ coordinate, type = 'rider' }: LocationMarkerProps) {
   const scale = useSharedValue(1);
+  const appState = useRef(AppState.currentState);
+
+  const startAnimation = () => {
+    scale.value = withRepeat(withTiming(1.2, { duration: 2000 }), -1, true);
+  };
+
+  const stopAnimation = () => {
+    // Stop at current value or reset to 1
+    scale.value = withTiming(1, { duration: 300 });
+  };
 
   useEffect(() => {
-    scale.value = withRepeat(withTiming(1.2, { duration: 2000 }), -1, true);
+    startAnimation();
+
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        startAnimation();
+      } else if (nextAppState.match(/inactive|background/)) {
+        stopAnimation();
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const pulseStyle = useAnimatedStyle(() => ({
@@ -33,10 +56,10 @@ export function LocationMarker({ coordinate, type = 'rider' }: LocationMarkerPro
 
   return (
     <MapLibreGL.MarkerView coordinate={[coordinate.longitude, coordinate.latitude]}>
-      <View style={styles.container}>
+      <View style={styles.container} accessibilityLabel={type === 'driver' ? 'موقع السائق' : 'موقعك الحالي'} accessibilityRole="image">
         <Animated.View style={[styles.pulse, pulseStyle]} />
         <Animated.View style={[styles.markerContainer, type === 'driver' && markerRotationStyle]}>
-          <View style={styles.iconCircle}>
+          <View style={styles.iconCircle} accessibilityLabel={type === 'driver' ? 'سيارة' : 'شخص'}>
             <Ionicons 
               name={type === 'driver' ? "car" : "person"} 
               size={type === 'driver' ? 18 : 16} 

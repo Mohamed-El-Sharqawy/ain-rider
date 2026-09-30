@@ -120,7 +120,7 @@ export default function DocumentsSettingsScreen() {
         <View className="px-6 pt-4 pb-6 flex-row items-center">
           <TouchableOpacity 
             onPress={() => router.back()}
-            className="w-10 h-10 rounded-full bg-zinc-800 items-center justify-center mr-4"
+            className="w-10 h-10 rounded-full bg-zinc-800 items-center justify-center me-4"
           >
             <Ionicons name="arrow-back" size={20} color="#fff" />
           </TouchableOpacity>
@@ -135,7 +135,7 @@ export default function DocumentsSettingsScreen() {
             <View className="bg-emerald-900/30 p-4 rounded-2xl mb-6" style={{ borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)' }}>
               <View className="flex-row items-center">
                 <Ionicons name="checkmark-circle" size={20} color="#10b981" />
-                <Text className="text-emerald-400 font-medium ml-2">Documents uploaded</Text>
+                <Text className="text-emerald-400 font-medium ms-2">Documents uploaded</Text>
               </View>
               <Text className="text-zinc-400 text-sm mt-1">You can update your documents by uploading new ones.</Text>
             </View>
@@ -154,7 +154,7 @@ export default function DocumentsSettingsScreen() {
               ) : (
                 <View className="flex-1 items-center justify-center flex-row">
                   <Ionicons name="image-outline" size={24} color="#3f3f46" />
-                  <Text className="text-zinc-500 font-medium ml-2">Tap to upload front</Text>
+                  <Text className="text-zinc-500 font-medium ms-2">Tap to upload front</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -178,7 +178,7 @@ export default function DocumentsSettingsScreen() {
               ) : (
                 <View className="flex-1 items-center justify-center flex-row">
                   <Ionicons name="image-outline" size={24} color="#3f3f46" />
-                  <Text className="text-zinc-500 font-medium ml-2">Tap to upload back</Text>
+                  <Text className="text-zinc-500 font-medium ms-2">Tap to upload back</Text>
                 </View>
               )}
             </TouchableOpacity>

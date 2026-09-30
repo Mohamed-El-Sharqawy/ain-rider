@@ -41,7 +41,7 @@ export default function ServicesScreen() {
                 >
                   <Ionicons name={service.icon as any} color={service.color} size={32} />
                 </View>
-                <View className="flex-1 ml-4">
+                <View className="flex-1 ms-4">
                   <Text className="text-xl font-bold text-white">{service.name}</Text>
                   <Text className="text-zinc-500 text-sm mt-1">{service.description}</Text>
                 </View>

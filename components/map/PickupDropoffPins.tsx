@@ -12,21 +12,31 @@ export function PickupDropoffPins({ pickup, dropoff }: PickupDropoffPinsProps) {
     <>
       {pickup && (
         <MapLibreGL.MarkerView coordinate={[pickup.longitude, pickup.latitude]}>
-          <View style={[styles.pin, styles.pickupPin]}>
+          <View style={[styles.pin, styles.pickupPin]} accessibilityLabel="نقطة الاستلام" accessibilityRole="image">
             <View style={[styles.pinDot, styles.pickupDot]} />
             <Text style={styles.pinLabel} numberOfLines={1}>
-              Pickup
+              نقطة الاستلام
             </Text>
+            {pickup.address && (
+              <Text style={[styles.pinAddress, { writingDirection: 'ltr' }]} numberOfLines={1}>
+                {pickup.address}
+              </Text>
+            )}
           </View>
         </MapLibreGL.MarkerView>
       )}
       {dropoff && (
         <MapLibreGL.MarkerView coordinate={[dropoff.longitude, dropoff.latitude]}>
-          <View style={[styles.pin, styles.dropoffPin]}>
+          <View style={[styles.pin, styles.dropoffPin]} accessibilityLabel="نقطة التوصيل" accessibilityRole="image">
             <View style={[styles.pinDot, styles.dropoffDot]} />
             <Text style={styles.pinLabel} numberOfLines={1}>
-              Dropoff
+              نقطة التوصيل
             </Text>
+            {dropoff.address && (
+              <Text style={[styles.pinAddress, { writingDirection: 'ltr' }]} numberOfLines={1}>
+                {dropoff.address}
+              </Text>
+            )}
           </View>
         </MapLibreGL.MarkerView>
       )}
@@ -64,5 +74,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     color: '#18181b',
+  },
+  pinAddress: {
+    fontSize: 9,
+    color: '#52525b',
+    maxWidth: 80,
   },
 });

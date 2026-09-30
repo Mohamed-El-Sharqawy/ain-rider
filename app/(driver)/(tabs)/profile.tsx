@@ -118,8 +118,6 @@ export default function DriverProfile() {
   const licenseStatus = onboardingData?.documents?.drivingLicense?.status;
   const vehicleStatus = onboardingData?.documents?.vehicle?.status;
 
-  console.log(onboardingData);
-
   function getDocBadge(status: string | undefined): { label: string; color: string } | null {
     if (!status) return null;
     switch (status) {
@@ -182,7 +180,7 @@ export default function DriverProfile() {
                 </Text>
                 <View className="flex-row items-center mt-1">
                   <Ionicons name="call-outline" color="#71717a" size={14} />
-                  <Text className="text-zinc-500 font-medium ml-1">{userData?.phoneNumber}</Text>
+                  <Text className="text-zinc-500 font-medium ms-1">{userData?.phoneNumber}</Text>
                 </View>
                 <Text className="text-zinc-600 text-sm mt-0.5">{userData?.email}</Text>
 
@@ -194,7 +192,7 @@ export default function DriverProfile() {
                       color={onboardingStatus === 'APPROVED' ? '#10b981' : onboardingStatus === 'UNDER_REVIEW' ? '#f59e0b' : onboardingStatus === 'REJECTED' ? '#ef4444' : '#71717a'}
                       size={16}
                     />
-                    <Text className={`${getStatusTextColor(onboardingStatus)} text-sm font-bold ml-1.5`}>
+                    <Text className={`${getStatusTextColor(onboardingStatus)} text-sm font-bold ms-1.5`}>
                       {getStatusLabel(onboardingStatus)}
                     </Text>
                   </View>
@@ -208,7 +206,7 @@ export default function DriverProfile() {
                     Vehicle
                   </Text>
                   <View className="flex-row items-center mb-4">
-                    <View className="bg-emerald-500/10 w-12 h-12 rounded-2xl items-center justify-center mr-4">
+                    <View className="bg-emerald-500/10 w-12 h-12 rounded-2xl items-center justify-center me-4">
                       <Ionicons name="car-sport" color="#10b981" size={24} />
                     </View>
                     <View className="flex-1">
@@ -261,7 +259,7 @@ export default function DriverProfile() {
                         activeOpacity={0.7}
                         onPress={() => handleMenuPress(item)}
                       >
-                        <View className="bg-zinc-800/50 p-2.5 rounded-xl mr-4">
+                        <View className="bg-zinc-800/50 p-2.5 rounded-xl me-4">
                           <Ionicons name={item.icon as any} color="#a1a1aa" size={22} />
                         </View>
                         <View className="flex-1">
@@ -271,7 +269,7 @@ export default function DriverProfile() {
                           )}
                         </View>
                         {badge && (
-                          <View className={`${badge.color} px-2 py-1 rounded-full mr-2`}>
+                          <View className={`${badge.color} px-2 py-1 rounded-full me-2`}>
                             <Text className={`text-xs font-bold ${badge.label === 'Verified' ? 'text-emerald-400' : badge.label === 'Rejected' ? 'text-red-400' : 'text-zinc-400'}`}>
                               {badge.label}
                             </Text>
@@ -325,7 +323,7 @@ export default function DriverProfile() {
                 activeOpacity={0.7}
                 onPress={handleLogout}
               >
-                <View className="bg-red-500/20 p-2.5 rounded-xl mr-4">
+                <View className="bg-red-500/20 p-2.5 rounded-xl me-4">
                   <Ionicons name="log-out-outline" color="#ef4444" size={22} />
                 </View>
                 <Text className="flex-1 text-lg text-red-500 font-bold">Sign Out</Text>

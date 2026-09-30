@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface RejectionBannerProps {
@@ -10,12 +10,40 @@ export const RejectionBanner = ({ reason }: RejectionBannerProps) => {
   if (!reason) return null;
 
   return (
-    <View className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex-row items-center gap-3 mb-6">
+    <View style={styles.container}>
       <Ionicons name="alert-circle" size={20} color="#EF4444" />
-      <View className="flex-1">
-        <Text className="text-red-500 font-bold text-sm mb-0.5">Documents Rejected</Text>
-        <Text className="text-red-400/80 text-xs leading-4">{reason}</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>Documents Rejected</Text>
+        <Text style={styles.reason}>{reason}</Text>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+    borderWidth: 1,
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  content: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  title: {
+    color: '#EF4444',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  reason: {
+    color: 'rgba(248, 113, 113, 0.8)',
+    fontSize: 12,
+    lineHeight: 16,
+  },
+});

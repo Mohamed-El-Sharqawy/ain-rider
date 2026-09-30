@@ -7,6 +7,7 @@ import { useTripStore } from '../../stores/trip.store';
 import { useLocation } from '../../hooks/useLocation';
 import { mapProvider } from '../../services/map';
 import { AppMapView, type AppMapViewRef } from '../../components/map/MapView';
+import { DEFAULT_LOCATION } from '../../lib/config/constants';
 
 export default function PickLocationScreen() {
   const router = useRouter();
@@ -23,10 +24,10 @@ export default function PickLocationScreen() {
   const [resolving, setResolving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Initial center: existing selection > current location > Baghdad
+  // Initial center: existing selection > current location > default
   const initialCenter = (isPickup ? tripStore.selectedPickup?.location : tripStore.selectedDropoff?.location)
     || currentLocation
-    || { latitude: 30.147719, longitude: 31.394327 };
+    || DEFAULT_LOCATION;
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     setResolving(true);
@@ -84,14 +85,17 @@ export default function PickLocationScreen() {
   return (
     <SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
       {/* Header */}
-      <View className="absolute top-12 left-4 right-4 z-20 flex-row items-center">
+      <View className="absolute top-12 start-4 end-4 z-20 flex-row items-center">
         <TouchableOpacity
           onPress={() => router.back()}
+          accessible
+          accessibilityLabel="رجوع"
+          accessibilityRole="button"
           className="bg-zinc-900/90 p-3 rounded-full border border-zinc-800"
         >
           <Ionicons name="arrow-back" size={22} color="white" />
         </TouchableOpacity>
-        <View className="flex-1 ml-3 bg-zinc-900/90 rounded-2xl px-4 py-3 border border-zinc-800">
+        <View className="flex-1 ms-3 bg-zinc-900/90 rounded-2xl px-4 py-3 border border-zinc-800">
           <Text className="text-zinc-400 text-xs">
             {isPickup ? 'Set pickup location' : 'Set drop-off location'}
           </Text>
@@ -122,13 +126,13 @@ export default function PickLocationScreen() {
       <View style={styles.bottomCard}>
         <View className="flex-row items-center mb-4">
           <View
-            className={`w-3 h-3 rounded-full mr-3 ${isPickup ? 'bg-emerald-500' : 'bg-red-500'}`}
+            className={`w-3 h-3 rounded-full me-3 ${isPickup ? 'bg-emerald-500' : 'bg-red-500'}`}
           />
           <View className="flex-1">
             {resolving ? (
               <View className="flex-row items-center">
                 <ActivityIndicator size="small" color="#71717a" />
-                <Text className="text-zinc-500 text-sm ml-2">Resolving address...</Text>
+                <Text className="text-zinc-500 text-sm ms-2">Resolving address...</Text>
               </View>
             ) : (
               <Text className="text-white text-sm" numberOfLines={2}>
@@ -141,6 +145,9 @@ export default function PickLocationScreen() {
         <TouchableOpacity
           onPress={handleConfirm}
           disabled={!coordinate || resolving}
+          accessible
+          accessibilityLabel={isPickup ? "تأكيد موقع الاستلام" : "تأكيد وجهة الوصول"}
+          accessibilityRole="button"
           className={`py-4 rounded-xl items-center ${!coordinate || resolving ? 'bg-zinc-700' : isPickup ? 'bg-emerald-500' : 'bg-red-500'
             }`}
         >

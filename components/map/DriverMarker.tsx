@@ -1,33 +1,38 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import MapLibreGL from '@maplibre/maplibre-react-native';
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
-  withTiming,
-  interpolate,
 } from 'react-native-reanimated';
 import { LatLng } from '../../services/map/map.provider';
+import { useAnimatedCoordinate } from '../../hooks/useAnimatedCoordinate';
 
+/**
+ * DriverMarker represents a vehicle on the map with Uber-style smooth animation.
+ *
+ * Position and heading interpolate smoothly between WebSocket updates (~3s intervals)
+ * via the useAnimatedCoordinate hook. The marker glides at ~20fps rather than jumping.
+ *
+ * IMPORTANT: When rendering multiple markers, ensure the React 'key' prop
+ * is set to the driver's unique ID to maintain proper animation state.
+ */
 interface DriverMarkerProps {
-  id: string;
   coordinate: LatLng;
   heading?: number;
 }
 
-export function DriverMarker({ id, coordinate, heading = 0 }: DriverMarkerProps) {
-  const rotation = useSharedValue(heading);
-
-  useEffect(() => {
-    rotation.value = withTiming(heading, { duration: 500 });
-  }, [heading]);
+export function DriverMarker({ coordinate, heading }: DriverMarkerProps) {
+  const { coord, sharedHeading } = useAnimatedCoordinate(
+    coordinate,
+    heading,
+  );
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
+    transform: [{ rotate: `${sharedHeading.value}deg` }],
   }));
 
   return (
-    <MapLibreGL.MarkerView coordinate={[coordinate.longitude, coordinate.latitude]}>
+    <MapLibreGL.MarkerView coordinate={[coord.longitude, coord.latitude]}>
       <Animated.View style={[styles.container, animatedStyle]}>
         <View style={styles.carIcon}>
           <View style={styles.carBody} />

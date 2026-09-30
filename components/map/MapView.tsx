@@ -1,9 +1,17 @@
 import React, { useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
-import MapLibreGL from '@maplibre/maplibre-react-native';
-import { View } from 'react-native';
+import MapLibreGL, { type CameraRef } from '@maplibre/maplibre-react-native';
+import { View, type ViewStyle, type StyleProp } from 'react-native';
 import mapStyle from '../../assets/map-style.json';
+import { DEFAULT_LOCATION } from '../../lib/config/constants';
 
-const BAGHDAD = { latitude: 30.147719, longitude: 31.394327 };
+interface MapRegionChangeEvent {
+  properties: {
+    visibleBounds: number[][];
+    zoomLevel: number;
+    isUserInteraction: boolean;
+  };
+  type: string;
+}
 
 export interface AppMapViewRef {
   flyTo: (center: { latitude: number; longitude: number }, zoom?: number) => void;
@@ -13,15 +21,15 @@ export interface AppMapViewRef {
 interface MapViewProps {
   center?: { latitude: number; longitude: number };
   zoom?: number;
-  onPress?: (feature: { geometry: { coordinates: [number, number] } }) => void;
-  onRegionChange?: (feature: { properties: { visibleBounds: any; zoomLevel: number; isUserInteraction: boolean } }) => void;
+  onPress?: (feature: { geometry: { coordinates: number[] }; properties: Record<string, unknown> }) => void;
+  onRegionChange?: (feature: MapRegionChangeEvent) => void;
   children?: React.ReactNode;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const AppMapView = forwardRef<AppMapViewRef, MapViewProps>(function AppMapView(
   {
-    center = BAGHDAD,
+    center = DEFAULT_LOCATION,
     zoom = 13,
     onPress,
     onRegionChange,
@@ -30,7 +38,7 @@ export const AppMapView = forwardRef<AppMapViewRef, MapViewProps>(function AppMa
   },
   ref,
 ) {
-  const cameraRef = useRef<any>(null);
+  const cameraRef = useRef<CameraRef>(null);
 
   useImperativeHandle(ref, () => ({
     flyTo: (target, targetZoom) => {
@@ -46,6 +54,7 @@ export const AppMapView = forwardRef<AppMapViewRef, MapViewProps>(function AppMa
     },
   }));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handlePress = useCallback(
     (event: any) => {
       if (onPress) {

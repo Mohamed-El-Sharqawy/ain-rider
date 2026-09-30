@@ -8,26 +8,43 @@ export interface NearbyDriver {
   heading?: number;
 }
 
-/**
- * Hook for polling nearby drivers around a coordinate.
- * Polls every 10 seconds to keep map updated without overwhelming the server.
- */
-export function useNearbyDrivers(latitude?: number, longitude?: number, enabled: boolean = true) {
+interface UseNearbyDriversOptions {
+  enabled?: boolean;
+  pollingIntervalMs?: number;
+}
+
+export function useNearbyDrivers(
+  latitude?: number,
+  longitude?: number,
+  enabledOrOptions: boolean | UseNearbyDriversOptions = true,
+) {
+  const options = typeof enabledOrOptions === 'boolean'
+    ? { enabled: enabledOrOptions, pollingIntervalMs: 10000 }
+    : { enabled: enabledOrOptions.enabled ?? true, pollingIntervalMs: enabledOrOptions.pollingIntervalMs ?? 10000 };
+
   const [drivers, setDrivers] = useState<NearbyDriver[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const fetchNearby = async () => {
     if (!latitude || !longitude) return;
+    setIsLoading(true);
+    setError(null);
     try {
       const data = await MatchApi.getNearbyDrivers(latitude, longitude);
       setDrivers(data);
-    } catch (error) {
-      console.error('Failed to fetch nearby drivers:', error);
+    } catch (err: any) {
+      const message = err?.message || 'Failed to fetch nearby drivers';
+      console.error(message, err);
+      setError(message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!enabled || !latitude || !longitude) {
+    if (!options.enabled || !latitude || !longitude) {
       setDrivers([]);
       if (pollInterval.current) {
         clearInterval(pollInterval.current);
@@ -36,18 +53,16 @@ export function useNearbyDrivers(latitude?: number, longitude?: number, enabled:
       return;
     }
 
-    // Initial fetch
     fetchNearby();
 
-    // Setup polling
-    pollInterval.current = setInterval(fetchNearby, 10000);
+    pollInterval.current = setInterval(fetchNearby, options.pollingIntervalMs);
 
     return () => {
       if (pollInterval.current) {
         clearInterval(pollInterval.current);
       }
     };
-  }, [latitude, longitude, enabled]);
+  }, [latitude, longitude, options.enabled, options.pollingIntervalMs]);
 
-  return drivers;
+  return { drivers, isLoading, error };
 }

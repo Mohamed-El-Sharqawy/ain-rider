@@ -40,8 +40,13 @@ export const TripApi = {
     return ApiClient.post<FareEstimate>('/trips/estimate', data);
   },
 
-  async getMyTrips(): Promise<TripResponse[]> {
-    return ApiClient.get<TripResponse[]>('/trips');
+  async getMyTrips(params?: { cursor?: string; page?: number; limit?: number }): Promise<TripResponse[]> {
+    const qs = new URLSearchParams();
+    if (params?.cursor) qs.set('cursor', params.cursor);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    const query = qs.toString();
+    return ApiClient.get<TripResponse[]>(`/trips${query ? `?${query}` : ''}`);
   },
 
   async updateTripStatus(

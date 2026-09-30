@@ -2,14 +2,13 @@ import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
 import { AppState } from 'react-native';
 import { LocationApi } from '../lib/api/location.api';
-import { ApiError } from '../lib/api/client';
+import { ApiClient, ApiError } from '../lib/api/client';
 import { wsService } from './websocket.service';
 
 const TASK_NAME = 'DRIVER_LOCATION_UPDATE';
 
 TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
   if (error) {
-    console.error('[BackgroundTask] Error:', error);
     return;
   }
 
@@ -39,7 +38,26 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
     });
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
-      console.warn('[BackgroundTask] Auth expired, stopping background task');
+      console.warn('[BackgroundTask] Auth expired, attempting token refresh...');
+      
+      // Attempt token refresh before stopping
+      const newToken = await ApiClient.refreshToken();
+      
+      if (newToken) {
+        try {
+          await LocationApi.updateDriverLocation({
+            latitude,
+            longitude,
+            heading: heading ?? undefined,
+            speed: speed ?? undefined,
+          });
+          return;
+        } catch (retryErr) {
+          console.error('[BackgroundTask] Location update failed after refresh:', retryErr);
+        }
+      }
+      
+      // Only stop if refresh failed
       await Location.stopLocationUpdatesAsync(TASK_NAME);
       return;
     }
@@ -49,7 +67,6 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
   if (!wsService.isConnected()) {
     const url = wsService.getCurrentUrl();
     if (url) {
-      console.log('[BackgroundTask] WebSocket disconnected, reconnecting...');
       wsService.reconnect();
     }
   }
@@ -71,8 +88,6 @@ export async function startBackgroundLocationTask(): Promise<void> {
       notificationBody: 'Tracking your location for trip matching',
     },
   });
-
-  console.log('[BackgroundTask] Started location updates');
 }
 
 export async function stopBackgroundLocationTask(): Promise<void> {
@@ -82,5 +97,4 @@ export async function stopBackgroundLocationTask(): Promise<void> {
   }
 
   await Location.stopLocationUpdatesAsync(TASK_NAME);
-  console.log('[BackgroundTask] Stopped location updates');
 }

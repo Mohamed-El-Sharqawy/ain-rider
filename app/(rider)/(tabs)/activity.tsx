@@ -1,10 +1,12 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { TripApi } from '../../../lib/api/trip.api';
 import { TripResponse } from '../../../lib/api/types';
+
+const PAGE_SIZE = 20;
 
 function formatDate(isoDate: string): string {
   const date = new Date(isoDate);
@@ -31,29 +33,63 @@ function formatDistance(km: number | undefined): string {
   return `${km} km`;
 }
 
-function formatDuration(min: number | undefined): string {
-  if (min == null) return '';
-  return `${min} min`;
-}
-
 export default function ActivityScreen() {
   const [trips, setTrips] = useState<TripResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadTrips = async () => {
+  const loadTrips = async (isRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
       setError(null);
-      const data = await TripApi.getMyTrips();
+      const data = await TripApi.getMyTrips({ limit: PAGE_SIZE });
       setTrips(data);
+      setHasMore(data.length >= PAGE_SIZE);
     } catch (err) {
       console.error('Failed to load trips:', err);
       setError('Failed to load trips');
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
+
+  const loadMore = async () => {
+    if (isLoadingMore || !hasMore || trips.length === 0) return;
+    try {
+      setIsLoadingMore(true);
+      const lastTrip = trips[trips.length - 1];
+      const data = await TripApi.getMyTrips({
+        cursor: lastTrip.id,
+        limit: PAGE_SIZE,
+      });
+      if (data.length === 0) {
+        setHasMore(false);
+      } else {
+        setTrips((prev) => [...prev, ...data]);
+        setHasMore(data.length >= PAGE_SIZE);
+      }
+    } catch (err) {
+      console.error('Failed to load more trips:', err);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleScroll = useCallback(({ nativeEvent }: any) => {
+    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+    const paddingToBottom = 200;
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+      loadMore();
+    }
+  }, [isLoadingMore, hasMore, trips]);
 
   useFocusEffect(
     useCallback(() => {
@@ -63,7 +99,6 @@ export default function ActivityScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-zinc-950" edges={['top']}>
-      {/* Header */}
       <View className="px-6 pt-6 pb-2 flex-row justify-between items-end">
         <View>
           <Text className="text-3xl font-bold text-white tracking-tight">Activity</Text>
@@ -78,6 +113,15 @@ export default function ActivityScreen() {
         className="flex-1 mt-4"
         contentContainerStyle={{ paddingHorizontal: 24 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => loadTrips(true)}
+            tintColor="#10b981"
+          />
+        }
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {isLoading ? (
           <View className="mt-20 items-center">
@@ -93,7 +137,7 @@ export default function ActivityScreen() {
             <Text className="text-zinc-500 text-center leading-6 mb-8">
               We couldn't load your trips. Please try again.
             </Text>
-            <TouchableOpacity onPress={loadTrips} className="bg-emerald-600 px-8 py-4 rounded-2xl">
+            <TouchableOpacity onPress={() => loadTrips()} className="bg-emerald-600 px-8 py-4 rounded-2xl">
               <Text className="text-white font-bold text-lg">Retry</Text>
             </TouchableOpacity>
           </View>
@@ -119,10 +163,9 @@ export default function ActivityScreen() {
                 activeOpacity={0.85}
               >
                 <View className="p-6">
-                  {/* Top Row: Date & Status */}
                   <View className="flex-row justify-between items-center mb-6">
                     <View className="flex-row items-center">
-                      <View className="bg-emerald-500/20 px-3 py-1.5 rounded-full mr-2">
+                      <View className="bg-emerald-500/20 px-3 py-1.5 rounded-full me-2">
                         <Text className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
                           Completed
                         </Text>
@@ -136,7 +179,6 @@ export default function ActivityScreen() {
                     </Text>
                   </View>
 
-                  {/* Route Details */}
                   <View className="flex-row gap-4 mb-6">
                     <View className="items-center py-1">
                       <View className="w-2.5 h-2.5 rounded-full border-2 border-emerald-500 bg-zinc-950" />
@@ -155,11 +197,10 @@ export default function ActivityScreen() {
                     </View>
                   </View>
 
-                  {/* Footer: Driver & Stats */}
                   {trip.driverName && (
                     <View className="pt-5 border-t border-zinc-800/50 flex-row items-center justify-between">
                       <View className="flex-row items-center flex-1">
-                        <View className="w-10 h-10 rounded-full border border-zinc-800 mr-3 bg-zinc-800 items-center justify-center">
+                        <View className="w-10 h-10 rounded-full border border-zinc-800 me-3 bg-zinc-800 items-center justify-center">
                           <Ionicons name="person" color="#71717a" size={20} />
                         </View>
                         <View>
@@ -168,7 +209,7 @@ export default function ActivityScreen() {
                             {trip.driverRating != null && (
                               <>
                                 <Ionicons name="star" color="#fbbf24" size={12} />
-                                <Text className="text-zinc-500 text-xs ml-1">{trip.driverRating}</Text>
+                                <Text className="text-zinc-500 text-xs ms-1">{trip.driverRating}</Text>
                                 <Text className="text-zinc-700 mx-1.5">•</Text>
                               </>
                             )}
@@ -186,6 +227,15 @@ export default function ActivityScreen() {
                 </View>
               </TouchableOpacity>
             ))}
+            {isLoadingMore && (
+              <View className="py-4 items-center">
+                <ActivityIndicator color="#10b981" size="small" />
+                <Text className="text-zinc-500 mt-2 text-sm">Loading more...</Text>
+              </View>
+            )}
+            {!hasMore && trips.length > 0 && (
+              <Text className="text-zinc-600 text-center py-4 text-sm">No more trips</Text>
+            )}
           </View>
         )}
       </ScrollView>

@@ -13,14 +13,21 @@ export function RoutePolyline({
   strokeColor = '#3b82f6',
   strokeWidth = 4,
 }: RoutePolylineProps) {
-  if (coordinates.length < 2) return null;
+  const isValidCoordinate = (c: LatLng) => 
+    typeof c.latitude === 'number' && 
+    typeof c.longitude === 'number' &&
+    !isNaN(c.latitude) && 
+    !isNaN(c.longitude);
+
+  const validCoords = coordinates.filter(isValidCoordinate);
+  if (validCoords.length < 2) return null;
 
   const geoJSON: GeoJSON.Feature<GeoJSON.LineString> = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: coordinates.map((c) => [c.longitude, c.latitude]),
+      coordinates: validCoords.map((c) => [c.longitude, c.latitude]),
     },
   };
 

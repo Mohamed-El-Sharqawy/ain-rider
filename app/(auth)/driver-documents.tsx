@@ -1,18 +1,18 @@
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, Alert, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { DriverApi } from '../../lib/api/driver';
 import { ApiError } from '../../lib/api/client';
-import { useAuthStore } from '../../stores/auth.store';
 import { useOnboardingStore } from '../../stores/onboarding.store';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { RejectionBanner } from '../../components/RejectionBanner';
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_LABEL } from '../../lib/validation';
 
 export default function DriverDocumentsScreen() {
-  const { onboardingStatus, documentsStatus, fetchOnboardingStatus, vehicle: storeVehicle } = useOnboardingStore();
+  const { documentsStatus, fetchOnboardingStatus, vehicle: storeVehicle } = useOnboardingStore();
   
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
   const [idFrontUri, setIdFrontUri] = useState<string | null>(null);
@@ -26,7 +26,6 @@ export default function DriverDocumentsScreen() {
   const [carLicenseUri, setCarLicenseUri] = useState<string | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
-  const { completeOnboarding } = useAuthStore();
 
   useEffect(() => {
     if (documentsStatus) {
@@ -85,13 +84,21 @@ export default function DriverDocumentsScreen() {
 
     setIsUploading(true);
     try {
-      // 1. Identity
+      const uris = [selfieUri, idFrontUri, idBackUri, licenseFrontUri, licenseBackUri, carImageUri, carLicenseUri].filter(Boolean) as string[];
+      for (const uri of uris) {
+        const fileInfo = await fetch(uri);
+        const blob = await fileInfo.blob();
+        if (blob.size > MAX_FILE_SIZE_BYTES) {
+          Alert.alert('File Too Large', `Each file must be under ${MAX_FILE_SIZE_LABEL}.`);
+          setIsUploading(false);
+          return;
+        }
+      }
+
       await DriverApi.uploadIdentityDocuments(idFrontUri, idBackUri, selfieUri);
       
-      // 2. License
       await DriverApi.uploadDrivingLicense(licenseNumber, licenseFrontUri, licenseBackUri);
 
-      // 3. Vehicle
       await DriverApi.registerVehicle(storeVehicle, carImageUri, carLicenseUri);
       
       Alert.alert('Success', 'Your documents have been uploaded and are under review!', [

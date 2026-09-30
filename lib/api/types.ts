@@ -222,6 +222,8 @@ export interface TripResponse {
   vehicleMake?: string;
   vehicleModel?: string;
   vehiclePlate?: string;
+  riderName?: string;
+  riderPhone?: string;
 }
 
 export interface FareEstimate {

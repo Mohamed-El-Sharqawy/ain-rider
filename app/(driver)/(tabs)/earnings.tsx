@@ -267,7 +267,7 @@ export default function DriverEarnings() {
 
             <View className="px-6 mb-5">
               <View className="bg-zinc-900/60 rounded-2xl border border-zinc-800/30 p-4 flex-row items-center">
-                <View className="bg-emerald-500/10 w-10 h-10 rounded-xl items-center justify-center mr-3">
+                <View className="bg-emerald-500/10 w-10 h-10 rounded-xl items-center justify-center me-3">
                   <Ionicons name="cash-outline" color="#10b981" size={20} />
                 </View>
                 <View className="flex-1">
@@ -313,7 +313,7 @@ export default function DriverEarnings() {
                         <View className="p-5">
                           <View className="flex-row justify-between items-center mb-5">
                             <View className="flex-row items-center flex-1">
-                              <View className="bg-emerald-500/20 px-2.5 py-1 rounded-full mr-2">
+                              <View className="bg-emerald-500/20 px-2.5 py-1 rounded-full me-2">
                                 <Text className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
                                   Completed
                                 </Text>
@@ -322,7 +322,7 @@ export default function DriverEarnings() {
                                 {formatDate(trip.completedAt || trip.requestedAt)}
                               </Text>
                             </View>
-                            <Text className="text-lg font-bold text-white tracking-tight ml-3">
+                            <Text className="text-lg font-bold text-white tracking-tight ms-3">
                               {formatFare(fare)}
                             </Text>
                           </View>
@@ -349,20 +349,20 @@ export default function DriverEarnings() {
                             <View className="flex-row items-center flex-1 gap-3">
                               <View className="flex-row items-center">
                                 <Ionicons name="navigate-outline" color="#71717a" size={14} />
-                                <Text className="text-zinc-500 text-xs ml-1">
+                                <Text className="text-zinc-500 text-xs ms-1">
                                   {trip.distance != null ? formatDistance(trip.distance) : 'N/A'}
                                 </Text>
                               </View>
                               <View className="flex-row items-center">
                                 <Ionicons name="time-outline" color="#71717a" size={14} />
-                                <Text className="text-zinc-500 text-xs ml-1">
+                                <Text className="text-zinc-500 text-xs ms-1">
                                   {trip.duration != null ? formatDuration(trip.duration) : 'N/A'}
                                 </Text>
                               </View>
                             </View>
                             <View className="flex-row items-center">
                               <Ionicons name="cash" color="#10b981" size={14} />
-                              <Text className="text-emerald-400 text-xs font-bold ml-1">Cash</Text>
+                              <Text className="text-emerald-400 text-xs font-bold ms-1">Cash</Text>
                             </View>
                           </View>
                         </View>
@@ -424,7 +424,7 @@ export default function DriverEarnings() {
                       <Text className="text-zinc-500 text-xs font-bold uppercase tracking-wider">Payment</Text>
                       <View className="flex-row items-center">
                         <Ionicons name="cash" color="#10b981" size={14} />
-                        <Text className="text-emerald-400 text-sm font-bold ml-1">Cash</Text>
+                        <Text className="text-emerald-400 text-sm font-bold ms-1">Cash</Text>
                       </View>
                     </View>
                   </View>
@@ -453,7 +453,7 @@ export default function DriverEarnings() {
                   <View className="bg-zinc-900 rounded-2xl border border-zinc-800/50 p-5 mb-6">
                     <Text className="text-zinc-400 text-xs font-bold uppercase tracking-[2px] mb-4">Rider</Text>
                     <View className="flex-row items-center">
-                      <View className="w-10 h-10 rounded-full bg-zinc-800 items-center justify-center mr-3 border border-zinc-700">
+                      <View className="w-10 h-10 rounded-full bg-zinc-800 items-center justify-center me-3 border border-zinc-700">
                         <Ionicons name="person" color="#71717a" size={20} />
                       </View>
                       <View>
@@ -461,7 +461,7 @@ export default function DriverEarnings() {
                         {selectedTrip.driverRating != null && (
                           <View className="flex-row items-center mt-0.5">
                             <Ionicons name="star" color="#fbbf24" size={12} />
-                            <Text className="text-zinc-500 text-xs ml-1">{selectedTrip.driverRating}</Text>
+                            <Text className="text-zinc-500 text-xs ms-1">{selectedTrip.driverRating}</Text>
                           </View>
                         )}
                       </View>
@@ -473,7 +473,7 @@ export default function DriverEarnings() {
                     activeOpacity={0.7}
                     onPress={handleReportPress}
                   >
-                    <View className="bg-red-500/20 p-2.5 rounded-xl mr-3">
+                    <View className="bg-red-500/20 p-2.5 rounded-xl me-3">
                       <Ionicons name="flag-outline" color="#ef4444" size={20} />
                     </View>
                     <View className="flex-1">
@@ -536,7 +536,7 @@ export default function DriverEarnings() {
                             activeOpacity={0.7}
                             onPress={() => setReportType(type.key)}
                           >
-                            <View className="bg-zinc-800/50 p-2.5 rounded-xl mr-3">
+                            <View className="bg-zinc-800/50 p-2.5 rounded-xl me-3">
                               <Ionicons name={type.icon as any} color="#a1a1aa" size={20} />
                             </View>
                             <View className="flex-1">
@@ -555,11 +555,11 @@ export default function DriverEarnings() {
                         onPress={() => { setReportType(null); setReportDescription(''); }}
                       >
                         <Ionicons name="arrow-back" color="#a1a1aa" size={20} />
-                        <Text className="text-zinc-400 font-medium ml-2">Back to categories</Text>
+                        <Text className="text-zinc-400 font-medium ms-2">Back to categories</Text>
                       </TouchableOpacity>
 
                       <View className="bg-zinc-900 rounded-2xl border border-zinc-800/50 p-4 mb-5 flex-row items-center">
-                        <View className="bg-zinc-800/50 p-2 rounded-xl mr-3">
+                        <View className="bg-zinc-800/50 p-2 rounded-xl me-3">
                           <Ionicons name={reportTypes.find((r) => r.key === reportType)?.icon as any} color="#a1a1aa" size={20} />
                         </View>
                         <Text className="text-white font-bold">
@@ -571,7 +571,7 @@ export default function DriverEarnings() {
                         <View className="bg-amber-500/10 rounded-2xl border border-amber-500/20 p-4 mb-5">
                           <View className="flex-row items-start">
                             <Ionicons name="information-circle" color="#f59e0b" size={20} />
-                            <Text className="text-amber-400/80 text-xs flex-1 ml-2 leading-4">
+                            <Text className="text-amber-400/80 text-xs flex-1 ms-2 leading-4">
                               Please describe the item you found and where in the vehicle it was located. Our support team will contact the rider.
                             </Text>
                           </View>

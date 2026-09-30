@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '../stores/auth.store';
@@ -22,11 +22,11 @@ export function useAuthCheck() {
       }
 
       const decoded = jwtDecode<TokenPayload>(accessToken);
+      const userId = decoded.sub;
       const currentTime = Math.floor(Date.now() / 1000);
 
-      // Check if access token is still valid
       if (decoded.exp > currentTime) {
-        setAuth(true, decoded.role);
+        setAuth(true, decoded.role, userId);
         setIsReady(true);
         return;
       }
@@ -47,14 +47,13 @@ export function useAuthCheck() {
       }
       
     } catch (e) {
-      // Corrupt token or decode failed
-      console.error('[AuthDebug] Auth check failed:', e);
+      if (__DEV__) console.error('[AuthDebug] Auth check failed:', e);
       await SecureStore.deleteItemAsync('accessToken');
       await SecureStore.deleteItemAsync('refreshToken');
       setAuth(false, null);
     } finally {
       setIsReady(true);
-      console.log('[AuthDebug] Auth ready. Ready:', true);
+      if (__DEV__) console.log('[AuthDebug] Auth ready. Ready:', true);
     }
   }, [setAuth]);
 

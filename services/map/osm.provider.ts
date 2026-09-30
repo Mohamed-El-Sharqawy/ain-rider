@@ -1,17 +1,30 @@
 import { LatLng, RouteResult, GeocodingResult, MapProvider } from './map.provider';
 import { decodePolyline } from './polyline';
+import { ApiConfig } from '../../lib/config/constants';
 
-const OSRM_URL = process.env.EXPO_PUBLIC_OSRM_URL || 'http://localhost:5000';
-const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
+const OSRM_URL = ApiConfig.osmRouterUrl;
+const NOMINATIM_BASE = ApiConfig.osmNominatimUrl;
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs: number = 5000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 export class OsmProvider implements MapProvider {
   async getRoute(origin: LatLng, destination: LatLng): Promise<RouteResult> {
     try {
       const url = `${OSRM_URL}/route/v1/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline&steps=true`;
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3000);
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeout);
+      const res = await fetchWithTimeout(url);
       const data = await res.json();
 
       if (data.routes && data.routes.length > 0) {
@@ -25,10 +38,8 @@ export class OsmProvider implements MapProvider {
         };
       }
     } catch {
-      // OSRM unreachable — fall through to Haversine fallback
     }
 
-    // Fallback: straight-line route with Haversine distance
     const R = 6371e3;
     const toRad = (d: number) => (d * Math.PI) / 180;
     const dLat = toRad(destination.latitude - origin.latitude);
@@ -54,7 +65,7 @@ export class OsmProvider implements MapProvider {
       limit: '10',
     });
 
-    const res = await fetch(`${NOMINATIM_BASE}/search?${params}`, {
+    const res = await fetchWithTimeout(`${NOMINATIM_BASE}/search?${params}`, {
       headers: { 'User-Agent': 'ain-rider/1.0' },
     });
     const data = await res.json();
@@ -75,7 +86,7 @@ export class OsmProvider implements MapProvider {
       format: 'json',
     });
 
-    const res = await fetch(`${NOMINATIM_BASE}/reverse?${params}`, {
+    const res = await fetchWithTimeout(`${NOMINATIM_BASE}/reverse?${params}`, {
       headers: { 'User-Agent': 'ain-rider/1.0' },
     });
     const data = await res.json();
@@ -96,7 +107,7 @@ export class OsmProvider implements MapProvider {
       params.bounded = '0';
     }
 
-    const res = await fetch(`${NOMINATIM_BASE}/search?${new URLSearchParams(params)}`, {
+    const res = await fetchWithTimeout(`${NOMINATIM_BASE}/search?${new URLSearchParams(params)}`, {
       headers: { 'User-Agent': 'ain-rider/1.0' },
     });
     const data = await res.json();
