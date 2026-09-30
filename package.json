@@ -1,0 +1,22 @@
+{
+  "name": "ain-rider-monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "dev": "turbo run dev",
+    "clean": "turbo run clean",
+    "prisma:generate": "pnpm -C backend prisma:generate",
+    "docker:infra:up": "pnpm -C backend docker:infra:up",
+    "docker:infra:down": "pnpm -C backend docker:infra:down"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  }
+}

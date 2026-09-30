@@ -1,0 +1,34 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# turbo
+.turbo/
+
+# expo / react native
+.expo/
+android/.gradle/
+android/build/
+android/app/build/
+ios/Pods/
+
+# env files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# secrets
+*adminsdk*.json
+*.pem
+*.keystore
+!debug.keystore
+
+# logs and os files
+*.log
+.DS_Store
+Thumbs.db

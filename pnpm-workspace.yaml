@@ -1,0 +1,14 @@
+packages:
+  - backend
+  - backend/apps/**
+  - backend/packages/**
+  - dashboard
+  - mobile
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/engines'
+  - '@swc/core'
+  - bcrypt
+  - esbuild
+  - prisma
