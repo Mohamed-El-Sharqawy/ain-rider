@@ -1,0 +1,293 @@
+/**
+ * Admin NATS Client
+ * 
+ * Client for making NATS request/reply calls to other services.
+ * Used by admin-service to trigger operations in auth, trip, and payment services.
+ */
+
+import { Injectable } from '@nestjs/common';
+import { NatsRequestClient } from '@ain-rider/nats-client';
+import { NatsService } from '../shared/nats/nats.service';
+
+// Request/Response types
+export interface SuspendUserRequest {
+  userId: string;
+  reason: string;
+  suspendedBy: string;
+}
+
+export interface SuspendUserResponse {
+  userId: string;
+  newStatus: string;
+}
+
+export interface ActivateUserRequest {
+  userId: string;
+  activatedBy: string;
+}
+
+export interface ActivateUserResponse {
+  userId: string;
+  newStatus: string;
+}
+
+export interface CancelTripRequest {
+  tripId: string;
+  reason: string;
+  cancelledBy: string;
+}
+
+export interface CancelTripResponse {
+  tripId: string;
+  newStatus: string;
+}
+
+export interface RefundRequest {
+  paymentId: string;
+  amount: number;
+  reason: string;
+  requestedBy: string;
+}
+
+export interface RefundResponse {
+  refundId: string;
+  amount: number;
+}
+
+export interface ApproveDriverRequest {
+  userId: string;
+  adminId: string;
+}
+
+export interface ApproveDriverResponse {
+  userId: string;
+  onboardingStatus: string;
+}
+
+export interface RejectDriverDocumentRequest {
+  userId: string;
+  stage: 'identity' | 'license' | 'vehicle';
+  reason: string;
+  adminId: string;
+}
+
+export interface RejectDriverDocumentResponse {
+  userId: string;
+  stage: string;
+  status: string;
+}
+
+export interface ApproveDriverDocumentRequest {
+  userId: string;
+  stage: 'identity' | 'license' | 'vehicle';
+  adminId: string;
+}
+
+export interface ApproveDriverDocumentResponse {
+  userId: string;
+  stage: string;
+  status: string;
+}
+
+export interface UpdateUserStatusRequest {
+  userId: string;
+  status: string;
+  adminId: string;
+  reason?: string;
+}
+
+export interface UpdateUserStatusResponse {
+  userId: string;
+  newStatus: string;
+}
+
+@Injectable()
+export class AdminNatsClient {
+  private _requestClient: NatsRequestClient | null = null;
+
+  constructor(private natsService: NatsService) { }
+
+  private get requestClient(): NatsRequestClient {
+    if (!this._requestClient) {
+      if (!this.natsService.nc) {
+        throw new Error('NATS connection not ready');
+      }
+      this._requestClient = new NatsRequestClient(this.natsService.nc);
+    }
+    return this._requestClient;
+  }
+
+  /**
+   * Suspend a user via auth-service
+   */
+  async suspendUser(
+    userId: string,
+    reason: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<SuspendUserResponse> {
+    const result = await this.requestClient.request<SuspendUserRequest, SuspendUserResponse>(
+      'admin.command.suspend_user',
+      { userId, reason, suspendedBy: adminId },
+      { traceId, requestedBy: adminId }
+    );
+    return result;
+  }
+
+  /**
+   * Activate a user via auth-service
+   */
+  async activateUser(
+    userId: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<ActivateUserResponse> {
+    const result = await this.requestClient.request<ActivateUserRequest, ActivateUserResponse>(
+      'admin.command.activate_user',
+      { userId, activatedBy: adminId },
+      { traceId, requestedBy: adminId }
+    );
+    return result;
+  }
+
+  /**
+   * Approve a driver via auth-service
+   */
+  async approveDriver(
+    userId: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<ApproveDriverResponse> {
+    const result = await this.requestClient.request<ApproveDriverRequest, ApproveDriverResponse>(
+      'admin.command.approve_driver',
+      { userId, adminId },
+      { traceId, requestedBy: adminId }
+    );
+    return result;
+  }
+
+  /**
+   * Reject a driver document stage via auth-service
+   */
+  async rejectDriverDocument(
+    userId: string,
+    stage: "identity" | "license" | "vehicle",
+    reason: string,
+    adminId: string,
+    traceId?: string,
+  ): Promise<RejectDriverDocumentResponse> {
+    const result = await this.requestClient.request<RejectDriverDocumentRequest, RejectDriverDocumentResponse>(
+      "admin.command.reject_driver_document",
+      { userId, stage, reason, adminId },
+      { traceId, requestedBy: adminId },
+    );
+    return result;
+  }
+
+  /**
+   * Approve a driver document stage via auth-service
+   */
+  async approveDriverDocument(
+    userId: string,
+    stage: "identity" | "license" | "vehicle",
+    adminId: string,
+    traceId?: string,
+  ): Promise<ApproveDriverDocumentResponse> {
+    const result = await this.requestClient.request<ApproveDriverDocumentRequest, ApproveDriverDocumentResponse>(
+      "admin.command.approve_driver_document",
+      { userId, stage, adminId },
+      { traceId, requestedBy: adminId },
+    );
+    return result;
+  }
+
+  /**
+   * Update user status generically via auth-service
+   */
+  async updateUserStatus(
+    userId: string,
+    userStatus: string,
+    adminId: string,
+    reason?: string,
+    traceId?: string
+  ): Promise<UpdateUserStatusResponse> {
+    const result = await this.requestClient.request<UpdateUserStatusRequest, UpdateUserStatusResponse>(
+      'admin.command.update_user_status',
+      { userId, status: userStatus, adminId, reason },
+      { traceId, requestedBy: adminId }
+    );
+    return result;
+  }
+
+  /**
+   * Cancel a trip via trip-service
+   */
+  async cancelTrip(
+    tripId: string,
+    reason: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<CancelTripResponse> {
+    return this.requestClient.request<CancelTripRequest, CancelTripResponse>(
+      'trip.cancel.request',
+      { tripId, reason, cancelledBy: adminId },
+      { traceId, requestedBy: adminId }
+    );
+  }
+
+  /**
+   * Assign a driver to a trip via trip-service
+   */
+  async assignDriver(
+    tripId: string,
+    driverId: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<{ tripId: string; driverId: string }> {
+    return this.requestClient.request<
+      { tripId: string; driverId: string; assignedBy: string },
+      { tripId: string; driverId: string }
+    >(
+      'trip.assign_driver.request',
+      { tripId, driverId, assignedBy: adminId },
+      { traceId, requestedBy: adminId }
+    );
+  }
+
+  /**
+   * Process a refund via payment-service
+   */
+  async refundPayment(
+    paymentId: string,
+    amount: number,
+    reason: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<RefundResponse> {
+    return this.requestClient.request<RefundRequest, RefundResponse>(
+      'payment.refund.request',
+      { paymentId, amount, reason, requestedBy: adminId },
+      { traceId, requestedBy: adminId }
+    );
+  }
+
+  /**
+   * Adjust a payment via payment-service
+   */
+  async adjustPayment(
+    paymentId: string,
+    adjustmentAmount: number,
+    reason: string,
+    adminId: string,
+    traceId?: string
+  ): Promise<{ paymentId: string; newAmount: number; adjustmentId: string }> {
+    return this.requestClient.request<
+      { paymentId: string; adjustmentAmount: number; reason: string; requestedBy: string },
+      { paymentId: string; newAmount: number; adjustmentId: string }
+    >(
+      'payment.adjust.request',
+      { paymentId, adjustmentAmount, reason, requestedBy: adminId },
+      { traceId, requestedBy: adminId }
+    );
+  }
+}

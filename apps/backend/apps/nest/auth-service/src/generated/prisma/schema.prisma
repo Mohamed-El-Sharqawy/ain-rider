@@ -1,0 +1,191 @@
+/// Migration strategy:
+/// - All schema changes must be backward-compatible (additive columns, nullable fields).
+/// - Renames require a two-step migration: add new column → backfill → drop old column.
+/// - Deprecated fields should be marked with a /// DEPRECATED comment and removed after a full release cycle.
+/// - Coordinate multi-service schema changes via NATS event versioning (new fields = new event version).
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Tracks the driver onboarding progress through document verification stages.
+enum OnboardingStatus {
+  PENDING_DOCUMENTS
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+/// Status of an uploaded document (identity, license, or vehicle).
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// User role determining access permissions within the platform.
+enum UserRole {
+  RIDER
+  DRIVER
+  ADMIN
+  SUPPORT
+}
+
+/// Account status controlling login and platform access.
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_DOCUMENTS
+  UNDER_REVIEW
+  REJECTED
+}
+
+/// Core user account. A single user can be either a rider or a driver (not both).
+/// Soft-deleted users have `deletedAt` set instead of being physically removed.
+model User {
+  id                    String     @id @default(uuid())
+  email                 String     @unique
+  phoneNumber           String     @unique
+  passwordHash          String
+  firstName             String
+  lastName              String
+  role                  UserRole
+  status                UserStatus @default(ACTIVE)
+  profileImage          String?
+  address               String?
+  city                  String?
+  state                 String?
+  country               String?
+  dateOfBirth           DateTime?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  /// Timestamp when the user was soft-deleted. Null means active.
+  deletedAt             DateTime?
+  /// ID of the admin or system user who performed the soft-delete.
+  deletedBy             String?
+
+  refreshTokens RefreshToken[]
+  driver        Driver?
+  rider         Rider?
+
+  @@index([role])
+  @@index([status])
+  @@index([role, status])
+  @@map("users")
+}
+
+/// JWT refresh token with rotation-based family tracking.
+/// Reuse of a revoked token revokes the entire family (reuse detection).
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  /// Token family — all tokens in a family are revoked on reuse detection.
+  family    String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, family])
+  @@index([expiresAt])
+  @@index([family])
+  @@map("refresh_tokens")
+}
+
+/// Driver profile linked to a User. Created on registration when role=DRIVER.
+/// Tracks onboarding progress, online status, and trip statistics.
+model Driver {
+  id               String           @id @default(uuid())
+  userId           String           @unique
+  vehicleId        String?
+  licenseNumber    String?          @unique
+  rating           Float            @default(5.0)
+  totalTrips       Int              @default(0)
+  onboardingStatus OnboardingStatus @default(PENDING_DOCUMENTS)
+  isOnline         Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle  Vehicle?        @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  document DriverDocument?
+
+  @@index([onboardingStatus])
+  @@map("drivers")
+}
+
+/// Stores identity and driving license documents for a driver.
+/// Upload attempts are capped at MAX_UPLOAD_ATTEMPTS (default 3) per document type.
+model DriverDocument {
+  id                            String         @id @default(uuid())
+  driverId                      String         @unique
+  /// MinIO object keys for front/back identity card images.
+  identityImages                String[]
+  identityStatus                DocumentStatus @default(PENDING)
+  identityRejectionReason       String?
+  identityUploadAttempts        Int            @default(0)
+  /// MinIO object keys for driving license images.
+  drivingLicenseImages          String[]
+  drivingLicenseStatus          DocumentStatus @default(PENDING)
+  drivingLicenseRejectionReason String?
+  drivingLicenseUploadAttempts  Int            @default(0)
+  createdAt                     DateTime       @default(now())
+  updatedAt                     DateTime       @updatedAt
+
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([identityStatus])
+  @@index([drivingLicenseStatus])
+  @@map("driver_documents")
+}
+
+/// Vehicle registered by a driver during onboarding.
+/// Images are stored as MinIO object keys; presigned URLs are generated on read.
+model Vehicle {
+  id              String         @id @default(uuid())
+  make            String
+  model           String
+  year            Int
+  color           String
+  plateNumber     String         @unique
+  /// MinIO object key for the vehicle exterior photo.
+  carImage        String
+  /// MinIO object key for the vehicle license/registration photo.
+  carLicenseImage String
+  carLicenseText  String?
+  status          DocumentStatus @default(PENDING)
+  rejectionReason String?
+  uploadAttempts  Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  drivers Driver[]
+
+  @@index([status])
+  @@index([make, model])
+  @@map("vehicles")
+}
+
+/// Rider profile linked to a User. Created on registration when role=RIDER.
+model Rider {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  rating        Float    @default(5.0)
+  totalTrips    Int      @default(0)
+  identityFront String?
+  identityBack  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("riders")
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ain-rider.com/schemas/error-response.json",
+  "title": "ErrorResponse",
+  "description": "Unified error response schema for all 911 Ain Rider backend services",
+  "type": "object",
+  "required": ["success", "error"],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "const": false,
+      "description": "Always false for error responses"
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message", "traceId"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "description": "Machine-readable error code (uppercase with underscores)",
+          "enum": [
+            "VALIDATION_ERROR",
+            "UNAUTHORIZED",
+            "FORBIDDEN",
+            "NOT_FOUND",
+            "CONFLICT",
+            "BUSINESS_RULE_VIOLATION",
+            "INTERNAL_ERROR",
+            "SERVICE_UNAVAILABLE",
+            "BAD_GATEWAY",
+            "NATS_TIMEOUT",
+            "NATS_NO_RESPONDERS"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Human-readable error message safe for display to end users"
+        },
+        "traceId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Request correlation ID for distributed tracing"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "success": false,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Email address is invalid",
+        "traceId": "550e8400-e29b-41d4-a716-446655440000"
+      }
+    },
+    {
+      "success": false,
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "Trip with ID '123' not found",
+        "traceId": "550e8400-e29b-41d4-a716-446655440001"
+      }
+    },
+    {
+      "success": false,
+      "error": {
+        "code": "SERVICE_UNAVAILABLE",
+        "message": "Service temporarily unavailable",
+        "traceId": "550e8400-e29b-41d4-a716-446655440002"
+      }
+    }
+  ]
+}

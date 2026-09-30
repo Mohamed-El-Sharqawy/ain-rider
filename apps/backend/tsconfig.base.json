@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "removeComments": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "prom-client": ["./packages/metrics/node_modules/prom-client"],
+      "@ain-rider/shared-types": ["./packages/shared-types/src"],
+      "@ain-rider/nats-client": ["./packages/nats-client/src"],
+      "@ain-rider/redis-client": ["./packages/redis-client/src"],
+      "@ain-rider/metrics": ["./packages/metrics/src/index.ts"],
+      "@ain-rider/metrics/*": ["./packages/metrics/src/*"],
+      "@ain-rider/internal-api": ["./packages/internal-api/src/index.ts"],
+      "@ain-rider/error-handling": ["./packages/error-handling/src"],
+      "@ain-rider/minio-client": ["./packages/minio-client/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build"]
+}
