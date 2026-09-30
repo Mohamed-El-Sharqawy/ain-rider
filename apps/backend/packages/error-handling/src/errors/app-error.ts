@@ -14,12 +14,13 @@ export class AppError extends Error {
   constructor(
     code: ErrorCode,
     message: string,
-    details?: unknown
+    details?: unknown,
+    httpStatus?: number
   ) {
     super(message);
     this.name = this.constructor.name;
     this.code = code;
-    this.httpStatus = ErrorCodeToHttpStatus[code];
+    this.httpStatus = httpStatus ?? ErrorCodeToHttpStatus[code];
     this.details = details;
     this.timestamp = new Date().toISOString();
 

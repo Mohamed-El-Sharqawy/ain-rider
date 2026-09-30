@@ -46,8 +46,9 @@ export class RiderProfileService {
     const existingImage = rider.user.profileImage;
     if (existingImage) {
       try {
-        const objectName = existingImage.split("/").slice(-2).join("/");
-        await this.storage.delete(`riders/${userId}/profile/${objectName}`);
+        // profileImage stores the full object key; deleting a sliced
+        // variant ("profile/<file>") silently targeted a nonexistent object.
+        await this.storage.delete(existingImage);
       } catch {
         // Ignore deletion errors
       }
