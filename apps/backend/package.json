@@ -4,13 +4,8 @@
   "private": true,
   "description": "911 Ain Rider Backend Monorepo",
   "scripts": {
-    "dev": "pnpm --parallel --filter @ain-rider/* dev",
-    "build": "node scripts/build.mjs",
     "build:packages": "node scripts/build-packages.mjs",
     "build:apps": "node scripts/build.mjs",
-    "test": "pnpm --recursive test",
-    "lint": "pnpm --recursive lint",
-    "install-all": "pnpm install",
     "postinstall": "pnpm prisma:generate",
     "clean": "node scripts/clean.mjs",
     "clean:all": "node scripts/clean.mjs",

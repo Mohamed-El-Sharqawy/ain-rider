@@ -51,7 +51,7 @@ export function transformUser(dto: UserDTO): User {
     fullName: `${dto.firstName} ${dto.lastName}`,
     role: dto.role,
     status: dto.status,
-    profileImage: dto.profileImage,
+    profileImage: dto.profileImage ?? undefined,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };

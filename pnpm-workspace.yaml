@@ -1,9 +1,9 @@
 packages:
-  - backend
-  - backend/apps/**
-  - backend/packages/**
-  - dashboard
-  - mobile
+  - apps/backend
+  - apps/backend/apps/*/*
+  - apps/backend/packages/*
+  - apps/dashboard
+  - apps/mobile
 
 onlyBuiltDependencies:
   - '@nestjs/core'
