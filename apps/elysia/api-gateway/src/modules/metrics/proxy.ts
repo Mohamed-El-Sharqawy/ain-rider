@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { fetchInternal } from '@ain-rider/internal-api';
+import { authGuard } from '../auth/guard';
 
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:4000';
 const TRIP_SERVICE_URL = process.env.TRIP_SERVICE_URL || 'http://localhost:4001';
@@ -20,7 +21,13 @@ const SERVICE_MAP: Record<string, string> = {
 };
 
 export const metricsProxy = new Elysia()
-  .get('/:service/metrics', async ({ params, set }) => {
+  .use(authGuard)
+  .get('/:service/metrics', async ({ params, set, user }) => {
+    if (user?.role !== 'ADMIN') {
+      set.status = 403;
+      return { error: 'Admin access required' };
+    }
+
     const targetUrl = SERVICE_MAP[params.service];
     if (!targetUrl) {
       set.status = 404;

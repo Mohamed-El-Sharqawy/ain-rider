@@ -7,6 +7,14 @@ const isProduction = process.env.NODE_ENV === "production";
 const ACCESS_TOKEN_MAX_AGE = 15 * 60;
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60;
 const SAME_SITE = isProduction ? "strict" : "lax";
+const MAX_FILES_PER_UPLOAD = 5;
+
+function countMultipartFiles(contentType: string | null, body: ArrayBuffer): number {
+  if (!contentType || !contentType.includes("multipart/form-data")) return 1;
+  const text = new TextDecoder().decode(body);
+  const matches = text.match(/Content-Disposition:\s*form-data;.*filename=/gi);
+  return matches ? matches.length : 0;
+}
 
 const isMobileClient = (headers: Headers): boolean => {
   return headers.get("x-client-type") === "mobile";
@@ -271,6 +279,16 @@ export const auth = new Elysia({ prefix: "/auth" })
 
     return res.json();
   })
+  .get("/ws-token", async ({ cookie: { accessToken }, set }) => {
+    // Return the access token for WebSocket authentication
+    // Dashboard uses http-only cookies, so we need to expose the token for WS
+    if (!accessToken?.value) {
+      throw status(401, "Not authenticated");
+    }
+
+    // Return the current access token for WebSocket connection
+    return { token: accessToken.value as string };
+  })
   .post(
     "/admin/create-user",
     async ({ body, cookie: { accessToken }, set }) => {
@@ -375,6 +393,12 @@ export const auth = new Elysia({ prefix: "/auth" })
 
       const contentType = request.headers.get("content-type");
       const body = await request.arrayBuffer();
+      if (body.byteLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+      if (countMultipartFiles(contentType, body) > MAX_FILES_PER_UPLOAD) {
+        throw status(400, `Too many files. Maximum ${MAX_FILES_PER_UPLOAD} files per upload.`);
+      }
 
       const res = await AuthProxyService.proxyRiderIdentityUpload(token, contentType || 'multipart/form-data', body);
       if (!res.ok) {
@@ -409,13 +433,19 @@ export const auth = new Elysia({ prefix: "/auth" })
       // Forward raw request with body
       const contentType = request.headers.get("content-type");
       const body = await request.arrayBuffer();
-      
+      if (body.byteLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+      if (countMultipartFiles(contentType, body) > MAX_FILES_PER_UPLOAD) {
+        throw status(400, `Too many files. Maximum ${MAX_FILES_PER_UPLOAD} files per upload.`);
+      }
+
       console.log(`[Gateway] Forwarding profile image upload, Content-Type: ${contentType}, Body size: ${body.byteLength}`);
-      
+
       const res = await AuthProxyService.proxyRiderProfileImage(token, contentType || 'multipart/form-data', body);
-      
+
       console.log(`[Gateway] Auth service response: ${res.status}`);
-      
+
       if (!res.ok) {
         try {
           const errorBody = await res.json();
@@ -620,6 +650,12 @@ export const auth = new Elysia({ prefix: "/auth" })
       }
 
       const rawBody = await request.arrayBuffer();
+      if (rawBody.byteLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+      if (countMultipartFiles(request.headers.get("content-type"), rawBody) > MAX_FILES_PER_UPLOAD) {
+        throw status(400, `Too many files. Maximum ${MAX_FILES_PER_UPLOAD} files per upload.`);
+      }
       const contentType = request.headers.get("content-type");
 
       console.log('[Gateway] Forwarding driver identity upload, Content-Type:', contentType, 'Body size:', rawBody.byteLength);
@@ -669,6 +705,12 @@ export const auth = new Elysia({ prefix: "/auth" })
       }
 
       const rawBody = await request.arrayBuffer();
+      if (rawBody.byteLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+      if (countMultipartFiles(request.headers.get("content-type"), rawBody) > MAX_FILES_PER_UPLOAD) {
+        throw status(400, `Too many files. Maximum ${MAX_FILES_PER_UPLOAD} files per upload.`);
+      }
       const contentType = request.headers.get("content-type");
 
       console.log('[Gateway] Forwarding driver driving-license upload, Content-Type:', contentType, 'Body size:', rawBody.byteLength);
@@ -718,6 +760,12 @@ export const auth = new Elysia({ prefix: "/auth" })
       }
 
       const rawBody = await request.arrayBuffer();
+      if (rawBody.byteLength > 10 * 1024 * 1024) {
+        throw status(413, "Request too large. Maximum total size is 10MB");
+      }
+      if (countMultipartFiles(request.headers.get("content-type"), rawBody) > MAX_FILES_PER_UPLOAD) {
+        throw status(400, `Too many files. Maximum ${MAX_FILES_PER_UPLOAD} files per upload.`);
+      }
       const contentType = request.headers.get("content-type");
 
       console.log('[Gateway] Forwarding driver vehicle registration, Content-Type:', contentType, 'Body size:', rawBody.byteLength);

@@ -23,7 +23,6 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     this._connection = await createNatsConnection({
-      // url: process.env.NATS_URL || 'nats://localhost:4222',
       servers: process.env.NATS_SERVERS?.split(',') || ['nats://localhost:4222'],
       name: 'admin-service',
     });
@@ -33,8 +32,7 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
     this._jsPublisher = new JetStreamPublisher(this._connection, 'admin-service');
     console.log('[NATS] admin-service connected');
 
-    // Start user-event subscriptions now that consumer is ready.
-    this.userSync.startSubscriptions(this._consumer).catch((err) =>
+    this.userSync.startSubscriptions(this._connection).catch((err) =>
       console.error('[NATS] Failed to start user sync subscriptions:', err),
     );
   }
@@ -42,12 +40,13 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
   async onModuleDestroy() {
     if (this.isShuttingDown) return;
     this.isShuttingDown = true;
-    
+
+    await this.userSync.onModuleDestroy();
+
     console.log('[NATS] Graceful shutdown initiated...');
-    
-    // Wait briefly for in-flight messages
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     if (this._connection) {
       try {
         await this._connection.drain();
@@ -56,7 +55,7 @@ export class NatsService implements OnModuleInit, OnModuleDestroy {
         console.error('[NATS] Error draining connection:', err);
       }
     }
-    
+
     console.log('[NATS] Graceful shutdown complete');
   }
 

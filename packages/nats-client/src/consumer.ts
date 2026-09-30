@@ -17,6 +17,10 @@ export interface ConsumerOptions {
 
 export type MessageHandler<T = any> = (data: T, msg: JsMsg) => Promise<void>;
 
+/**
+ * @deprecated Use JetStreamConsumer from './jetstream/consumer' instead.
+ * This legacy consumer will be removed in a future version.
+ */
 export class NatsConsumer {
   private js: JetStreamClient;
 

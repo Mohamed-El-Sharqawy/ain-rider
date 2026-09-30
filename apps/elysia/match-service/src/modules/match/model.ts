@@ -19,10 +19,10 @@ export const MatchModel = {
   manualMatchBody: t.Object({
     tripId: t.String(),
     riderId: t.String(),
-    pickupLatitude: t.Number(),
-    pickupLongitude: t.Number(),
-    dropoffLatitude: t.Number(),
-    dropoffLongitude: t.Number(),
+    pickupLatitude: t.Number({ minimum: -90, maximum: 90 }),
+    pickupLongitude: t.Number({ minimum: -180, maximum: 180 }),
+    dropoffLatitude: t.Number({ minimum: -90, maximum: 90 }),
+    dropoffLongitude: t.Number({ minimum: -180, maximum: 180 }),
   }),
 } as const;
 

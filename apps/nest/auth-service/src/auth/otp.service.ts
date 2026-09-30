@@ -8,7 +8,6 @@ import {
   OtpProvider,
   DecodedOtpToken,
 } from "./otp-providers/otp-provider.interface";
-import { FirebaseProvider } from "./otp-providers/firebase.provider";
 import { ConsoleProvider } from "./otp-providers/console.provider";
 
 interface CircuitBreakerState {
@@ -39,7 +38,8 @@ export class OtpService implements OnModuleInit {
     if (providerName === "console") {
       this.provider = new ConsoleProvider();
     } else {
-      this.provider = new FirebaseProvider();
+      console.warn(`[OtpService] Unknown provider "${providerName}". Falling back to console provider.`);
+      this.provider = new ConsoleProvider();
     }
 
     if (!this.provider.isInitialized()) {
@@ -100,14 +100,9 @@ export class OtpService implements OnModuleInit {
         "[OtpService] Circuit breaker closed after successful request",
       );
       this.circuitBreaker.isOpen = false;
-      this.circuitBreaker.failures = 0;
-      this.circuitBreaker.halfOpenAttempts = 0;
-    } else if (this.circuitBreaker.failures >= this.CIRCUIT_BREAKER_THRESHOLD) {
-      this.circuitBreaker.isOpen = true;
-      console.error(
-        `[OtpService] Circuit breaker opened after ${this.circuitBreaker.failures} consecutive failures`,
-      );
     }
+    this.circuitBreaker.failures = 0;
+    this.circuitBreaker.halfOpenAttempts = 0;
   }
 
   private onFailure(error: any, _traceId: string): Promise<never> {

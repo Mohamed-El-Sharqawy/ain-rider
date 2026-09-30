@@ -31,7 +31,7 @@ export class NotificationsController {
   @Post()
   @ApiOperation({ summary: 'Create a notification' })
   create(@Body() body: CreateNotificationDto, @CurrentUser() user: CurrentUserPayload) {
-    return this.notificationsService.create({ ...body, createdBy: user.sub });
+    return this.notificationsService.create({ ...body, data: body.data as Record<string, unknown> | undefined, createdBy: user.sub });
   }
 
   @Get('user/:userId')
@@ -45,7 +45,7 @@ export class NotificationsController {
   @Post('push')
   @ApiOperation({ summary: 'Send a push notification' })
   sendPushNotification(@Body() body: SendPushDto) {
-    return this.notificationsService.sendPushNotification(body.userId, body.title, body.body, body.data);
+    return this.notificationsService.sendPushNotification(body.userId, body.title, body.body, body.data as Record<string, unknown> | undefined);
   }
 
   @Roles('ADMIN')

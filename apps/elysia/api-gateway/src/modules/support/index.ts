@@ -1,9 +1,12 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 import { jwt } from '@elysiajs/jwt';
 import { authGuard } from '../auth/guard';
 
 const ADMIN_SERVICE_URL = process.env.ADMIN_SERVICE_URL || 'http://localhost:4003';
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'dev-internal-secret-987654321';
+const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET;
+if (!INTERNAL_SECRET) {
+  throw new Error('[SupportProxy] FATAL: INTERNAL_SERVICE_SECRET environment variable is required. Refusing to start.');
+}
 
 async function buildInternalToken(internalJwt: any, user: any) {
   return internalJwt.sign({
@@ -52,12 +55,16 @@ export const support = new Elysia({ prefix: '/support' })
   )
 
   // GET /support/complaints - list user's own complaints
-  .get('/complaints', async ({ user, set, internalJwt }) => {
+  .get('/complaints', async ({ user, set, internalJwt, query }) => {
     const internalToken = await buildInternalToken(internalJwt, user);
+    const params = new URLSearchParams();
+    if (query.limit) params.set('limit', query.limit);
+    if (query.cursor) params.set('cursor', query.cursor);
+    const qs = params.toString();
     try {
       const { status, data } = await proxyToAdminService(
         'GET',
-        '/complaints/public',
+        `/complaints/public${qs ? `?${qs}` : ''}`,
         internalToken,
       );
       if (status >= 400) {
@@ -70,6 +77,11 @@ export const support = new Elysia({ prefix: '/support' })
       set.status = 500;
       return { success: false, error: { message: 'Failed to fetch complaints' } };
     }
+  }, {
+    query: t.Object({
+      limit: t.Optional(t.String()),
+      cursor: t.Optional(t.String()),
+    }),
   })
 
   // GET /support/complaints/:id - get single complaint
@@ -113,6 +125,15 @@ export const support = new Elysia({ prefix: '/support' })
       set.status = 500;
       return { success: false, error: { message: 'Failed to submit complaint' } };
     }
+  }, {
+    body: t.Object({
+      type: t.String({ minLength: 1 }),
+      subject: t.String({ minLength: 1 }),
+      description: t.String({ minLength: 1 }),
+      againstUserId: t.Optional(t.String()),
+      tripId: t.Optional(t.String()),
+      priority: t.Optional(t.String()),
+    }),
   })
 
   // POST /support/complaints/:id/comments - add comment
@@ -135,4 +156,9 @@ export const support = new Elysia({ prefix: '/support' })
       set.status = 500;
       return { success: false, error: { message: 'Failed to add comment' } };
     }
+  }, {
+    body: t.Object({
+      comment: t.String({ minLength: 1 }),
+      isInternal: t.Optional(t.Boolean()),
+    }),
   });

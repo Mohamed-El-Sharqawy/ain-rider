@@ -43,8 +43,13 @@ export const trips = new Elysia({ prefix: '/trips' })
   )
   .get(
     '/',
-    async ({ user, set }) => {
-      const res = await TripProxyService.getUserTrips(user.id, user.role);
+    async ({ user, query, set }) => {
+      const res = await TripProxyService.getUserTrips(
+        user.id,
+        user.role,
+        query.limit ? parseInt(query.limit) : undefined,
+        query.cursor,
+      );
       if (!res.ok) {
         try {
           const errorBody = await res.json();
@@ -56,6 +61,12 @@ export const trips = new Elysia({ prefix: '/trips' })
         }
       }
       return res.json();
+    },
+    {
+      query: t.Object({
+        limit: t.Optional(t.String()),
+        cursor: t.Optional(t.String()),
+      }),
     }
   )
   .get(

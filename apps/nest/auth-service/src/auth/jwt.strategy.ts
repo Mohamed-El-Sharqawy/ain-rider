@@ -10,8 +10,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private authService: AuthService,
     config: ConfigService,
   ) {
-    const secret = config.get<string>('JWT_SECRET') || 'change-me-in-production';
-    // console.log('[JwtStrategy] Initializing with secret:', secret.substring(0, 10) + '...', 'Full length:', secret.length);
+    const secret = config.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('[JwtStrategy] FATAL: JWT_SECRET environment variable is required. Refusing to start.');
+    }
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

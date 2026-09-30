@@ -1,3 +1,8 @@
+/// Migration strategy:
+/// - All schema changes must be backward-compatible (additive columns, nullable fields).
+/// - Renames require a two-step migration: add new column → backfill → drop old column.
+/// - Deprecated fields should be marked with a /// DEPRECATED comment and removed after a full release cycle.
+/// - Coordinate multi-service schema changes via NATS event versioning (new fields = new event version).
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -7,24 +12,134 @@ datasource db {
   provider = "postgresql"
 }
 
-// Shadow copy of users from auth-service, kept in sync via NATS USER_* events.
-// admin-service NEVER queries auth-service over HTTP — all user data comes from here.
+/// Mirrors UserRole from auth-service for local typed queries on shadow data.
+enum ShadowUserRole {
+  RIDER
+  DRIVER
+  ADMIN
+  SUPPORT
+}
+
+/// Mirrors UserStatus from auth-service plus DELETED for soft-delete tracking.
+enum ShadowUserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_DOCUMENTS
+  UNDER_REVIEW
+  REJECTED
+  DELETED
+}
+
+/// Admin-side vehicle verification status (distinct from auth-service DocumentStatus).
+enum VehicleStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  INACTIVE
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+/// Withdrawal lifecycle. Note: PROCESSED (not COMPLETED) is the terminal success state.
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSED
+  REJECTED
+}
+
+enum PromoType {
+  PERCENTAGE
+  FLAT
+}
+
+enum PromoStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum SOSPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ComplaintStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+/// Tracks the sync health of a shadow user record relative to auth-service.
+enum SyncStatus {
+  SYNCED
+  PENDING
+  FAILED
+}
+
+/// Shadow copy of users from auth-service, kept in sync via NATS USER_* events.
+/// admin-service NEVER queries auth-service over HTTP for user data — all reads come from this table.
+/// Falls back to HTTP only when a user hasn't been synced yet (findById).
 model UserShadow {
-  id           String   @id
-  email        String   @unique
+  id           String           @id
+  email        String           @unique
   phoneNumber  String
   firstName    String
   lastName     String
-  role         String
-  status       String   @default("ACTIVE")
+  role         ShadowUserRole
+  status       ShadowUserStatus @default(ACTIVE)
   profileImage String?
-  syncedAt     DateTime @default(now())
+  /// Sync health indicator — FAILED records should be retried via consumer error handling.
+  syncStatus   SyncStatus       @default(SYNCED)
+  /// Last sync error message, populated when syncStatus = FAILED.
+  syncError    String?
+  syncedAt     DateTime         @default(now())
   createdAt    DateTime
   updatedAt    DateTime
 
+  @@index([role])
+  @@index([status])
+  @@index([role, status])
+  @@index([phoneNumber])
+  @@index([firstName])
+  @@index([lastName])
   @@map("shadow_users")
 }
 
+/// Vehicle type/category defining fare structure (e.g., sedan, SUV, van).
 model VehicleType {
   id            String         @id @default(uuid())
   name          String
@@ -44,6 +159,7 @@ model VehicleType {
   @@map("vehicle_types")
 }
 
+/// Vehicle manufacturer (e.g., Toyota, Hyundai) for dropdown selections.
 model VehicleMake {
   id        String         @id @default(uuid())
   name      String         @unique
@@ -55,6 +171,7 @@ model VehicleMake {
   @@map("vehicle_makes")
 }
 
+/// Specific vehicle model (e.g., "Camry") linked to a make and optional vehicle type.
 model VehicleModel {
   id            String   @id @default(uuid())
   makeId        String
@@ -71,27 +188,30 @@ model VehicleModel {
   @@map("vehicle_models")
 }
 
+/// Admin-managed vehicle record with full registration and insurance details.
+/// Distinct from auth-service Vehicle which is driver-uploaded during onboarding.
 model Vehicle {
-  id                 String      @id @default(uuid())
+  id                 String        @id @default(uuid())
   driverId           String
   vehicleTypeId      String
   make               String
   model              String
   year               Int
   color              String
-  licensePlate       String      @unique
-  registrationNumber String      @unique
+  licensePlate       String        @unique
+  registrationNumber String        @unique
   insuranceNumber    String
   insuranceExpiry    DateTime
-  status             String      @default("ACTIVE")
+  status             VehicleStatus @default(ACTIVE)
   imageUrl           String?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-  vehicleType        VehicleType @relation(fields: [vehicleTypeId], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  vehicleType        VehicleType   @relation(fields: [vehicleTypeId], references: [id])
 
   @@map("vehicles")
 }
 
+/// Driver wallet for earnings management. All amounts in IQD.
 model Wallet {
   id           String              @id @default(uuid())
   userId       String              @unique
@@ -105,57 +225,64 @@ model Wallet {
   @@map("wallets")
 }
 
+/// Immutable ledger entry for wallet balance changes.
+/// balanceBefore + amount (CREDIT) = balanceAfter; balanceBefore - amount (DEBIT) = balanceAfter.
 model WalletTransaction {
-  id            String   @id @default(uuid())
+  id            String                  @id @default(uuid())
   walletId      String
   userId        String
-  type          String
+  type          WalletTransactionType
   amount        Float
   balanceBefore Float
   balanceAfter  Float
-  status        String   @default("COMPLETED")
+  status        WalletTransactionStatus @default(COMPLETED)
   description   String
+  /// Links to the source entity (tripId, withdrawalId, etc.).
   referenceId   String?
-  createdAt     DateTime @default(now())
-  wallet        Wallet   @relation(fields: [walletId], references: [id])
+  createdAt     DateTime                @default(now())
+  wallet        Wallet                  @relation(fields: [walletId], references: [id])
 
   @@index([userId])
   @@index([walletId])
+  @@index([walletId, type])
+  @@index([status, createdAt])
   @@map("wallet_transactions")
 }
 
+/// Driver withdrawal request to bank account. Processed by admins.
 model Withdrawal {
-  id                String    @id @default(uuid())
+  id                String           @id @default(uuid())
   userId            String
   walletId          String
   amount            Float
-  status            String    @default("PENDING")
+  status            WithdrawalStatus @default(PENDING)
   bankAccountNumber String
   bankName          String
   accountHolderName String
-  requestedAt       DateTime  @default(now())
+  requestedAt       DateTime         @default(now())
   processedAt       DateTime?
   processedBy       String?
   rejectionReason   String?
   transactionId     String?
-  wallet            Wallet    @relation(fields: [walletId], references: [id])
+  wallet            Wallet           @relation(fields: [walletId], references: [id])
 
   @@index([userId])
   @@index([status])
   @@map("withdrawals")
 }
 
+/// Promotional code with usage limits and validity window.
 model Promo {
   id                String       @id @default(uuid())
   code              String       @unique
-  type              String
+  type              PromoType
   value             Float
   maxDiscount       Float?
   minTripAmount     Float?
   maxUsagePerUser   Int          @default(1)
   totalUsageLimit   Int
   currentUsageCount Int          @default(0)
-  status            String       @default("ACTIVE")
+  status            PromoStatus  @default(ACTIVE)
   validFrom         DateTime
   validUntil        DateTime
   description       String
@@ -169,6 +296,7 @@ model Promo {
   @@map("promos")
 }
 
+/// Tracks individual promo code redemptions per user per trip.
 model PromoUsage {
   id             String   @id @default(uuid())
   promoId        String
@@ -179,15 +307,17 @@ model PromoUsage {
   promo          Promo    @relation(fields: [promoId], references: [id])
 
   @@index([userId])
+  @@index([promoId, userId])
   @@map("promo_usages")
 }
 
+/// Notification record. Supports broadcast (userId=null) and targeted delivery.
 model Notification {
-  id          String             @id @default(uuid())
+  id          String               @id @default(uuid())
   userId      String?
   type        String
-  priority    String             @default("MEDIUM")
-  status      String             @default("PENDING")
+  priority    NotificationPriority @default(MEDIUM)
+  status      NotificationStatus   @default(PENDING)
   title       String
   body        String
   data        Json?
@@ -197,7 +327,7 @@ model Notification {
   deliveredAt DateTime?
   readAt      DateTime?
   createdBy   String
-  createdAt   DateTime           @default(now())
+  createdAt   DateTime             @default(now())
   reads       NotificationRead[]
 
   @@index([userId])
@@ -205,7 +335,7 @@ model Notification {
   @@map("notifications")
 }
 
-// Tracks who has read a notification — supports admin reads without affecting the target user's read status
+/// Tracks who has read a notification — supports admin reads without affecting the target user's read status.
 model NotificationRead {
   id             String       @id @default(uuid())
   notificationId String
@@ -218,29 +348,32 @@ model NotificationRead {
   @@map("notification_reads")
 }
 
+/// Admin-side SOS alert with response tracking and emergency contact details.
 model SOS {
-  id                String    @id @default(uuid())
+  id                String      @id @default(uuid())
   userId            String
   tripId            String?
-  status            String    @default("ACTIVE")
-  priority          String    @default("CRITICAL")
+  status            String      @default("ACTIVE")
+  priority          SOSPriority @default(CRITICAL)
   latitude          Float
   longitude         Float
   address           String
   reason            String?
   notes             String?
+  /// JSON array of emergency contact objects { name, phone, relation }.
   emergencyContacts Json
   respondedBy       String?
   responseNotes     String?
-  createdAt         DateTime  @default(now())
+  createdAt         DateTime    @default(now())
   resolvedAt        DateTime?
-  updatedAt         DateTime  @updatedAt
+  updatedAt         DateTime    @updatedAt
 
   @@index([userId])
   @@index([status])
   @@map("sos_alerts")
 }
 
+/// User-submitted complaint against another user, trip, or platform issue.
 model Complaint {
   id              String             @id @default(uuid())
   complainantId   String
@@ -248,7 +381,7 @@ model Complaint {
   againstUserId   String?
   tripId          String?
   type            String
-  status          String             @default("PENDING")
+  status          ComplaintStatus    @default(PENDING)
   priority        String             @default("MEDIUM")
   subject         String
   description     String
@@ -266,6 +399,7 @@ model Complaint {
   @@map("complaints")
 }
 
+/// Internal or public comment on a complaint thread. isInternal=true for admin-only notes.
 model ComplaintComment {
   id          String    @id @default(uuid())
   complaintId String
@@ -279,23 +413,33 @@ model ComplaintComment {
   @@map("complaint_comments")
 }
 
+/// Defines the value type for runtime parsing/validation of the setting value field.
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+/// Platform-wide configuration key-value store with type hints for safe parsing.
 model Setting {
-  id          String   @id @default(uuid())
-  key         String   @unique
+  id          String      @id @default(uuid())
+  key         String      @unique
   value       String
-  type        String
+  type        SettingType @default(STRING)
   category    String
   description String
-  isPublic    Boolean  @default(false)
+  isPublic    Boolean     @default(false)
   updatedBy   String
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime    @updatedAt
 
   @@index([category])
   @@map("settings")
 }
 
+/// Scheduled ride booking for future pickup.
 model Booking {
-  id             String    @id @default(uuid())
+  id             String        @id @default(uuid())
   riderId        String
   driverId       String?
   pickupAddress  String
@@ -305,24 +449,27 @@ model Booking {
   dropoffLat     Float
   dropoffLng     Float
   scheduledAt    DateTime?
-  status         String    @default("PENDING")
+  status         BookingStatus @default(PENDING)
   fare           Float?
   paymentMethod  String
   notes          String?
   createdBy      String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@index([riderId])
   @@index([status])
+  @@index([scheduledAt])
   @@map("bookings")
 }
 
+/// Immutable audit trail for all admin actions. Used for compliance and debugging.
 model AdminAuditLog {
   id            String   @id @default(uuid())
   adminId       String
   action        String
-  targetType    String // e.g., "USER", "TRIP", "SETTING"
+  /// Entity type being acted upon (e.g., "USER", "TRIP", "SETTING").
+  targetType    String
   targetId      String
   previousState Json?
   newState      Json?

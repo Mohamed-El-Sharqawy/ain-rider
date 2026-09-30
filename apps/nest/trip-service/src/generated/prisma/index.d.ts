@@ -15,14 +15,74 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
 /**
  * Model Trip
- * 
+ * Core trip record. Driver/vehicle info is intentionally duplicated at assignment time
+ * for historical accuracy — even if the driver later updates their profile, past trips
+ * retain the name/phone/vehicle at the time of the trip.
  */
 export type Trip = $Result.DefaultSelection<Prisma.$TripPayload>
 /**
  * Model SOS
- * 
+ * Emergency SOS alert triggered by riders or drivers during a trip or standalone.
  */
 export type SOS = $Result.DefaultSelection<Prisma.$SOSPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const TripStatus: {
+  REQUESTED: 'REQUESTED',
+  ASSIGNED: 'ASSIGNED',
+  MATCHED: 'MATCHED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type TripStatus = (typeof TripStatus)[keyof typeof TripStatus]
+
+
+export const TripPaymentStatus: {
+  PENDING: 'PENDING',
+  COLLECTED: 'COLLECTED',
+  FAILED: 'FAILED'
+};
+
+export type TripPaymentStatus = (typeof TripPaymentStatus)[keyof typeof TripPaymentStatus]
+
+
+export const SOSStatus: {
+  ACTIVE: 'ACTIVE',
+  RESOLVED: 'RESOLVED'
+};
+
+export type SOSStatus = (typeof SOSStatus)[keyof typeof SOSStatus]
+
+
+export const SOSUserType: {
+  RIDER: 'RIDER',
+  DRIVER: 'DRIVER'
+};
+
+export type SOSUserType = (typeof SOSUserType)[keyof typeof SOSUserType]
+
+}
+
+export type TripStatus = $Enums.TripStatus
+
+export const TripStatus: typeof $Enums.TripStatus
+
+export type TripPaymentStatus = $Enums.TripPaymentStatus
+
+export const TripPaymentStatus: typeof $Enums.TripPaymentStatus
+
+export type SOSStatus = $Enums.SOSStatus
+
+export const SOSStatus: typeof $Enums.SOSStatus
+
+export type SOSUserType = $Enums.SOSUserType
+
+export const SOSUserType: typeof $Enums.SOSUserType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1001,7 +1061,7 @@ export namespace Prisma {
     id: string | null
     riderId: string | null
     driverId: string | null
-    status: string | null
+    status: $Enums.TripStatus | null
     pickupLat: number | null
     pickupLng: number | null
     pickupAddress: string | null
@@ -1011,7 +1071,7 @@ export namespace Prisma {
     estimatedFare: number | null
     actualFare: number | null
     paymentMethod: string | null
-    paymentStatus: string | null
+    paymentStatus: $Enums.TripPaymentStatus | null
     promoCode: string | null
     promoDiscount: number | null
     distance: number | null
@@ -1037,7 +1097,7 @@ export namespace Prisma {
     id: string | null
     riderId: string | null
     driverId: string | null
-    status: string | null
+    status: $Enums.TripStatus | null
     pickupLat: number | null
     pickupLng: number | null
     pickupAddress: string | null
@@ -1047,7 +1107,7 @@ export namespace Prisma {
     estimatedFare: number | null
     actualFare: number | null
     paymentMethod: string | null
-    paymentStatus: string | null
+    paymentStatus: $Enums.TripPaymentStatus | null
     promoCode: string | null
     promoDiscount: number | null
     distance: number | null
@@ -1334,7 +1394,7 @@ export namespace Prisma {
     id: string
     riderId: string
     driverId: string | null
-    status: string
+    status: $Enums.TripStatus
     pickupLat: number
     pickupLng: number
     pickupAddress: string
@@ -1344,7 +1404,7 @@ export namespace Prisma {
     estimatedFare: number
     actualFare: number | null
     paymentMethod: string
-    paymentStatus: string
+    paymentStatus: $Enums.TripPaymentStatus
     promoCode: string | null
     promoDiscount: number
     distance: number | null
@@ -1538,7 +1598,7 @@ export namespace Prisma {
       id: string
       riderId: string
       driverId: string | null
-      status: string
+      status: $Enums.TripStatus
       pickupLat: number
       pickupLng: number
       pickupAddress: string
@@ -1548,7 +1608,7 @@ export namespace Prisma {
       estimatedFare: number
       actualFare: number | null
       paymentMethod: string
-      paymentStatus: string
+      paymentStatus: $Enums.TripPaymentStatus
       promoCode: string | null
       promoDiscount: number
       distance: number | null
@@ -1561,10 +1621,25 @@ export namespace Prisma {
       cancellationReason: string | null
       cancelledBy: string | null
       driverRating: number | null
+      /**
+       * Driver name at the time of assignment (snapshot, not a live FK).
+       */
       driverName: string | null
+      /**
+       * Driver phone at the time of assignment (snapshot, not a live FK).
+       */
       driverPhone: string | null
+      /**
+       * Vehicle make at the time of assignment (snapshot, not a live FK).
+       */
       vehicleMake: string | null
+      /**
+       * Vehicle model at the time of assignment (snapshot, not a live FK).
+       */
       vehicleModel: string | null
+      /**
+       * Vehicle plate at the time of assignment (snapshot, not a live FK).
+       */
       vehiclePlate: string | null
       riderRating: number | null
       updatedAt: Date
@@ -1994,7 +2069,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Trip", 'String'>
     readonly riderId: FieldRef<"Trip", 'String'>
     readonly driverId: FieldRef<"Trip", 'String'>
-    readonly status: FieldRef<"Trip", 'String'>
+    readonly status: FieldRef<"Trip", 'TripStatus'>
     readonly pickupLat: FieldRef<"Trip", 'Float'>
     readonly pickupLng: FieldRef<"Trip", 'Float'>
     readonly pickupAddress: FieldRef<"Trip", 'String'>
@@ -2004,7 +2079,7 @@ export namespace Prisma {
     readonly estimatedFare: FieldRef<"Trip", 'Float'>
     readonly actualFare: FieldRef<"Trip", 'Float'>
     readonly paymentMethod: FieldRef<"Trip", 'String'>
-    readonly paymentStatus: FieldRef<"Trip", 'String'>
+    readonly paymentStatus: FieldRef<"Trip", 'TripPaymentStatus'>
     readonly promoCode: FieldRef<"Trip", 'String'>
     readonly promoDiscount: FieldRef<"Trip", 'Float'>
     readonly distance: FieldRef<"Trip", 'Float'>
@@ -2408,24 +2483,24 @@ export namespace Prisma {
   }
 
   export type SOSAvgAggregateOutputType = {
-    lat: number | null
-    lng: number | null
+    latitude: number | null
+    longitude: number | null
   }
 
   export type SOSSumAggregateOutputType = {
-    lat: number | null
-    lng: number | null
+    latitude: number | null
+    longitude: number | null
   }
 
   export type SOSMinAggregateOutputType = {
     id: string | null
     tripId: string | null
     userId: string | null
-    userType: string | null
-    lat: number | null
-    lng: number | null
+    userType: $Enums.SOSUserType | null
+    latitude: number | null
+    longitude: number | null
     reason: string | null
-    status: string | null
+    status: $Enums.SOSStatus | null
     resolution: string | null
     resolvedBy: string | null
     resolvedAt: Date | null
@@ -2437,11 +2512,11 @@ export namespace Prisma {
     id: string | null
     tripId: string | null
     userId: string | null
-    userType: string | null
-    lat: number | null
-    lng: number | null
+    userType: $Enums.SOSUserType | null
+    latitude: number | null
+    longitude: number | null
     reason: string | null
-    status: string | null
+    status: $Enums.SOSStatus | null
     resolution: string | null
     resolvedBy: string | null
     resolvedAt: Date | null
@@ -2454,8 +2529,8 @@ export namespace Prisma {
     tripId: number
     userId: number
     userType: number
-    lat: number
-    lng: number
+    latitude: number
+    longitude: number
     reason: number
     status: number
     resolution: number
@@ -2468,13 +2543,13 @@ export namespace Prisma {
 
 
   export type SOSAvgAggregateInputType = {
-    lat?: true
-    lng?: true
+    latitude?: true
+    longitude?: true
   }
 
   export type SOSSumAggregateInputType = {
-    lat?: true
-    lng?: true
+    latitude?: true
+    longitude?: true
   }
 
   export type SOSMinAggregateInputType = {
@@ -2482,8 +2557,8 @@ export namespace Prisma {
     tripId?: true
     userId?: true
     userType?: true
-    lat?: true
-    lng?: true
+    latitude?: true
+    longitude?: true
     reason?: true
     status?: true
     resolution?: true
@@ -2498,8 +2573,8 @@ export namespace Prisma {
     tripId?: true
     userId?: true
     userType?: true
-    lat?: true
-    lng?: true
+    latitude?: true
+    longitude?: true
     reason?: true
     status?: true
     resolution?: true
@@ -2514,8 +2589,8 @@ export namespace Prisma {
     tripId?: true
     userId?: true
     userType?: true
-    lat?: true
-    lng?: true
+    latitude?: true
+    longitude?: true
     reason?: true
     status?: true
     resolution?: true
@@ -2616,11 +2691,11 @@ export namespace Prisma {
     id: string
     tripId: string | null
     userId: string
-    userType: string
-    lat: number
-    lng: number
+    userType: $Enums.SOSUserType
+    latitude: number
+    longitude: number
     reason: string | null
-    status: string
+    status: $Enums.SOSStatus
     resolution: string | null
     resolvedBy: string | null
     resolvedAt: Date | null
@@ -2652,8 +2727,8 @@ export namespace Prisma {
     tripId?: boolean
     userId?: boolean
     userType?: boolean
-    lat?: boolean
-    lng?: boolean
+    latitude?: boolean
+    longitude?: boolean
     reason?: boolean
     status?: boolean
     resolution?: boolean
@@ -2668,8 +2743,8 @@ export namespace Prisma {
     tripId?: boolean
     userId?: boolean
     userType?: boolean
-    lat?: boolean
-    lng?: boolean
+    latitude?: boolean
+    longitude?: boolean
     reason?: boolean
     status?: boolean
     resolution?: boolean
@@ -2684,8 +2759,8 @@ export namespace Prisma {
     tripId?: boolean
     userId?: boolean
     userType?: boolean
-    lat?: boolean
-    lng?: boolean
+    latitude?: boolean
+    longitude?: boolean
     reason?: boolean
     status?: boolean
     resolution?: boolean
@@ -2700,8 +2775,8 @@ export namespace Prisma {
     tripId?: boolean
     userId?: boolean
     userType?: boolean
-    lat?: boolean
-    lng?: boolean
+    latitude?: boolean
+    longitude?: boolean
     reason?: boolean
     status?: boolean
     resolution?: boolean
@@ -2711,7 +2786,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type SOSOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tripId" | "userId" | "userType" | "lat" | "lng" | "reason" | "status" | "resolution" | "resolvedBy" | "resolvedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["sOS"]>
+  export type SOSOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tripId" | "userId" | "userType" | "latitude" | "longitude" | "reason" | "status" | "resolution" | "resolvedBy" | "resolvedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["sOS"]>
 
   export type $SOSPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "SOS"
@@ -2720,11 +2795,11 @@ export namespace Prisma {
       id: string
       tripId: string | null
       userId: string
-      userType: string
-      lat: number
-      lng: number
+      userType: $Enums.SOSUserType
+      latitude: number
+      longitude: number
       reason: string | null
-      status: string
+      status: $Enums.SOSStatus
       resolution: string | null
       resolvedBy: string | null
       resolvedAt: Date | null
@@ -3156,11 +3231,11 @@ export namespace Prisma {
     readonly id: FieldRef<"SOS", 'String'>
     readonly tripId: FieldRef<"SOS", 'String'>
     readonly userId: FieldRef<"SOS", 'String'>
-    readonly userType: FieldRef<"SOS", 'String'>
-    readonly lat: FieldRef<"SOS", 'Float'>
-    readonly lng: FieldRef<"SOS", 'Float'>
+    readonly userType: FieldRef<"SOS", 'SOSUserType'>
+    readonly latitude: FieldRef<"SOS", 'Float'>
+    readonly longitude: FieldRef<"SOS", 'Float'>
     readonly reason: FieldRef<"SOS", 'String'>
-    readonly status: FieldRef<"SOS", 'String'>
+    readonly status: FieldRef<"SOS", 'SOSStatus'>
     readonly resolution: FieldRef<"SOS", 'String'>
     readonly resolvedBy: FieldRef<"SOS", 'String'>
     readonly resolvedAt: FieldRef<"SOS", 'DateTime'>
@@ -3595,8 +3670,8 @@ export namespace Prisma {
     tripId: 'tripId',
     userId: 'userId',
     userType: 'userType',
-    lat: 'lat',
-    lng: 'lng',
+    latitude: 'latitude',
+    longitude: 'longitude',
     reason: 'reason',
     status: 'status',
     resolution: 'resolution',
@@ -3653,6 +3728,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TripStatus'
+   */
+  export type EnumTripStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TripStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'TripStatus[]'
+   */
+  export type ListEnumTripStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TripStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -3663,6 +3752,20 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TripPaymentStatus'
+   */
+  export type EnumTripPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TripPaymentStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'TripPaymentStatus[]'
+   */
+  export type ListEnumTripPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TripPaymentStatus[]'>
     
 
 
@@ -3692,6 +3795,34 @@ export namespace Prisma {
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
+
+
+  /**
+   * Reference to a field of type 'SOSUserType'
+   */
+  export type EnumSOSUserTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SOSUserType'>
+    
+
+
+  /**
+   * Reference to a field of type 'SOSUserType[]'
+   */
+  export type ListEnumSOSUserTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SOSUserType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'SOSStatus'
+   */
+  export type EnumSOSStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SOSStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'SOSStatus[]'
+   */
+  export type ListEnumSOSStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SOSStatus[]'>
+    
   /**
    * Deep Input Types
    */
@@ -3704,7 +3835,7 @@ export namespace Prisma {
     id?: StringFilter<"Trip"> | string
     riderId?: StringFilter<"Trip"> | string
     driverId?: StringNullableFilter<"Trip"> | string | null
-    status?: StringFilter<"Trip"> | string
+    status?: EnumTripStatusFilter<"Trip"> | $Enums.TripStatus
     pickupLat?: FloatFilter<"Trip"> | number
     pickupLng?: FloatFilter<"Trip"> | number
     pickupAddress?: StringFilter<"Trip"> | string
@@ -3714,7 +3845,7 @@ export namespace Prisma {
     estimatedFare?: FloatFilter<"Trip"> | number
     actualFare?: FloatNullableFilter<"Trip"> | number | null
     paymentMethod?: StringFilter<"Trip"> | string
-    paymentStatus?: StringFilter<"Trip"> | string
+    paymentStatus?: EnumTripPaymentStatusFilter<"Trip"> | $Enums.TripPaymentStatus
     promoCode?: StringNullableFilter<"Trip"> | string | null
     promoDiscount?: FloatFilter<"Trip"> | number
     distance?: FloatNullableFilter<"Trip"> | number | null
@@ -3779,7 +3910,7 @@ export namespace Prisma {
     NOT?: TripWhereInput | TripWhereInput[]
     riderId?: StringFilter<"Trip"> | string
     driverId?: StringNullableFilter<"Trip"> | string | null
-    status?: StringFilter<"Trip"> | string
+    status?: EnumTripStatusFilter<"Trip"> | $Enums.TripStatus
     pickupLat?: FloatFilter<"Trip"> | number
     pickupLng?: FloatFilter<"Trip"> | number
     pickupAddress?: StringFilter<"Trip"> | string
@@ -3789,7 +3920,7 @@ export namespace Prisma {
     estimatedFare?: FloatFilter<"Trip"> | number
     actualFare?: FloatNullableFilter<"Trip"> | number | null
     paymentMethod?: StringFilter<"Trip"> | string
-    paymentStatus?: StringFilter<"Trip"> | string
+    paymentStatus?: EnumTripPaymentStatusFilter<"Trip"> | $Enums.TripPaymentStatus
     promoCode?: StringNullableFilter<"Trip"> | string | null
     promoDiscount?: FloatFilter<"Trip"> | number
     distance?: FloatNullableFilter<"Trip"> | number | null
@@ -3859,7 +3990,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Trip"> | string
     riderId?: StringWithAggregatesFilter<"Trip"> | string
     driverId?: StringNullableWithAggregatesFilter<"Trip"> | string | null
-    status?: StringWithAggregatesFilter<"Trip"> | string
+    status?: EnumTripStatusWithAggregatesFilter<"Trip"> | $Enums.TripStatus
     pickupLat?: FloatWithAggregatesFilter<"Trip"> | number
     pickupLng?: FloatWithAggregatesFilter<"Trip"> | number
     pickupAddress?: StringWithAggregatesFilter<"Trip"> | string
@@ -3869,7 +4000,7 @@ export namespace Prisma {
     estimatedFare?: FloatWithAggregatesFilter<"Trip"> | number
     actualFare?: FloatNullableWithAggregatesFilter<"Trip"> | number | null
     paymentMethod?: StringWithAggregatesFilter<"Trip"> | string
-    paymentStatus?: StringWithAggregatesFilter<"Trip"> | string
+    paymentStatus?: EnumTripPaymentStatusWithAggregatesFilter<"Trip"> | $Enums.TripPaymentStatus
     promoCode?: StringNullableWithAggregatesFilter<"Trip"> | string | null
     promoDiscount?: FloatWithAggregatesFilter<"Trip"> | number
     distance?: FloatNullableWithAggregatesFilter<"Trip"> | number | null
@@ -3898,11 +4029,11 @@ export namespace Prisma {
     id?: StringFilter<"SOS"> | string
     tripId?: StringNullableFilter<"SOS"> | string | null
     userId?: StringFilter<"SOS"> | string
-    userType?: StringFilter<"SOS"> | string
-    lat?: FloatFilter<"SOS"> | number
-    lng?: FloatFilter<"SOS"> | number
+    userType?: EnumSOSUserTypeFilter<"SOS"> | $Enums.SOSUserType
+    latitude?: FloatFilter<"SOS"> | number
+    longitude?: FloatFilter<"SOS"> | number
     reason?: StringNullableFilter<"SOS"> | string | null
-    status?: StringFilter<"SOS"> | string
+    status?: EnumSOSStatusFilter<"SOS"> | $Enums.SOSStatus
     resolution?: StringNullableFilter<"SOS"> | string | null
     resolvedBy?: StringNullableFilter<"SOS"> | string | null
     resolvedAt?: DateTimeNullableFilter<"SOS"> | Date | string | null
@@ -3915,8 +4046,8 @@ export namespace Prisma {
     tripId?: SortOrderInput | SortOrder
     userId?: SortOrder
     userType?: SortOrder
-    lat?: SortOrder
-    lng?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     reason?: SortOrderInput | SortOrder
     status?: SortOrder
     resolution?: SortOrderInput | SortOrder
@@ -3933,11 +4064,11 @@ export namespace Prisma {
     NOT?: SOSWhereInput | SOSWhereInput[]
     tripId?: StringNullableFilter<"SOS"> | string | null
     userId?: StringFilter<"SOS"> | string
-    userType?: StringFilter<"SOS"> | string
-    lat?: FloatFilter<"SOS"> | number
-    lng?: FloatFilter<"SOS"> | number
+    userType?: EnumSOSUserTypeFilter<"SOS"> | $Enums.SOSUserType
+    latitude?: FloatFilter<"SOS"> | number
+    longitude?: FloatFilter<"SOS"> | number
     reason?: StringNullableFilter<"SOS"> | string | null
-    status?: StringFilter<"SOS"> | string
+    status?: EnumSOSStatusFilter<"SOS"> | $Enums.SOSStatus
     resolution?: StringNullableFilter<"SOS"> | string | null
     resolvedBy?: StringNullableFilter<"SOS"> | string | null
     resolvedAt?: DateTimeNullableFilter<"SOS"> | Date | string | null
@@ -3950,8 +4081,8 @@ export namespace Prisma {
     tripId?: SortOrderInput | SortOrder
     userId?: SortOrder
     userType?: SortOrder
-    lat?: SortOrder
-    lng?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     reason?: SortOrderInput | SortOrder
     status?: SortOrder
     resolution?: SortOrderInput | SortOrder
@@ -3973,11 +4104,11 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"SOS"> | string
     tripId?: StringNullableWithAggregatesFilter<"SOS"> | string | null
     userId?: StringWithAggregatesFilter<"SOS"> | string
-    userType?: StringWithAggregatesFilter<"SOS"> | string
-    lat?: FloatWithAggregatesFilter<"SOS"> | number
-    lng?: FloatWithAggregatesFilter<"SOS"> | number
+    userType?: EnumSOSUserTypeWithAggregatesFilter<"SOS"> | $Enums.SOSUserType
+    latitude?: FloatWithAggregatesFilter<"SOS"> | number
+    longitude?: FloatWithAggregatesFilter<"SOS"> | number
     reason?: StringNullableWithAggregatesFilter<"SOS"> | string | null
-    status?: StringWithAggregatesFilter<"SOS"> | string
+    status?: EnumSOSStatusWithAggregatesFilter<"SOS"> | $Enums.SOSStatus
     resolution?: StringNullableWithAggregatesFilter<"SOS"> | string | null
     resolvedBy?: StringNullableWithAggregatesFilter<"SOS"> | string | null
     resolvedAt?: DateTimeNullableWithAggregatesFilter<"SOS"> | Date | string | null
@@ -3989,7 +4120,7 @@ export namespace Prisma {
     id?: string
     riderId: string
     driverId?: string | null
-    status?: string
+    status?: $Enums.TripStatus
     pickupLat: number
     pickupLng: number
     pickupAddress: string
@@ -3999,7 +4130,7 @@ export namespace Prisma {
     estimatedFare: number
     actualFare?: number | null
     paymentMethod?: string
-    paymentStatus?: string
+    paymentStatus?: $Enums.TripPaymentStatus
     promoCode?: string | null
     promoDiscount?: number
     distance?: number | null
@@ -4025,7 +4156,7 @@ export namespace Prisma {
     id?: string
     riderId: string
     driverId?: string | null
-    status?: string
+    status?: $Enums.TripStatus
     pickupLat: number
     pickupLng: number
     pickupAddress: string
@@ -4035,7 +4166,7 @@ export namespace Prisma {
     estimatedFare: number
     actualFare?: number | null
     paymentMethod?: string
-    paymentStatus?: string
+    paymentStatus?: $Enums.TripPaymentStatus
     promoCode?: string | null
     promoDiscount?: number
     distance?: number | null
@@ -4061,7 +4192,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     riderId?: StringFieldUpdateOperationsInput | string
     driverId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
     pickupLat?: FloatFieldUpdateOperationsInput | number
     pickupLng?: FloatFieldUpdateOperationsInput | number
     pickupAddress?: StringFieldUpdateOperationsInput | string
@@ -4071,7 +4202,7 @@ export namespace Prisma {
     estimatedFare?: FloatFieldUpdateOperationsInput | number
     actualFare?: NullableFloatFieldUpdateOperationsInput | number | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
-    paymentStatus?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: EnumTripPaymentStatusFieldUpdateOperationsInput | $Enums.TripPaymentStatus
     promoCode?: NullableStringFieldUpdateOperationsInput | string | null
     promoDiscount?: FloatFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -4097,7 +4228,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     riderId?: StringFieldUpdateOperationsInput | string
     driverId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
     pickupLat?: FloatFieldUpdateOperationsInput | number
     pickupLng?: FloatFieldUpdateOperationsInput | number
     pickupAddress?: StringFieldUpdateOperationsInput | string
@@ -4107,7 +4238,7 @@ export namespace Prisma {
     estimatedFare?: FloatFieldUpdateOperationsInput | number
     actualFare?: NullableFloatFieldUpdateOperationsInput | number | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
-    paymentStatus?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: EnumTripPaymentStatusFieldUpdateOperationsInput | $Enums.TripPaymentStatus
     promoCode?: NullableStringFieldUpdateOperationsInput | string | null
     promoDiscount?: FloatFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -4133,7 +4264,7 @@ export namespace Prisma {
     id?: string
     riderId: string
     driverId?: string | null
-    status?: string
+    status?: $Enums.TripStatus
     pickupLat: number
     pickupLng: number
     pickupAddress: string
@@ -4143,7 +4274,7 @@ export namespace Prisma {
     estimatedFare: number
     actualFare?: number | null
     paymentMethod?: string
-    paymentStatus?: string
+    paymentStatus?: $Enums.TripPaymentStatus
     promoCode?: string | null
     promoDiscount?: number
     distance?: number | null
@@ -4169,7 +4300,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     riderId?: StringFieldUpdateOperationsInput | string
     driverId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
     pickupLat?: FloatFieldUpdateOperationsInput | number
     pickupLng?: FloatFieldUpdateOperationsInput | number
     pickupAddress?: StringFieldUpdateOperationsInput | string
@@ -4179,7 +4310,7 @@ export namespace Prisma {
     estimatedFare?: FloatFieldUpdateOperationsInput | number
     actualFare?: NullableFloatFieldUpdateOperationsInput | number | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
-    paymentStatus?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: EnumTripPaymentStatusFieldUpdateOperationsInput | $Enums.TripPaymentStatus
     promoCode?: NullableStringFieldUpdateOperationsInput | string | null
     promoDiscount?: FloatFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -4205,7 +4336,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     riderId?: StringFieldUpdateOperationsInput | string
     driverId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumTripStatusFieldUpdateOperationsInput | $Enums.TripStatus
     pickupLat?: FloatFieldUpdateOperationsInput | number
     pickupLng?: FloatFieldUpdateOperationsInput | number
     pickupAddress?: StringFieldUpdateOperationsInput | string
@@ -4215,7 +4346,7 @@ export namespace Prisma {
     estimatedFare?: FloatFieldUpdateOperationsInput | number
     actualFare?: NullableFloatFieldUpdateOperationsInput | number | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
-    paymentStatus?: StringFieldUpdateOperationsInput | string
+    paymentStatus?: EnumTripPaymentStatusFieldUpdateOperationsInput | $Enums.TripPaymentStatus
     promoCode?: NullableStringFieldUpdateOperationsInput | string | null
     promoDiscount?: FloatFieldUpdateOperationsInput | number
     distance?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -4241,11 +4372,11 @@ export namespace Prisma {
     id?: string
     tripId?: string | null
     userId: string
-    userType: string
-    lat: number
-    lng: number
+    userType: $Enums.SOSUserType
+    latitude: number
+    longitude: number
     reason?: string | null
-    status?: string
+    status?: $Enums.SOSStatus
     resolution?: string | null
     resolvedBy?: string | null
     resolvedAt?: Date | string | null
@@ -4257,11 +4388,11 @@ export namespace Prisma {
     id?: string
     tripId?: string | null
     userId: string
-    userType: string
-    lat: number
-    lng: number
+    userType: $Enums.SOSUserType
+    latitude: number
+    longitude: number
     reason?: string | null
-    status?: string
+    status?: $Enums.SOSStatus
     resolution?: string | null
     resolvedBy?: string | null
     resolvedAt?: Date | string | null
@@ -4273,11 +4404,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tripId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
-    userType?: StringFieldUpdateOperationsInput | string
-    lat?: FloatFieldUpdateOperationsInput | number
-    lng?: FloatFieldUpdateOperationsInput | number
+    userType?: EnumSOSUserTypeFieldUpdateOperationsInput | $Enums.SOSUserType
+    latitude?: FloatFieldUpdateOperationsInput | number
+    longitude?: FloatFieldUpdateOperationsInput | number
     reason?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumSOSStatusFieldUpdateOperationsInput | $Enums.SOSStatus
     resolution?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4289,11 +4420,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tripId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
-    userType?: StringFieldUpdateOperationsInput | string
-    lat?: FloatFieldUpdateOperationsInput | number
-    lng?: FloatFieldUpdateOperationsInput | number
+    userType?: EnumSOSUserTypeFieldUpdateOperationsInput | $Enums.SOSUserType
+    latitude?: FloatFieldUpdateOperationsInput | number
+    longitude?: FloatFieldUpdateOperationsInput | number
     reason?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumSOSStatusFieldUpdateOperationsInput | $Enums.SOSStatus
     resolution?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4305,11 +4436,11 @@ export namespace Prisma {
     id?: string
     tripId?: string | null
     userId: string
-    userType: string
-    lat: number
-    lng: number
+    userType: $Enums.SOSUserType
+    latitude: number
+    longitude: number
     reason?: string | null
-    status?: string
+    status?: $Enums.SOSStatus
     resolution?: string | null
     resolvedBy?: string | null
     resolvedAt?: Date | string | null
@@ -4321,11 +4452,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tripId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
-    userType?: StringFieldUpdateOperationsInput | string
-    lat?: FloatFieldUpdateOperationsInput | number
-    lng?: FloatFieldUpdateOperationsInput | number
+    userType?: EnumSOSUserTypeFieldUpdateOperationsInput | $Enums.SOSUserType
+    latitude?: FloatFieldUpdateOperationsInput | number
+    longitude?: FloatFieldUpdateOperationsInput | number
     reason?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumSOSStatusFieldUpdateOperationsInput | $Enums.SOSStatus
     resolution?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4337,11 +4468,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tripId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
-    userType?: StringFieldUpdateOperationsInput | string
-    lat?: FloatFieldUpdateOperationsInput | number
-    lng?: FloatFieldUpdateOperationsInput | number
+    userType?: EnumSOSUserTypeFieldUpdateOperationsInput | $Enums.SOSUserType
+    latitude?: FloatFieldUpdateOperationsInput | number
+    longitude?: FloatFieldUpdateOperationsInput | number
     reason?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumSOSStatusFieldUpdateOperationsInput | $Enums.SOSStatus
     resolution?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -4379,6 +4510,13 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type EnumTripStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripStatus | EnumTripStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripStatusFilter<$PrismaModel> | $Enums.TripStatus
+  }
+
   export type FloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -4399,6 +4537,13 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type EnumTripPaymentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripPaymentStatus | EnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripPaymentStatusFilter<$PrismaModel> | $Enums.TripPaymentStatus
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -4611,6 +4756,16 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type EnumTripStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripStatus | EnumTripStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTripStatusFilter<$PrismaModel>
+    _max?: NestedEnumTripStatusFilter<$PrismaModel>
+  }
+
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -4641,6 +4796,16 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type EnumTripPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripPaymentStatus | EnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripPaymentStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripPaymentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTripPaymentStatusFilter<$PrismaModel>
+    _max?: NestedEnumTripPaymentStatusFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -4687,13 +4852,27 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type EnumSOSUserTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSUserType | EnumSOSUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSUserTypeFilter<$PrismaModel> | $Enums.SOSUserType
+  }
+
+  export type EnumSOSStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSStatus | EnumSOSStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSStatusFilter<$PrismaModel> | $Enums.SOSStatus
+  }
+
   export type SOSCountOrderByAggregateInput = {
     id?: SortOrder
     tripId?: SortOrder
     userId?: SortOrder
     userType?: SortOrder
-    lat?: SortOrder
-    lng?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     reason?: SortOrder
     status?: SortOrder
     resolution?: SortOrder
@@ -4704,8 +4883,8 @@ export namespace Prisma {
   }
 
   export type SOSAvgOrderByAggregateInput = {
-    lat?: SortOrder
-    lng?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
   }
 
   export type SOSMaxOrderByAggregateInput = {
@@ -4713,8 +4892,8 @@ export namespace Prisma {
     tripId?: SortOrder
     userId?: SortOrder
     userType?: SortOrder
-    lat?: SortOrder
-    lng?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     reason?: SortOrder
     status?: SortOrder
     resolution?: SortOrder
@@ -4729,8 +4908,8 @@ export namespace Prisma {
     tripId?: SortOrder
     userId?: SortOrder
     userType?: SortOrder
-    lat?: SortOrder
-    lng?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     reason?: SortOrder
     status?: SortOrder
     resolution?: SortOrder
@@ -4741,8 +4920,28 @@ export namespace Prisma {
   }
 
   export type SOSSumOrderByAggregateInput = {
-    lat?: SortOrder
-    lng?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
+  }
+
+  export type EnumSOSUserTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSUserType | EnumSOSUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSUserTypeWithAggregatesFilter<$PrismaModel> | $Enums.SOSUserType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSOSUserTypeFilter<$PrismaModel>
+    _max?: NestedEnumSOSUserTypeFilter<$PrismaModel>
+  }
+
+  export type EnumSOSStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSStatus | EnumSOSStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSStatusWithAggregatesFilter<$PrismaModel> | $Enums.SOSStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSOSStatusFilter<$PrismaModel>
+    _max?: NestedEnumSOSStatusFilter<$PrismaModel>
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -4751,6 +4950,10 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type EnumTripStatusFieldUpdateOperationsInput = {
+    set?: $Enums.TripStatus
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -4769,6 +4972,10 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type EnumTripPaymentStatusFieldUpdateOperationsInput = {
+    set?: $Enums.TripPaymentStatus
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -4783,6 +4990,14 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type EnumSOSUserTypeFieldUpdateOperationsInput = {
+    set?: $Enums.SOSUserType
+  }
+
+  export type EnumSOSStatusFieldUpdateOperationsInput = {
+    set?: $Enums.SOSStatus
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -4813,6 +5028,13 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedEnumTripStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripStatus | EnumTripStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripStatusFilter<$PrismaModel> | $Enums.TripStatus
+  }
+
   export type NestedFloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -4833,6 +5055,13 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumTripPaymentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripPaymentStatus | EnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripPaymentStatusFilter<$PrismaModel> | $Enums.TripPaymentStatus
   }
 
   export type NestedIntNullableFilter<$PrismaModel = never> = {
@@ -4913,6 +5142,16 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumTripStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripStatus | EnumTripStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripStatus[] | ListEnumTripStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTripStatusFilter<$PrismaModel>
+    _max?: NestedEnumTripStatusFilter<$PrismaModel>
+  }
+
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -4943,6 +5182,16 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTripPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TripPaymentStatus | EnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TripPaymentStatus[] | ListEnumTripPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTripPaymentStatusWithAggregatesFilter<$PrismaModel> | $Enums.TripPaymentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTripPaymentStatusFilter<$PrismaModel>
+    _max?: NestedEnumTripPaymentStatusFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -4987,6 +5236,40 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumSOSUserTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSUserType | EnumSOSUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSUserTypeFilter<$PrismaModel> | $Enums.SOSUserType
+  }
+
+  export type NestedEnumSOSStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSStatus | EnumSOSStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSStatusFilter<$PrismaModel> | $Enums.SOSStatus
+  }
+
+  export type NestedEnumSOSUserTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSUserType | EnumSOSUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSUserType[] | ListEnumSOSUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSUserTypeWithAggregatesFilter<$PrismaModel> | $Enums.SOSUserType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSOSUserTypeFilter<$PrismaModel>
+    _max?: NestedEnumSOSUserTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumSOSStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SOSStatus | EnumSOSStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SOSStatus[] | ListEnumSOSStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSOSStatusWithAggregatesFilter<$PrismaModel> | $Enums.SOSStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSOSStatusFilter<$PrismaModel>
+    _max?: NestedEnumSOSStatusFilter<$PrismaModel>
   }
 
 

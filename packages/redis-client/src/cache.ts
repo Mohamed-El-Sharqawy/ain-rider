@@ -1,15 +1,26 @@
 import { Cluster } from 'ioredis';
 
+export class CacheError extends Error {
+  constructor(
+    message: string,
+    public readonly operation: string,
+    public readonly key: string,
+    public readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = 'CacheError';
+  }
+}
+
 export class RedisCache {
-  constructor(private cluster: Cluster) {}
+  constructor(private cluster: Cluster) { }
 
   async get<T = any>(key: string): Promise<T | null> {
     try {
       const value = await this.cluster.get(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
-      console.error(`[Redis Cache] Get error for key ${key}:`, error);
-      return null;
+      throw new CacheError(`Get failed for key ${key}`, 'get', key, error);
     }
   }
 
@@ -22,8 +33,7 @@ export class RedisCache {
         await this.cluster.set(key, serialized);
       }
     } catch (error) {
-      console.error(`[Redis Cache] Set error for key ${key}:`, error);
-      throw error;
+      throw new CacheError(`Set failed for key ${key}`, 'set', key, error);
     }
   }
 
@@ -31,8 +41,7 @@ export class RedisCache {
     try {
       await this.cluster.del(key);
     } catch (error) {
-      console.error(`[Redis Cache] Delete error for key ${key}:`, error);
-      throw error;
+      throw new CacheError(`Delete failed for key ${key}`, 'del', key, error);
     }
   }
 
@@ -51,15 +60,14 @@ export class RedisCache {
       const values = await this.cluster.mget(...keys);
       return values.map((v) => (v ? JSON.parse(v) : null));
     } catch (error) {
-      console.error(`[Redis Cache] Mget error:`, error);
-      return keys.map(() => null);
+      throw new CacheError('Mget failed', 'mget', keys.join(','), error);
     }
   }
 
   async mset(entries: Record<string, any>, ttlSeconds?: number): Promise<void> {
     try {
       const pipeline = this.cluster.pipeline();
-      
+
       for (const [key, value] of Object.entries(entries)) {
         const serialized = JSON.stringify(value);
         if (ttlSeconds) {
@@ -68,11 +76,10 @@ export class RedisCache {
           pipeline.set(key, serialized);
         }
       }
-      
+
       await pipeline.exec();
     } catch (error) {
-      console.error(`[Redis Cache] Mset error:`, error);
-      throw error;
+      throw new CacheError('Mset failed', 'mset', Object.keys(entries).join(','), error);
     }
   }
 
@@ -80,8 +87,7 @@ export class RedisCache {
     try {
       return await this.cluster.incrby(key, by);
     } catch (error) {
-      console.error(`[Redis Cache] Increment error for key ${key}:`, error);
-      throw error;
+      throw new CacheError(`Increment failed for key ${key}`, 'increment', key, error);
     }
   }
 
@@ -89,8 +95,7 @@ export class RedisCache {
     try {
       await this.cluster.expire(key, ttlSeconds);
     } catch (error) {
-      console.error(`[Redis Cache] Expire error for key ${key}:`, error);
-      throw error;
+      throw new CacheError(`Expire failed for key ${key}`, 'expire', key, error);
     }
   }
 }

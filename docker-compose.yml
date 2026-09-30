@@ -14,13 +14,14 @@ volumes:
   redis_data_5:
   redis_data_6:
 
+  redisinsight_data:
+
   nats_data_1:
   nats_data_2:
   nats_data_3:
   minio_data:
 
 services:
-
   # ── PostgreSQL (TimescaleDB) ─────────────────────────────────────────────────
   # Single instance, multiple databases:
   #   ainrider_auth     → auth-service
@@ -34,12 +35,12 @@ services:
     environment:
       POSTGRES_USER: ainrider
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: ainrider_auth        # default DB; init.sql creates the rest
+      POSTGRES_DB: ainrider_auth # default DB; init.sql creates the rest
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5433:5432"                     # direct access for prisma db push / migrations
+      - "5433:5432" # direct access for prisma db push / migrations
     networks:
       - ain-rider-net
     healthcheck:
@@ -255,6 +256,19 @@ services:
     volumes: [redis_data_6:/data]
     networks: [ain-rider-net]
 
+  redisinsight:
+    image: redis/redisinsight:3.2.0 # latest v3 tag on Docker Hub
+    container_name: ain-rider-redisinsight
+    ports:
+      - "5540:5540" # expose correct UI port
+    environment:
+      - REDIS_INSIGHT_HTTP_PORT=5540 # ensure the app listens on 5540
+    volumes:
+      - redisinsight_data:/data # persistent settings & saved connections
+    networks:
+      - ain-rider-net
+    restart: unless-stopped
+
   redis-cluster-init:
     image: redis:7.4-alpine
     container_name: ain-rider-redis-cluster-init
@@ -395,7 +409,7 @@ services:
     networks: [ain-rider-net]
     restart: "no"
 
-  # ── OSRM Backend (Iraq routing engine) ────────────────────────────────────────
+  # ── OSRM Backend (Egypt routing engine) ────────────────────────────────────────
   osrm-backend:
     image: ghcr.io/project-osrm/osrm-backend:v6.0.0
     container_name: ain-rider-osrm
@@ -403,7 +417,7 @@ services:
       - "5000:5000"
     volumes:
       - ./data/osrm:/data
-    command: osrm-routed --algorithm mld /data/iraq-latest.osrm
+    command: osrm-routed --algorithm mld /data/egypt-latest.osrm
     networks:
       - ain-rider-net
     restart: unless-stopped

@@ -9,11 +9,16 @@ interface JwtPayload {
   role: string;
 }
 
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("[AuthGuard] FATAL: JWT_SECRET environment variable is required. Refusing to start.");
+}
+
 export const authGuard = new Elysia({ name: "Auth.Guard" })
   .use(
     jwt({
       name: "jwt",
-      secret: process.env.JWT_SECRET || "change-me-in-production",
+      secret: JWT_SECRET,
     }),
   )
   .use(cookie())

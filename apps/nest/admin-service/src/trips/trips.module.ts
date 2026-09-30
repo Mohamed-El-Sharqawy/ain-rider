@@ -4,10 +4,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TripsController } from './trips.controller';
 import { TripsService } from './trips.service';
 import { NatsModule } from '../shared/nats/nats.module';
+import { AuthModule } from '../auth/auth.module';
 import { AdminNatsClient } from '../nats/admin-nats.client';
 
 @Module({
   imports: [
+    AuthModule,
     NatsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

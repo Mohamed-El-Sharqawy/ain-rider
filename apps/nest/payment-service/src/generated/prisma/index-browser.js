@@ -172,7 +172,20 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.PaymentStatus = exports.$Enums.PaymentStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
 
+exports.RefundStatus = exports.$Enums.RefundStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  PROCESSED: 'PROCESSED',
+  REJECTED: 'REJECTED'
+};
 
 exports.Prisma.ModelName = {
   Payment: 'Payment',

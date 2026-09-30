@@ -3,6 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NatsService } from '../shared/nats/nats.service';
 import { NATS_SUBJECTS } from '@ain-rider/shared-types';
 import { generateTraceId } from '@ain-rider/nats-client';
+import { CreateNotificationDto as CreateNotificationBody } from './dto/create-notification.dto';
+
+type CreateNotificationInput = Omit<CreateNotificationBody, 'data'> & {
+  data?: Record<string, unknown>;
+  createdBy: string;
+};
 
 @Injectable()
 export class NotificationsService {
@@ -11,8 +17,8 @@ export class NotificationsService {
     private nats: NatsService,
   ) {}
 
-  create(data: any) {
-    return this.prisma.notification.create({ data });
+  create(data: CreateNotificationInput) {
+    return this.prisma.notification.create({ data: data as any });
   }
 
   findAll(limit = 100) {
@@ -41,12 +47,12 @@ export class NotificationsService {
   }
 
   async markAllAsRead(readerId: string) {
-    // Find all notifications this reader hasn't read yet
     const unread = await this.prisma.notification.findMany({
       where: {
         reads: { none: { readerId } },
       },
       select: { id: true },
+      take: 200,
     });
 
     if (unread.length === 0) return { count: 0 };
@@ -59,7 +65,7 @@ export class NotificationsService {
     return { count: unread.length };
   }
 
-  async sendPushNotification(userId: string, title: string, body: string, data?: any) {
+  async sendPushNotification(userId: string, title: string, body: string, data?: Record<string, unknown>) {
     console.log(`[Push] To ${userId}: ${title} - ${body}`);
     
     const notification = await this.create({

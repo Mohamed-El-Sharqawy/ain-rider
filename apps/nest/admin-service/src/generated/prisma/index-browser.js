@@ -129,6 +129,8 @@ exports.Prisma.UserShadowScalarFieldEnum = {
   role: 'role',
   status: 'status',
   profileImage: 'profileImage',
+  syncStatus: 'syncStatus',
+  syncError: 'syncError',
   syncedAt: 'syncedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -401,7 +403,105 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.ShadowUserRole = exports.$Enums.ShadowUserRole = {
+  RIDER: 'RIDER',
+  DRIVER: 'DRIVER',
+  ADMIN: 'ADMIN',
+  SUPPORT: 'SUPPORT'
+};
 
+exports.ShadowUserStatus = exports.$Enums.ShadowUserStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  PENDING_DOCUMENTS: 'PENDING_DOCUMENTS',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  REJECTED: 'REJECTED',
+  DELETED: 'DELETED'
+};
+
+exports.SyncStatus = exports.$Enums.SyncStatus = {
+  SYNCED: 'SYNCED',
+  PENDING: 'PENDING',
+  FAILED: 'FAILED'
+};
+
+exports.VehicleStatus = exports.$Enums.VehicleStatus = {
+  ACTIVE: 'ACTIVE',
+  PENDING: 'PENDING',
+  SUSPENDED: 'SUSPENDED',
+  INACTIVE: 'INACTIVE'
+};
+
+exports.WalletTransactionType = exports.$Enums.WalletTransactionType = {
+  CREDIT: 'CREDIT',
+  DEBIT: 'DEBIT'
+};
+
+exports.WalletTransactionStatus = exports.$Enums.WalletTransactionStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+};
+
+exports.WithdrawalStatus = exports.$Enums.WithdrawalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  PROCESSED: 'PROCESSED',
+  REJECTED: 'REJECTED'
+};
+
+exports.PromoType = exports.$Enums.PromoType = {
+  PERCENTAGE: 'PERCENTAGE',
+  FLAT: 'FLAT'
+};
+
+exports.PromoStatus = exports.$Enums.PromoStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  EXPIRED: 'EXPIRED'
+};
+
+exports.NotificationPriority = exports.$Enums.NotificationPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+};
+
+exports.NotificationStatus = exports.$Enums.NotificationStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  DELIVERED: 'DELIVERED',
+  FAILED: 'FAILED'
+};
+
+exports.SOSPriority = exports.$Enums.SOSPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+};
+
+exports.ComplaintStatus = exports.$Enums.ComplaintStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+};
+
+exports.SettingType = exports.$Enums.SettingType = {
+  STRING: 'STRING',
+  NUMBER: 'NUMBER',
+  BOOLEAN: 'BOOLEAN',
+  JSON: 'JSON'
+};
+
+exports.BookingStatus = exports.$Enums.BookingStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED',
+  COMPLETED: 'COMPLETED'
+};
 
 exports.Prisma.ModelName = {
   UserShadow: 'UserShadow',

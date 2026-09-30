@@ -16,7 +16,11 @@ async function bootstrap() {
     new FastifyAdapter({ logger: true }),
   );
 
-  app.enableCors();
+  const corsOrigins = process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173'];
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -44,7 +48,7 @@ async function bootstrap() {
     SwaggerModule.setup("api/docs", app, document);
   }
 
-  const port = parseInt(process.env.ADMIN_SERVICE_PORT ?? "4003", 10);
+  const port = parseInt(process.env.PORT ?? "4003", 10);
   await app.listen(port, "0.0.0.0");
 
   console.log(

@@ -20,10 +20,9 @@ import { redisCluster } from '../../shared/redis';
 import { natsEventsTotal, wsConnectionsTotal } from '../../shared/metrics';
 import { log } from '../../shared/logger';
 
+// OSRM_URL from environment
 const NATS_SERVERS = process.env.NATS_SERVERS?.split(',') || ['nats://localhost:4222'];
-
-// Driver watchers: driverId -> Set of WebSocket keys watching this driver
-const driverWatchers = new Map<string, Set<string>>();
+const OSRM_URL = process.env.OSRM_URL || 'http://localhost:5000';
 
 let nc: NatsConnection;
 let idempotency: IdempotencyService;
@@ -49,29 +48,76 @@ class LocationUpdateConsumer extends JetStreamConsumer {
     const data = envelope.data as LocationUpdate;
     natsEventsTotal.inc({ subject: NATS_SUBJECTS.LOCATION_UPDATE });
 
+    try {
+      // ── NEW: Real-time OSRM Enrichment ──
+      const targetKey = `driver:trip:target:${data.driverId}`;
+      const targetJson = await redisCluster.get(targetKey);
+
+      if (targetJson) {
+        const target = JSON.parse(targetJson);
+        const cacheKey = `driver:osrm:cache:${data.driverId}`;
+        const cached = await redisCluster.get(cacheKey);
+
+        let osrmResult = cached ? JSON.parse(cached) : null;
+
+        // Refresh OSRM if no cache or if it's older than 10s
+        const lastRefresh = await redisCluster.get(`driver:osrm:refresh:${data.driverId}`);
+        if (!osrmResult || !lastRefresh) {
+          try {
+            const res = await fetch(`${OSRM_URL}/route/v1/driving/${data.location.longitude},${data.location.latitude};${target.lng},${target.lat}?overview=false`);
+            if (res.ok) {
+              const osrmData = await res.json() as any;
+              if (osrmData.routes?.[0]) {
+                osrmResult = {
+                  distanceMeters: Math.round(osrmData.routes[0].distance),
+                  durationSeconds: Math.round(osrmData.routes[0].duration),
+                };
+                await redisCluster.set(cacheKey, JSON.stringify(osrmResult), 'EX', 60);
+                await redisCluster.set(`driver:osrm:refresh:${data.driverId}`, '1', 'EX', 10);
+              }
+            }
+          } catch (e) {
+            log('warn', 'OSRM fetch failed in WS consumer', { driverId: data.driverId, error: String(e) });
+          }
+        }
+
+        if (osrmResult) {
+          data.distanceMeters = osrmResult.distanceMeters;
+          data.durationSeconds = osrmResult.durationSeconds;
+        }
+      }
+    } catch (e) {
+      log('error', 'Failed to enrich location update with OSRM', { driverId: data.driverId, error: String(e) });
+    }
+
     // Send to driver's own connection
-    const sent = ConnectionStore.send(`driver:${data.driverId}`, {
+    ConnectionStore.send(`driver:${data.driverId}`, {
       type: 'location_update',
       data,
     });
 
-    // If driver not connected, send to riders watching this driver
-    if (!sent) {
-      ConnectionStore.send(`trip:${data.driverId}:rider`, {
-        type: 'driver_location_update',
-        data,
+    // Notify any rider watching this driver (Global State Sync)
+    try {
+      const activeTripKey = `driver:active_trip:${data.driverId}`;
+      const activeTripId = await redisCluster.get(activeTripKey);
+      log('warn', 'LocationUpdate: active_trip lookup', {
+        driverId: data.driverId,
+        activeTripKey,
+        activeTripId: activeTripId ?? '<none>',
       });
-    }
-
-    // Send to all watchers of this driver
-    const watchers = driverWatchers.get(data.driverId);
-    if (watchers) {
-      for (const watcherKey of watchers) {
-        ConnectionStore.send(watcherKey, {
+      if (activeTripId) {
+        const sent = ConnectionStore.send(`trip:${activeTripId}:rider`, {
           type: 'driver_location_update',
           data,
         });
+        log('warn', 'LocationUpdate: forwarded to rider', {
+          driverId: data.driverId,
+          tripId: activeTripId,
+          sent,
+        });
       }
+    } catch (e) {
+      log('error', 'Failed to notify watcher via Redis active_trip', { driverId: data.driverId, error: String(e) });
     }
   }
 }
@@ -125,13 +171,19 @@ class TripMatchedConsumer extends JetStreamConsumer {
     natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_MATCHED });
 
     // Notify rider that trip is MATCHED
-    ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_matched', data });
-    log('info', 'Trip matched forwarded to rider', { tripId: data.tripId });
+    const riderSent = ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_matched', data });
+    log('info', 'Trip matched forwarded to rider', { tripId: data.tripId, driverId: data.driverId, riderSent });
 
-    // Add rider as watcher of this driver
-    const watchers = driverWatchers.get(data.driverId) ?? new Set();
-    watchers.add(`trip:${data.tripId}:rider`);
-    driverWatchers.set(data.driverId, watchers);
+    // Track destination for real-time OSRM (matched phase -> pickup)
+    if (data.pickupLocation) {
+      const target = { lat: data.pickupLocation.lat, lng: data.pickupLocation.lng, type: 'pickup' };
+      await redisCluster.set(`driver:trip:target:${data.driverId}`, JSON.stringify(target), 'EX', 7200);
+      log('info', 'TripMatched: set OSRM target for driver', { driverId: data.driverId, target });
+    }
+
+    // Add rider as watcher of this driver via Redis
+    await redisCluster.set(`driver:active_trip:${data.driverId}`, data.tripId, 'EX', 7200);
+    log('info', 'TripMatched: set active_trip key', { driverId: data.driverId, tripId: data.tripId });
   }
 }
 
@@ -152,8 +204,14 @@ class TripStartedConsumer extends JetStreamConsumer {
   }
 
   async handleMessage(envelope: EventEnvelope<unknown>, _msg: JsMsg, _traceId: string): Promise<void> {
-    const data = envelope.data as { tripId: string; driverId: string };
+    const data = envelope.data as { tripId: string; driverId: string; dropoffLocation?: { lat: number, lng: number } };
     natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_STARTED });
+
+    // Track destination for real-time OSRM (in_progress phase -> dropoff)
+    if (data.dropoffLocation) {
+      const target = { lat: data.dropoffLocation.lat, lng: data.dropoffLocation.lng, type: 'dropoff' };
+      await redisCluster.set(`driver:trip:target:${data.driverId}`, JSON.stringify(target), 'EX', 7200);
+    }
 
     ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_started', data });
     ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_started', data });
@@ -180,17 +238,15 @@ class TripCompletedConsumer extends JetStreamConsumer {
     const data = envelope.data as { tripId: string; driverId: string };
     natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_COMPLETED });
 
+    // Clean up all driver-specific Redis keys for this trip
+    await redisCluster.del(`driver:active_trip:${data.driverId}`);
+    await redisCluster.del(`driver:trip:target:${data.driverId}`);
+    await redisCluster.del(`driver:osrm:cache:${data.driverId}`);
+    await redisCluster.del(`driver:osrm:refresh:${data.driverId}`);
+
     ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_completed', data });
     ConnectionStore.send(`driver:${data.driverId}`, { type: 'trip_completed', data });
-
-    // Remove rider from driver watchers
-    const watchers = driverWatchers.get(data.driverId);
-    if (watchers) {
-      watchers.delete(`trip:${data.tripId}:rider`);
-      if (watchers.size === 0) {
-        driverWatchers.delete(data.driverId);
-      }
-    }
+    log('info', 'Trip completed: cleaned up Redis keys and notified clients', { tripId: data.tripId, driverId: data.driverId });
   }
 }
 
@@ -335,6 +391,13 @@ class TripCancelledConsumer extends JetStreamConsumer {
     const data = envelope.data as { tripId: string; driverId?: string; riderId: string };
     natsEventsTotal.inc({ subject: NATS_SUBJECTS.TRIP_CANCELLED });
 
+    if (data.driverId) {
+      await redisCluster.del(`driver:trip:target:${data.driverId}`);
+      await redisCluster.del(`driver:osrm:cache:${data.driverId}`);
+      await redisCluster.del(`driver:osrm:refresh:${data.driverId}`);
+      await redisCluster.del(`driver:active_trip:${data.driverId}`);
+    }
+
     // Notify rider
     ConnectionStore.send(`trip:${data.tripId}:rider`, { type: 'trip_cancelled', data });
 
@@ -415,41 +478,14 @@ export async function initNatsConsumers(): Promise<void> {
     await consumer.start();
     consumers.push(consumer);
   }
-
   log('info', 'JetStream consumers initialized', { count: consumers.length });
   wsConnectionsTotal.set(ConnectionStore.size());
 }
 
 /**
- * Stop all consumers gracefully
+ * Stop all NATS consumers gracefully
  */
 export async function stopNatsConsumers(): Promise<void> {
-  for (const consumer of consumers) {
-    await consumer.stop();
-  }
-  log('info', 'JetStream consumers stopped');
-}
-
-/**
- * Add a watcher for a driver's location updates
- */
-export function addDriverWatcher(driverId: string, watcherKey: string): void {
-  const watchers = driverWatchers.get(driverId) ?? new Set();
-  watchers.add(watcherKey);
-  driverWatchers.set(driverId, watchers);
-  log('info', 'Driver watcher added', { driverId, watcherKey, totalWatchers: watchers.size });
-}
-
-/**
- * Remove a watcher for a driver's location updates
- */
-export function removeDriverWatcher(driverId: string, watcherKey: string): void {
-  const watchers = driverWatchers.get(driverId);
-  if (watchers) {
-    watchers.delete(watcherKey);
-    if (watchers.size === 0) {
-      driverWatchers.delete(driverId);
-    }
-    log('info', 'Driver watcher removed', { driverId, watcherKey });
-  }
+  const promises = consumers.map(c => c.stop());
+  await Promise.all(promises);
 }

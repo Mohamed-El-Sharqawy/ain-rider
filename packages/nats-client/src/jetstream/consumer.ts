@@ -114,14 +114,18 @@ export abstract class JetStreamConsumer {
       await jsm.streams.info(this.config.streamName);
       console.log(`[${this.config.consumerName}] Stream ${this.config.streamName} exists`);
     } catch {
+      console.warn(
+        `[${this.config.consumerName}] Stream ${this.config.streamName} not found. ` +
+        `Streams should be created via StreamManager at deployment time. ` +
+        `Auto-creating with subject ${this.config.filterSubject}...`
+      );
       try {
-        console.log(`[${this.config.consumerName}] Creating stream ${this.config.streamName}`);
         await jsm.streams.add({
           name: this.config.streamName,
           subjects: [this.config.filterSubject],
           retention: 'limits' as any,
           max_msgs: 100000,
-          max_bytes: 100 * 1024 * 1024, // 100MB
+          max_bytes: 100 * 1024 * 1024,
           storage: 'file' as any,
         });
       } catch (createError: any) {
@@ -313,6 +317,14 @@ export abstract class JetStreamConsumer {
     console.log(
       `[${this.config.consumerName}] Sent to DLQ | subject=${msg.subject} | eventId=${eventId} | traceId=${traceId}`
     );
+  }
+
+  protected validateRequired(data: Record<string, unknown>, fields: string[], label: string): void {
+    for (const field of fields) {
+      if (data[field] === undefined || data[field] === null) {
+        throw new Error(`[${this.config.consumerName}] Missing required field "${field}" in ${label}`);
+      }
+    }
   }
 
   /**

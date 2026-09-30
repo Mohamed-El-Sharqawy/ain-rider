@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { WalletTransactionType, WithdrawalStatus } from '../generated/prisma';
 
 @Injectable()
 export class WalletsService {
@@ -13,60 +14,72 @@ export class WalletsService {
   }
 
   async credit(userId: string, amount: number, description: string, referenceId?: string) {
-    const wallet = await this.prisma.wallet.upsert({
-      where: { userId },
-      create: { userId, balance: 0 },
-      update: {},
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const wallet = await tx.wallet.upsert({
+        where: { userId },
+        create: { userId, balance: 0 },
+        update: {},
+      });
 
-    const updated = await this.prisma.wallet.update({
-      where: { id: wallet.id },
-      data: { balance: { increment: amount } },
-    });
+      const balanceBefore = wallet.balance;
 
-    await this.prisma.walletTransaction.create({
-      data: {
-        walletId: wallet.id,
-        userId,
-        type: 'CREDIT',
-        amount,
-        balanceBefore: wallet.balance,
-        balanceAfter: updated.balance,
-        description,
-        referenceId,
-      },
-    });
+      const updated = await tx.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { increment: amount } },
+      });
 
-    return updated;
+      await tx.walletTransaction.create({
+        data: {
+          walletId: wallet.id,
+          userId,
+          type: WalletTransactionType.CREDIT,
+          amount,
+          balanceBefore,
+          balanceAfter: updated.balance,
+          description,
+          referenceId,
+        },
+      });
+
+      return updated;
+    });
   }
 
   async debit(userId: string, amount: number, description: string, referenceId?: string) {
-    const wallet = await this.prisma.wallet.findUniqueOrThrow({ where: { userId } });
+    return this.prisma.$transaction(async (tx) => {
+      const wallet = await tx.wallet.findUniqueOrThrow({ where: { userId } });
 
-    const updated = await this.prisma.wallet.update({
-      where: { id: wallet.id },
-      data: { balance: { decrement: amount } },
+      if (wallet.balance < amount) {
+        throw new BadRequestException(`Insufficient balance. Current: ${wallet.balance}, Requested: ${amount}`);
+      }
+
+      const balanceBefore = wallet.balance;
+
+      const updated = await tx.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { decrement: amount } },
+      });
+
+      await tx.walletTransaction.create({
+        data: {
+          walletId: wallet.id,
+          userId,
+          type: WalletTransactionType.DEBIT,
+          amount,
+          balanceBefore,
+          balanceAfter: updated.balance,
+          description,
+          referenceId,
+        },
+      });
+
+      return updated;
     });
-
-    await this.prisma.walletTransaction.create({
-      data: {
-        walletId: wallet.id,
-        userId,
-        type: 'DEBIT',
-        amount,
-        balanceBefore: wallet.balance,
-        balanceAfter: updated.balance,
-        description,
-        referenceId,
-      },
-    });
-
-    return updated;
   }
 
   findWithdrawals(status?: string) {
     return this.prisma.withdrawal.findMany({
-      where: status ? { status } : undefined,
+      where: status ? { status: status as WithdrawalStatus } : undefined,
       orderBy: { requestedAt: 'desc' },
     });
   }
@@ -75,7 +88,7 @@ export class WalletsService {
     return this.prisma.withdrawal.update({
       where: { id },
       data: {
-        status: approve ? 'COMPLETED' : 'REJECTED',
+        status: approve ? WithdrawalStatus.PROCESSED : WithdrawalStatus.REJECTED,
         processedAt: new Date(),
         processedBy,
         rejectionReason: approve ? null : rejectionReason,

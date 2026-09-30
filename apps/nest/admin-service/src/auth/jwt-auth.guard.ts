@@ -4,10 +4,18 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private readonly internalSecret: string;
+  private readonly jwtSecret: string;
+
   constructor(
     private jwtService: JwtService,
     private config: ConfigService,
-  ) {}
+  ) {
+    this.internalSecret = this.config.get<string>('INTERNAL_SERVICE_SECRET')
+      ?? (() => { throw new Error('[JwtAuthGuard] FATAL: INTERNAL_SERVICE_SECRET is required.'); })();
+    this.jwtSecret = this.config.get<string>('JWT_SECRET')
+      ?? (() => { throw new Error('[JwtAuthGuard] FATAL: JWT_SECRET is required.'); })();
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{ headers: Record<string, string>; user?: unknown }>();
@@ -20,19 +28,16 @@ export class JwtAuthGuard implements CanActivate {
     const token = authHeader.slice(7);
 
     try {
-      const internalSecret = this.config.get<string>('INTERNAL_SERVICE_SECRET') || 'dev-internal-secret-987654321';
-      const jwtSecret = this.config.get<string>('JWT_SECRET') || 'change-me-in-production';
-      
       let payload;
       try {
-        payload = await this.jwtService.verifyAsync(token, { secret: internalSecret });
-      } catch (err) {
-        payload = await this.jwtService.verifyAsync(token, { secret: jwtSecret });
+        payload = await this.jwtService.verifyAsync(token, { secret: this.internalSecret });
+      } catch {
+        payload = await this.jwtService.verifyAsync(token, { secret: this.jwtSecret });
       }
-      
+
       (request as any).user = payload;
       return true;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

@@ -2,7 +2,7 @@
 // Admin endpoints for viewing and managing users.
 // Reads directly from auth-service's database, writes via NATS.
 
-import { Controller, Get, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { AdminGuard } from '../auth/admin.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -34,7 +34,7 @@ export class UsersController {
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', type: String })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findById(id);
   }
 
@@ -43,7 +43,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Suspend a user' })
   @ApiParam({ name: 'id', type: String })
   suspendUser(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body('reason') reason: string,
     @CurrentUser() user: CurrentUserPayload,
   ) {
@@ -55,7 +55,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Activate a user' })
   @ApiParam({ name: 'id', type: String })
   activateUser(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.usersService.activateUser(id, user.sub);
@@ -66,7 +66,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Update user status generically' })
   @ApiParam({ name: 'id', type: String })
   updateUserStatus(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: UpdateUserStatusDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
@@ -78,7 +78,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Approve a driver' })
   @ApiParam({ name: 'id', type: String })
   approveDriver(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.usersService.approveDriver(id, user.sub);
@@ -89,7 +89,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Reject a driver document stage' })
   @ApiParam({ name: 'id', type: String })
   rejectDocument(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body('stage') stage: 'identity' | 'license' | 'vehicle',
     @Body('reason') reason: string,
     @CurrentUser() user: CurrentUserPayload,
@@ -102,7 +102,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Approve a driver document stage' })
   @ApiParam({ name: 'id', type: String })
   approveDocument(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body('stage') stage: 'identity' | 'license' | 'vehicle',
     @CurrentUser() user: CurrentUserPayload,
   ) {
@@ -114,9 +114,16 @@ export class UsersController {
   @ApiOperation({ summary: 'Reset driver document upload attempts' })
   @ApiParam({ name: 'id', type: String })
   resetUploadAttempts(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.usersService.resetUploadAttempts(id, user.sub);
+  }
+
+  @Get(':id/onboarding-status')
+  @ApiOperation({ summary: 'Get driver onboarding status' })
+  @ApiParam({ name: 'id', type: String })
+  getOnboardingStatus(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.getOnboardingStatus(id);
   }
 }

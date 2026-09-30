@@ -6,10 +6,15 @@ import { CONSOLE_SIMULATED_UID } from "./otp-provider.interface";
  */
 export class ConsoleProvider implements OtpProvider {
   private initialized: boolean = true;
+  private readonly testCode: string;
+
+  constructor() {
+    this.testCode = process.env.TEST_OTP_CODE || "123456";
+  }
 
   async requestOtp(phone: string, traceId: string): Promise<void> {
     console.log(
-      `[ConsoleProvider] SMS Request Sim: Sending OTP code '123456' to ${phone} | traceId=${traceId}`,
+      `[ConsoleProvider] SMS Request Sim: Sending OTP code '${this.testCode}' to ${phone} | traceId=${traceId}`,
     );
   }
 
@@ -22,7 +27,7 @@ export class ConsoleProvider implements OtpProvider {
       `[ConsoleProvider] Simulating code verification | phone=${phone} | code=${code} | traceId=${traceId}`,
     );
 
-    if (code !== "123456") {
+    if (code !== this.testCode) {
       throw new Error("Invalid or expired OTP code");
     }
 

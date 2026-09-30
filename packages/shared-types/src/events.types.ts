@@ -54,11 +54,13 @@ export const NATS_REQUESTS = {
 
 // Event Payloads
 export interface LocationUpdateEvent {
+  readonly type: 'LOCATION_UPDATE';
   subject: typeof NATS_SUBJECTS.LOCATION_UPDATE;
   data: LocationUpdate;
 }
 
 export interface TripRequestedEvent {
+  readonly type: 'TRIP_REQUESTED';
   subject: typeof NATS_SUBJECTS.TRIP_REQUESTED;
   data: {
     tripId: string;
@@ -79,6 +81,7 @@ export interface TripRequestedEvent {
 
 /** TRIP_MATCHED — match-service sends minimal payload; trip-service may send full snapshot */
 export interface TripMatchedEvent {
+  readonly type: 'TRIP_MATCHED';
   subject: typeof NATS_SUBJECTS.TRIP_MATCHED;
   data: {
     tripId: string;
@@ -102,6 +105,7 @@ export interface TripMatchedEvent {
 
 /** TRIP_STARTED | TRIP_COMPLETED | TRIP_CANCELLED — trip-service snapshot */
 export interface TripStatusChangedEvent {
+  readonly type: 'TRIP_STATUS_CHANGED';
   subject:
     | typeof NATS_SUBJECTS.TRIP_STARTED
     | typeof NATS_SUBJECTS.TRIP_COMPLETED
@@ -127,6 +131,7 @@ export interface TripStatusChangedEvent {
 }
 
 export interface DriverStatusChangedEvent {
+  readonly type: 'DRIVER_STATUS_CHANGED';
   subject: typeof NATS_SUBJECTS.DRIVER_STATUS_CHANGED;
   data: {
     driverId: string;
@@ -136,6 +141,7 @@ export interface DriverStatusChangedEvent {
 }
 
 export interface PaymentProcessedEvent {
+  readonly type: 'PAYMENT_PROCESSED';
   subject: typeof NATS_SUBJECTS.PAYMENT_PROCESSED;
   data: {
     tripId: string;
@@ -148,6 +154,7 @@ export interface PaymentProcessedEvent {
 // ── User lifecycle events (auth-service → all) ──────────────────────────────
 
 export interface UserCreatedEvent {
+  readonly type: 'USER_CREATED';
   subject: typeof NATS_SUBJECTS.USER_CREATED;
   data: {
     id: string;
@@ -163,6 +170,7 @@ export interface UserCreatedEvent {
 }
 
 export interface UserUpdatedEvent {
+  readonly type: 'USER_UPDATED';
   subject: typeof NATS_SUBJECTS.USER_UPDATED;
   data: {
     id: string;
@@ -176,6 +184,7 @@ export interface UserUpdatedEvent {
 }
 
 export interface UserStatusChangedEvent {
+  readonly type: 'USER_STATUS_CHANGED';
   subject: typeof NATS_SUBJECTS.USER_STATUS_CHANGED;
   data: {
     id: string;
@@ -186,6 +195,7 @@ export interface UserStatusChangedEvent {
 }
 
 export interface UserDeletedEvent {
+  readonly type: 'USER_DELETED';
   subject: typeof NATS_SUBJECTS.USER_DELETED;
   data: {
     id: string;
@@ -194,6 +204,7 @@ export interface UserDeletedEvent {
 }
 
 export interface OtpVerifiedEvent {
+  readonly type: 'OTP_VERIFIED';
   subject: typeof NATS_SUBJECTS.OTP_VERIFIED;
   data: {
     phoneNumber: string;
@@ -203,6 +214,7 @@ export interface OtpVerifiedEvent {
 }
 
 export interface DriverApprovedEvent {
+  readonly type: 'DRIVER_APPROVED';
   subject: typeof NATS_SUBJECTS.DRIVER_APPROVED;
   data: {
     driverId: string;
@@ -213,6 +225,7 @@ export interface DriverApprovedEvent {
 }
 
 export interface NotificationSentEvent {
+  readonly type: 'NOTIFICATION_SENT';
   subject: typeof NATS_SUBJECTS.NOTIFICATION_SENT;
   data: {
     userId: string;
@@ -237,3 +250,91 @@ export type NatsEvent =
   | NotificationSentEvent
   | OtpVerifiedEvent
   | DriverApprovedEvent;
+
+export type NatsEventType = NatsEvent['type'];
+
+export function validateEvent<T>(data: unknown, requiredFields: string[]): data is T {
+  if (typeof data !== 'object' || data === null) return false;
+  for (const field of requiredFields) {
+    if (!(field in data)) return false;
+  }
+  return true;
+}
+
+export function isNatsEvent(data: unknown): data is NatsEvent {
+  return validateEvent<NatsEvent>(data, ['type', 'subject', 'data']);
+}
+
+type FieldSpec = { name: string; type: 'string' | 'number' | 'boolean' | 'object' | 'array' };
+
+function validateFields(data: unknown, fields: FieldSpec[]): { valid: boolean; missing: string[] } {
+  if (typeof data !== 'object' || data === null) return { valid: false, missing: ['root'] };
+  const obj = data as Record<string, unknown>;
+  const missing: string[] = [];
+  for (const field of fields) {
+    const val = obj[field.name];
+    if (val === undefined || val === null) { missing.push(field.name); continue; }
+    switch (field.type) {
+      case 'string': if (typeof val !== 'string') missing.push(field.name); break;
+      case 'number': if (typeof val !== 'number') missing.push(field.name); break;
+      case 'boolean': if (typeof val !== 'boolean') missing.push(field.name); break;
+      case 'object': if (typeof val !== 'object' || val === null) missing.push(field.name); break;
+      case 'array': if (!Array.isArray(val)) missing.push(field.name); break;
+    }
+  }
+  return { valid: missing.length === 0, missing };
+}
+
+export const EventValidators = {
+  USER_CREATED: (data: unknown) => validateFields(data, [
+    { name: 'id', type: 'string' }, { name: 'email', type: 'string' },
+    { name: 'phoneNumber', type: 'string' }, { name: 'role', type: 'string' },
+    { name: 'status', type: 'string' }, { name: 'createdAt', type: 'string' },
+  ]),
+  USER_UPDATED: (data: unknown) => validateFields(data, [
+    { name: 'id', type: 'string' }, { name: 'updatedAt', type: 'string' },
+  ]),
+  USER_STATUS_CHANGED: (data: unknown) => validateFields(data, [
+    { name: 'id', type: 'string' }, { name: 'status', type: 'string' },
+    { name: 'updatedAt', type: 'string' },
+  ]),
+  USER_DELETED: (data: unknown) => validateFields(data, [
+    { name: 'id', type: 'string' }, { name: 'deletedAt', type: 'string' },
+  ]),
+  LOCATION_UPDATE: (data: unknown) => validateFields(data, [
+    { name: 'driverId', type: 'string' },
+  ]),
+  TRIP_REQUESTED: (data: unknown) => validateFields(data, [
+    { name: 'tripId', type: 'string' }, { name: 'riderId', type: 'string' },
+  ]),
+  TRIP_MATCHED: (data: unknown) => validateFields(data, [
+    { name: 'tripId', type: 'string' },
+  ]),
+  TRIP_STARTED: (data: unknown) => validateFields(data, [
+    { name: 'tripId', type: 'string' },
+  ]),
+  TRIP_COMPLETED: (data: unknown) => validateFields(data, [
+    { name: 'tripId', type: 'string' }, { name: 'riderId', type: 'string' },
+    { name: 'driverId', type: 'string' },
+  ]),
+  TRIP_CANCELLED: (data: unknown) => validateFields(data, [
+    { name: 'tripId', type: 'string' }, { name: 'riderId', type: 'string' },
+  ]),
+  DRIVER_STATUS_CHANGED: (data: unknown) => validateFields(data, [
+    { name: 'driverId', type: 'string' }, { name: 'isOnline', type: 'boolean' },
+  ]),
+  PAYMENT_PROCESSED: (data: unknown) => validateFields(data, [
+    { name: 'tripId', type: 'string' }, { name: 'paymentId', type: 'string' },
+    { name: 'amount', type: 'number' },
+  ]),
+  NOTIFICATION_SENT: (data: unknown) => validateFields(data, [
+    { name: 'userId', type: 'string' }, { name: 'title', type: 'string' },
+    { name: 'body', type: 'string' },
+  ]),
+  SOS_CREATED: (data: unknown) => validateFields(data, [
+    { name: 'sosId', type: 'string' }, { name: 'userId', type: 'string' },
+  ]),
+  SOS_RESOLVED: (data: unknown) => validateFields(data, [
+    { name: 'sosId', type: 'string' }, { name: 'resolvedBy', type: 'string' },
+  ]),
+} as const;

@@ -46,6 +46,9 @@ export class UserActivateResponder implements OnModuleInit, OnModuleDestroy {
     await this.responder.respond<ActivateUserRequest, ActivateUserResponse>(
       'user.activate.request',
       async (request) => {
+        if (!request?.userId || !request?.activatedBy) {
+          throw new Error('[UserActivateResponder] Missing required fields: userId, activatedBy');
+        }
         const { userId } = request;
 
         console.log(

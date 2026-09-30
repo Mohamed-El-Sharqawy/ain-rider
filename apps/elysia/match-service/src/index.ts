@@ -204,17 +204,6 @@ new Elysia()
   .use(health)
   .use(metricsPlugin({ serviceName: 'match-service' }))
   .use(match)
-  .post('/driver/respond', async ({ body, set }) => {
-    const { tripId, action, driverId } = body as { tripId: string; action: string; driverId: string };
-    if (action !== 'accept' && action !== 'reject') {
-      set.status = 400;
-      return { success: false, error: 'Invalid action' };
-    }
-    const value = action === 'accept' ? 'accepted' : 'rejected';
-    await redisCluster.set(`match:response:${tripId}`, value, 'EX', 60);
-    tripLog({ step: value === 'accepted' ? 'DRIVER_ACCEPTED' : 'DRIVER_REJECTED', tripId, driverId, detail: `TOP-LEVEL /driver/respond action=${action}` });
-    return { success: true, action: value };
-  })
   .listen(PORT);
 
 log('info', 'Match Service running', { port: PORT });

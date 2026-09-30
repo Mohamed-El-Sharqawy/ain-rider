@@ -17,6 +17,7 @@ import { SettingsModule } from './settings/settings.module';
 import { ProfileModule } from './profile/profile.module';
 import { AuditModule } from './shared/audit/audit.module';
 import { InternalApiModule } from './shared/internal-api/internal-api.module';
+import { RedisCacheModule } from './shared/redis-cache/redis-cache.module';
 import { HealthController } from './health/health.controller';
 
 @Module({
@@ -27,6 +28,7 @@ import { HealthController } from './health/health.controller';
     PrismaModule,
     AuditModule,
     InternalApiModule,
+    RedisCacheModule,
     NatsModule,
     StorageModule,
     AuthModule,

@@ -11,8 +11,17 @@ import { UserEventPublisher } from "../events/user-event.publisher";
 import { UserRole } from "@ain-rider/shared-types";
 import { generateTraceId } from "@ain-rider/nats-client";
 import type { RegisterDto } from "./dto/register.dto";
+import type { AdminUpdateUserDto } from "./dto/admin-update-user.dto";
 import { Prisma } from "../generated/prisma/client";
 import { OtpService } from "./otp.service";
+
+const VALID_USER_STATUS_TRANSITIONS: Record<string, Set<string>> = {
+  ACTIVE: new Set(['SUSPENDED', 'PENDING_DOCUMENTS', 'UNDER_REVIEW', 'REJECTED']),
+  SUSPENDED: new Set(['ACTIVE']),
+  PENDING_DOCUMENTS: new Set(['UNDER_REVIEW', 'ACTIVE', 'SUSPENDED', 'REJECTED']),
+  UNDER_REVIEW: new Set(['APPROVED', 'REJECTED', 'SUSPENDED']),
+  REJECTED: new Set(['PENDING_DOCUMENTS', 'ACTIVE', 'SUSPENDED']),
+};
 
 @Injectable()
 export class AuthService {
@@ -151,10 +160,14 @@ export class AuthService {
     if (!previousUser) throw new UnauthorizedException("User not found");
 
     const previousStatus = previousUser.status;
+    const allowed = VALID_USER_STATUS_TRANSITIONS[previousStatus];
+    if (!allowed || !allowed.has(status)) {
+      throw new ConflictException(`Invalid user status transition: ${previousStatus} → ${status}`);
+    }
 
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { status, updatedAt: new Date() },
+      data: { status: status as any, updatedAt: new Date() },
     });
 
     // Sync onboarding status if it's a driver
@@ -208,7 +221,7 @@ export class AuthService {
           passwordHash,
           firstName: data.firstName,
           lastName: data.lastName,
-          role: data.role,
+          role: data.role as any,
         },
       });
 
@@ -293,20 +306,29 @@ export class AuthService {
   ): Promise<void> {
     const oldTokenHash = this.hashToken(oldToken);
 
-    // Mark old token as revoked
-    await this.prisma.refreshToken.update({
-      where: { tokenHash: oldTokenHash },
-      data: { revoked: true },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.refreshToken.update({
+        where: { tokenHash: oldTokenHash },
+        data: { revoked: true },
+      });
+
+      const stored = await tx.refreshToken.findUnique({
+        where: { tokenHash: oldTokenHash },
+      });
+
+      if (stored?.userId) {
+        const newTokenHash = this.hashToken(newToken);
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await tx.refreshToken.create({
+          data: {
+            userId: stored.userId,
+            tokenHash: newTokenHash,
+            family,
+            expiresAt,
+          },
+        });
+      }
     });
-
-    // Store new token in same family
-    const userId = await this.prisma.refreshToken
-      .findUnique({ where: { tokenHash: oldTokenHash } })
-      .then((t) => t?.userId);
-
-    if (userId) {
-      await this.storeRefreshToken(userId, newToken, family);
-    }
   }
 
   private signAccessToken(user: { id: string; email: string; role: string }) {
@@ -423,13 +445,14 @@ export class AuthService {
     };
   }
 
-  async updateUser(id: string, data: any) {
+  async updateUser(id: string, data: AdminUpdateUserDto) {
+    const { ...updateData } = data;
     const user = await this.prisma.user.update({
       where: { id },
       data: {
-        ...data,
+        ...updateData,
         updatedAt: new Date(),
-      },
+      } as Prisma.UserUpdateInput,
     });
     return this.sanitize(user);
   }

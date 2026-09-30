@@ -1,10 +1,12 @@
 import { Elysia, t } from 'elysia';
 import { MatchService } from './service';
 import { MatchModel } from './model';
-import { cache, redisCluster } from '../../shared/redis';
+import { redisCluster } from '../../shared/redis';
 import { tripLog } from '../../shared/trip-flow-logger';
+import { internalAuth } from '../../shared/internal-auth';
 
 export const match = new Elysia({ prefix: '/driver' })
+  .use(internalAuth)
   .post(
     '/available',
     async ({ body }) => {
@@ -24,8 +26,13 @@ export const match = new Elysia({ prefix: '/driver' })
   )
   .post(
     '/respond',
-    async ({ body, set }) => {
+    async ({ body, set, serviceCaller }) => {
       const { tripId, action, driverId } = body;
+
+      if (driverId !== serviceCaller.sub) {
+        set.status = 403;
+        return { success: false, error: 'Driver ID does not match authenticated user.' };
+      }
 
       if (action !== 'accept' && action !== 'reject') {
         set.status = 400;
@@ -48,9 +55,13 @@ export const match = new Elysia({ prefix: '/driver' })
   )
   .get(
     '/nearby',
-    async ({ query }) => {
+    async ({ query, set }) => {
       const lat = parseFloat(query.latitude as string);
       const lng = parseFloat(query.longitude as string);
+      if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        set.status = 400;
+        return { error: 'Invalid coordinates. lat must be [-90, 90], lng must be [-180, 180]' };
+      }
       return await MatchService.getNearbyDrivers(lat, lng);
     },
     {
@@ -60,7 +71,11 @@ export const match = new Elysia({ prefix: '/driver' })
       })
     }
   )
-  .get('/debug', async () => {
+  .get('/debug', async ({ set }) => {
+    if (process.env.NODE_ENV === 'production') {
+      set.status = 404;
+      return { error: 'Not found' };
+    }
     // Scan for all driver:available:* keys
     const drivers: any[] = [];
     let cursor = '0';

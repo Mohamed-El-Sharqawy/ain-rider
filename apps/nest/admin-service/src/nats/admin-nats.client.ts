@@ -54,6 +54,53 @@ export interface RefundResponse {
   amount: number;
 }
 
+export interface ApproveDriverRequest {
+  userId: string;
+  adminId: string;
+}
+
+export interface ApproveDriverResponse {
+  userId: string;
+  onboardingStatus: string;
+}
+
+export interface RejectDriverDocumentRequest {
+  userId: string;
+  stage: 'identity' | 'license' | 'vehicle';
+  reason: string;
+  adminId: string;
+}
+
+export interface RejectDriverDocumentResponse {
+  userId: string;
+  stage: string;
+  status: string;
+}
+
+export interface ApproveDriverDocumentRequest {
+  userId: string;
+  stage: 'identity' | 'license' | 'vehicle';
+  adminId: string;
+}
+
+export interface ApproveDriverDocumentResponse {
+  userId: string;
+  stage: string;
+  status: string;
+}
+
+export interface UpdateUserStatusRequest {
+  userId: string;
+  status: string;
+  adminId: string;
+  reason?: string;
+}
+
+export interface UpdateUserStatusResponse {
+  userId: string;
+  newStatus: string;
+}
+
 @Injectable()
 export class AdminNatsClient {
   private _requestClient: NatsRequestClient | null = null;
@@ -79,11 +126,12 @@ export class AdminNatsClient {
     adminId: string,
     traceId?: string
   ): Promise<SuspendUserResponse> {
-    return this.requestClient.request<any, any>(
+    const result = await this.requestClient.request<SuspendUserRequest, SuspendUserResponse>(
       'admin.command.suspend_user',
-      { userId, reason, adminId },
+      { userId, reason, suspendedBy: adminId },
       { traceId, requestedBy: adminId }
     );
+    return result;
   }
 
   /**
@@ -94,11 +142,12 @@ export class AdminNatsClient {
     adminId: string,
     traceId?: string
   ): Promise<ActivateUserResponse> {
-    return this.requestClient.request<any, any>(
+    const result = await this.requestClient.request<ActivateUserRequest, ActivateUserResponse>(
       'admin.command.activate_user',
-      { userId, adminId },
+      { userId, activatedBy: adminId },
       { traceId, requestedBy: adminId }
     );
+    return result;
   }
 
   /**
@@ -108,12 +157,13 @@ export class AdminNatsClient {
     userId: string,
     adminId: string,
     traceId?: string
-  ): Promise<any> {
-    return this.requestClient.request<any, any>(
+  ): Promise<ApproveDriverResponse> {
+    const result = await this.requestClient.request<ApproveDriverRequest, ApproveDriverResponse>(
       'admin.command.approve_driver',
       { userId, adminId },
       { traceId, requestedBy: adminId }
     );
+    return result;
   }
 
   /**
@@ -125,12 +175,13 @@ export class AdminNatsClient {
     reason: string,
     adminId: string,
     traceId?: string,
-  ): Promise<any> {
-    return this.requestClient.request<any, any>(
+  ): Promise<RejectDriverDocumentResponse> {
+    const result = await this.requestClient.request<RejectDriverDocumentRequest, RejectDriverDocumentResponse>(
       "admin.command.reject_driver_document",
       { userId, stage, reason, adminId },
       { traceId, requestedBy: adminId },
     );
+    return result;
   }
 
   /**
@@ -141,12 +192,13 @@ export class AdminNatsClient {
     stage: "identity" | "license" | "vehicle",
     adminId: string,
     traceId?: string,
-  ): Promise<any> {
-    return this.requestClient.request<any, any>(
+  ): Promise<ApproveDriverDocumentResponse> {
+    const result = await this.requestClient.request<ApproveDriverDocumentRequest, ApproveDriverDocumentResponse>(
       "admin.command.approve_driver_document",
       { userId, stage, adminId },
       { traceId, requestedBy: adminId },
     );
+    return result;
   }
 
   /**
@@ -154,16 +206,17 @@ export class AdminNatsClient {
    */
   async updateUserStatus(
     userId: string,
-    status: string,
+    userStatus: string,
     adminId: string,
     reason?: string,
     traceId?: string
-  ): Promise<any> {
-    return this.requestClient.request<any, any>(
+  ): Promise<UpdateUserStatusResponse> {
+    const result = await this.requestClient.request<UpdateUserStatusRequest, UpdateUserStatusResponse>(
       'admin.command.update_user_status',
-      { userId, status, adminId, reason },
+      { userId, status: userStatus, adminId, reason },
       { traceId, requestedBy: adminId }
     );
+    return result;
   }
 
   /**

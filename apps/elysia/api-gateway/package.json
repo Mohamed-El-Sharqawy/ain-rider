@@ -4,7 +4,7 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
+    "dev": "nodemon --config ../../../nodemon.json",
     "start": "bun src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun --external @nestjs/common --external @nestjs/core --external fastify",
     "clean": "rimraf dist"

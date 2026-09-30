@@ -1,5 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreatePromoDto as CreatePromoBody } from './dto/create-promo.dto';
+import { UpdatePromoDto as UpdatePromoBody } from './dto/update-promo.dto';
+
+type CreatePromoInput = Omit<CreatePromoBody, 'validFrom' | 'validUntil'> & {
+  validFrom?: string;
+  validUntil?: string;
+  createdBy: string;
+};
+
+type UpdatePromoInput = UpdatePromoBody;
 
 @Injectable()
 export class PromosService {
@@ -7,7 +17,7 @@ export class PromosService {
 
   findAll(status?: string) {
     return this.prisma.promo.findMany({
-      where: status ? { status } : undefined,
+      where: status ? { status: status as any } : undefined,
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -16,12 +26,12 @@ export class PromosService {
     return this.prisma.promo.findUnique({ where: { code } });
   }
 
-  create(data: any) {
-    return this.prisma.promo.create({ data });
+  create(data: CreatePromoInput) {
+    return this.prisma.promo.create({ data: data as any });
   }
 
-  update(id: string, data: any) {
-    return this.prisma.promo.update({ where: { id }, data });
+  update(id: string, data: UpdatePromoInput) {
+    return this.prisma.promo.update({ where: { id }, data: data as any });
   }
 
   async validate(code: string, userId: string, tripAmount: number) {
@@ -36,6 +46,13 @@ export class PromosService {
 
     const userUsage = await this.prisma.promoUsage.count({ where: { promoId: promo.id, userId } });
     if (userUsage >= promo.maxUsagePerUser) return { valid: false, reason: 'Usage limit per user reached' };
+
+    const result = await this.prisma.promo.updateMany({
+      where: { id: promo.id, currentUsageCount: { lt: promo.totalUsageLimit } },
+      data: { currentUsageCount: { increment: 1 } },
+    });
+
+    if (result.count === 0) return { valid: false, reason: 'Promo limit reached' };
 
     const discount = promo.type === 'PERCENTAGE'
       ? Math.min((tripAmount * promo.value) / 100, promo.maxDiscount ?? Infinity)

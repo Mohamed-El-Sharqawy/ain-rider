@@ -10,6 +10,7 @@ export interface FetchInternalConfig {
   serviceName: string;
   metrics?: MetricsHooks;
   logger?: LoggerHooks;
+  internalSecret?: string;
 }
 
 export interface FetchInternalOptions {

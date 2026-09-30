@@ -47,6 +47,7 @@ const fetchInternalConfig: FetchInternalConfig = {
       log('error', message, meta);
     },
   },
+  internalSecret: process.env.INTERNAL_SERVICE_SECRET,
 };
 configureFetchInternal(fetchInternalConfig);
 
@@ -129,7 +130,7 @@ new Elysia()
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cache-Control", "Pragma"],
     }),
   )
   .use(
@@ -148,10 +149,14 @@ new Elysia()
     rateLimit({
       duration: 60_000,
       max: 200,
-      generator: (req) =>
-        req.headers.get("x-forwarded-for") ||
-        req.headers.get("x-real-ip") ||
-        "anonymous",
+      generator: (req) => {
+        const xff = req.headers.get("x-forwarded-for");
+        if (xff) {
+          const ips = xff.split(",").map((s) => s.trim());
+          return ips[ips.length - 1] || "anonymous";
+        }
+        return req.headers.get("x-real-ip") || "anonymous";
+      },
     }),
   )
   .use(health)

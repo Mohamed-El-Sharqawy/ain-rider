@@ -7,12 +7,13 @@ import {
 
 @Injectable()
 export class DriverEventPublisher {
-  constructor(private readonly natsPublisher: NatsPublisher) {}
+  constructor(private readonly natsPublisher: NatsPublisher) { }
 
   async publishDriverApproved(
     data: DriverApprovedEvent["data"],
   ): Promise<void> {
     const event: DriverApprovedEvent = {
+      type: "DRIVER_APPROVED",
       subject: NATS_SUBJECTS.DRIVER_APPROVED,
       data,
     };

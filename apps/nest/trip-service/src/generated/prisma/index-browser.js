@@ -161,8 +161,8 @@ exports.Prisma.SOSScalarFieldEnum = {
   tripId: 'tripId',
   userId: 'userId',
   userType: 'userType',
-  lat: 'lat',
-  lng: 'lng',
+  latitude: 'latitude',
+  longitude: 'longitude',
   reason: 'reason',
   status: 'status',
   resolution: 'resolution',
@@ -186,7 +186,30 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.TripStatus = exports.$Enums.TripStatus = {
+  REQUESTED: 'REQUESTED',
+  ASSIGNED: 'ASSIGNED',
+  MATCHED: 'MATCHED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
 
+exports.TripPaymentStatus = exports.$Enums.TripPaymentStatus = {
+  PENDING: 'PENDING',
+  COLLECTED: 'COLLECTED',
+  FAILED: 'FAILED'
+};
+
+exports.SOSUserType = exports.$Enums.SOSUserType = {
+  RIDER: 'RIDER',
+  DRIVER: 'DRIVER'
+};
+
+exports.SOSStatus = exports.$Enums.SOSStatus = {
+  ACTIVE: 'ACTIVE',
+  RESOLVED: 'RESOLVED'
+};
 
 exports.Prisma.ModelName = {
   Trip: 'Trip',

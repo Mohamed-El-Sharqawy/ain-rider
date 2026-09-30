@@ -1,11 +1,10 @@
 import { ConnectionStore } from '../../shared/connections';
 import { wsConnectionsTotal } from '../../shared/metrics';
 import { log } from '../../shared/logger';
+import { redisCluster } from '../../shared/redis';
 import {
   initNatsConsumers,
   stopNatsConsumers,
-  addDriverWatcher,
-  removeDriverWatcher,
 } from './consumers';
 
 export abstract class RealtimeService {
@@ -23,33 +22,30 @@ export abstract class RealtimeService {
     await stopNatsConsumers();
   }
 
-  /**
-   * Add a watcher for a driver's location updates
-   */
-  static addDriverWatcher(driverId: string, watcherKey: string): void {
-    addDriverWatcher(driverId, watcherKey);
-  }
-
-  /**
-   * Remove a watcher for a driver's location updates
-   */
-  static removeDriverWatcher(driverId: string, watcherKey: string): void {
-    removeDriverWatcher(driverId, watcherKey);
-  }
-
-  static handleSubscribe(key: string, ws: unknown): void {
+  static async handleSubscribe(key: string, ws: any): Promise<void> {
     log('info', 'Subscription attempt', { key });
     ConnectionStore.set(key, ws as Parameters<typeof ConnectionStore.set>[1]);
     wsConnectionsTotal.set(ConnectionStore.size());
     log('info', 'Client subscribed', { key, total: ConnectionStore.size() });
+
+    // State sync: If it's a driver subscription, check for pending assignments
+    const [type, id] = key.split(':');
+    if (type === 'driver' && id) {
+      try {
+        const pending = await redisCluster.get(`driver:assignment:pending:${id}`);
+        if (pending) {
+          log('info', 'Pushing pending assignment to reconnected driver', { driverId: id });
+          const data = JSON.parse(pending);
+          ws.send(JSON.stringify({ type: 'trip_assigned', data }));
+        }
+      } catch (e) {
+        log('error', 'Failed to check pending assignment', { driverId: id, error: String(e) });
+      }
+    }
   }
 
-  static handleUnsubscribe(key: string): void {
-    ConnectionStore.delete(key);
-
-    // Remove from any driver watchers
-    removeDriverWatcher(key.split(':')[1] || '', key);
-
+  static handleUnsubscribe(key: string, ws: unknown): void {
+    ConnectionStore.removeFromKey(key, ws as Parameters<typeof ConnectionStore.removeFromKey>[1]);
     wsConnectionsTotal.set(ConnectionStore.size());
     log('info', 'Client unsubscribed', { key, total: ConnectionStore.size() });
   }

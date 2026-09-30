@@ -13,6 +13,7 @@ import { UserActivateResponder } from "../nats/responders/user-activate.responde
 import { UserEventPublisher } from "../events/user-event.publisher";
 import { OtpService } from "./otp.service";
 import { InternalAuthGuard } from "./guards/internal-auth.guard";
+import { InternalUserController } from "./internal-user.controller";
 import { DriverOnboardingModule } from "../driver-onboarding/driver-onboarding.module";
 import { AdminCommandHandler } from "../nats/responders/admin-command.handler";
 
@@ -25,8 +26,10 @@ import { AdminCommandHandler } from "../nats/responders/admin-command.handler";
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const secret =
-          config.get<string>("JWT_SECRET") || "change-me-in-production";
+        const secret = config.get<string>("JWT_SECRET");
+        if (!secret) {
+          throw new Error("[AuthModule] FATAL: JWT_SECRET environment variable is required. Refusing to start.");
+        }
         return { secret };
       },
     }),
@@ -41,7 +44,7 @@ import { AdminCommandHandler } from "../nats/responders/admin-command.handler";
     InternalAuthGuard,
     AdminCommandHandler,
   ],
-  controllers: [AuthController, AdminController],
+  controllers: [AuthController, AdminController, InternalUserController],
   exports: [AuthService, InternalAuthGuard, JwtModule],
 })
 export class AuthModule {}

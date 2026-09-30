@@ -69,9 +69,12 @@ export abstract class TripProxyService {
     });
   }
 
-  static async getUserTrips(userId: string, role: string): Promise<Response> {
-    const queryParam = role === 'DRIVER' ? `driverId=${userId}` : `riderId=${userId}`;
-    return fetchInternal(`${TRIP_SERVICE_URL}/trips?${queryParam}`, 'GET', undefined, {
+  static async getUserTrips(userId: string, role: string, limit?: number, cursor?: string): Promise<Response> {
+    const params = new URLSearchParams();
+    params.set(role === 'DRIVER' ? 'driverId' : 'riderId', userId);
+    if (limit) params.set('limit', String(limit));
+    if (cursor) params.set('cursor', cursor);
+    return fetchInternal(`${TRIP_SERVICE_URL}/trips?${params.toString()}`, 'GET', undefined, {
       targetService: 'trip-service',
       headers: { 'x-user-id': userId },
     });

@@ -14,11 +14,11 @@ async function getPrismaClients() {
   const { PrismaClient: AuthPrisma } = await import('../apps/nest/auth-service/src/generated/prisma/index.js');
   const { PrismaClient: AdminPrisma } = await import('../apps/nest/admin-service/src/generated/prisma/index.js');
   const { PrismaClient: TripPrisma } = await import('../apps/nest/trip-service/src/generated/prisma/index.js');
-  
+
   const authDb = new AuthPrisma({ adapter: new PrismaPg({ connectionString: AUTH_DB_URL }) });
   const adminDb = new AdminPrisma({ adapter: new PrismaPg({ connectionString: ADMIN_DB_URL }) });
   const tripDb = new TripPrisma({ adapter: new PrismaPg({ connectionString: TRIP_DB_URL }) });
-  
+
   return { authDb, adminDb, tripDb };
 }
 
@@ -27,15 +27,15 @@ const uuid = () => randomUUID();
 
 async function main() {
   console.log('🚀 Starting database cleanup and seeding...\n');
-  
+
   const { authDb, adminDb, tripDb } = await getPrismaClients();
-  
+
   try {
     await Promise.all([authDb.$connect(), adminDb.$connect(), tripDb.$connect()]);
-    
+
     // ─── Cleanup ───────────────────────────────────────────────────────────────
     console.log('🧹 Cleaning up existing data...');
-    
+
     // Cleanup admin-service (Admin Panel data)
     // Using simple checks to avoid TS issues if some models are missing in specific envs
     const safeDelete = async (db: any, model: string) => {
@@ -81,10 +81,10 @@ async function main() {
 
     const bcrypt = await import('bcrypt');
     const password = await bcrypt.hash('password123', 10);
-    
+
     // ─── Seed Admin Users ────────────────────────────────────────────────────────
     console.log('🌱 Seeding administrative users...');
-    
+
     const adminUser = await authDb.user.create({
       data: {
         id: uuid(),
@@ -98,7 +98,7 @@ async function main() {
       },
     });
     console.log('  ✓ Admin user');
-    
+
     await authDb.user.create({
       data: {
         id: uuid(),
@@ -115,7 +115,7 @@ async function main() {
 
     // ─── Seed Vehicle Types ──────────────────────────────────────────────────────
     console.log('🌱 Seeding vehicle services (VehicleTypes)...');
-    
+
     const economyId = uuid();
     const comfortId = uuid();
     const premiumId = uuid();
@@ -127,7 +127,7 @@ async function main() {
       { id: premiumId, name: 'مميز', type: 'PREMIUM', baseFare: 3000, perKmRate: 1000, perMinuteRate: 200, minFare: 7500, maxPassengers: 4 },
       { id: suvId, name: 'دفع رباعي', type: 'SUV', baseFare: 2500, perKmRate: 800, perMinuteRate: 175, minFare: 6000, maxPassengers: 6 },
     ];
-    
+
     for (const vt of vehicleTypes) {
       await adminDb.vehicleType.create({ data: vt });
     }
@@ -199,29 +199,29 @@ async function main() {
 
     // ─── Seed Settings ───────────────────────────────────────────────────────────
     console.log('🌱 Seeding system settings...');
-    
+
     const settings = [
       { key: 'app.name', value: 'عين رايدر', type: 'STRING', category: 'general', description: 'اسم التطبيق', isPublic: true },
       { key: 'app.currency', value: 'IQD', type: 'STRING', category: 'general', description: 'العملة الافتراضية', isPublic: true },
       { key: 'trip.cancellation_fee', value: '1000', type: 'NUMBER', category: 'trips', description: 'رسوم الإلغاء', isPublic: false },
       { key: 'driver.commission_rate', value: '15', type: 'NUMBER', category: 'drivers', description: 'نسبة العمولة (%)', isPublic: false },
     ];
-    
+
     for (const s of settings) {
-      await adminDb.setting.create({ 
-        data: { ...s, updatedBy: 'system' } 
+      await adminDb.setting.create({
+        data: { ...s, updatedBy: 'system' }
       });
     }
     console.log(`  ✓ ${settings.length} Settings seeded`);
 
     // ─── Seed Promos ─────────────────────────────────────────────────────────────
     console.log('🌱 Seeding promotional codes...');
-    
+
     const promos = [
       { code: 'WELCOME10', type: 'PERCENTAGE', value: 10, maxDiscount: 5000, description: 'خصم ترحيبي للمستخدمين الجدد' },
-      { code: 'FLAT2000', type: 'FIXED', value: 2000, description: 'خصم ثابت 2000 دينار' },
+      { code: 'FLAT2000', type: 'FLAT', value: 2000, description: 'خصم ثابت 2000 دينار' },
     ];
-    
+
     for (const promo of promos) {
       await adminDb.promo.create({
         data: {
@@ -235,13 +235,14 @@ async function main() {
         },
       });
     }
+    // @TODO
     console.log(`  ✓ ${promos.length} Promos seeded`);
-    
+
     console.log('\n✅ Database cleanup and seeding completed successfully!');
     console.log('\n📋 Admin credentials:');
     console.log('   Email: admin@ainrider.com');
     console.log('   Password: password123');
-    
+
   } catch (error) {
     console.error('\n❌ Seeding failed:', error);
     process.exit(1);

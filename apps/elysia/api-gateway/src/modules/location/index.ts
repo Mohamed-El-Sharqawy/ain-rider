@@ -9,17 +9,25 @@ export const locationProxy = new Elysia({ prefix: '/location' })
       parseFloat(query.latitude),
       parseFloat(query.longitude),
     );
+    
+    const resText = await res.text();
     if (!res.ok) {
+      set.status = res.status;
       try {
-        const errorBody = await res.json();
-        set.status = res.status;
-        return errorBody;
+        return JSON.parse(resText);
       } catch {
-        set.status = res.status;
+        console.error(`[LocationProxy] Non-JSON error from ${res.url} (${res.status}): ${resText.slice(0, 500)}`);
         return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
       }
     }
-    return res.json();
+
+    try {
+      return JSON.parse(resText);
+    } catch (e) {
+      console.error(`[LocationProxy] Malformed JSON from ${res.url}: ${resText.slice(0, 500)}`);
+      set.status = 500;
+      return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Malformed response from location service' } };
+    }
   }, {
     query: t.Object({
       latitude: t.String(),
@@ -32,17 +40,25 @@ export const locationProxy = new Elysia({ prefix: '/location' })
       return { error: 'Forbidden' };
     }
     const res = await LocationProxyService.updateDriverLocation(user.id, body);
+    
+    const resText = await res.text();
     if (!res.ok) {
+      set.status = res.status;
       try {
-        const errorBody = await res.json();
-        set.status = res.status;
-        return errorBody;
+        return JSON.parse(resText);
       } catch {
-        set.status = res.status;
+        console.error(`[LocationProxy] Non-JSON error from ${res.url} (${res.status}): ${resText.slice(0, 500)}`);
         return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
       }
     }
-    return res.json();
+
+    try {
+      return JSON.parse(resText);
+    } catch (e) {
+      console.error(`[LocationProxy] Malformed JSON from ${res.url}: ${resText.slice(0, 500)}`);
+      set.status = 500;
+      return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Malformed response from location service' } };
+    }
   }, {
     body: t.Object({
       latitude: t.Number(),

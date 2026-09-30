@@ -15,32 +15,37 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
 /**
  * Model User
- * 
+ * Core user account. A single user can be either a rider or a driver (not both).
+ * Soft-deleted users have `deletedAt` set instead of being physically removed.
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
  * Model RefreshToken
- * 
+ * JWT refresh token with rotation-based family tracking.
+ * Reuse of a revoked token revokes the entire family (reuse detection).
  */
 export type RefreshToken = $Result.DefaultSelection<Prisma.$RefreshTokenPayload>
 /**
  * Model Driver
- * 
+ * Driver profile linked to a User. Created on registration when role=DRIVER.
+ * Tracks onboarding progress, online status, and trip statistics.
  */
 export type Driver = $Result.DefaultSelection<Prisma.$DriverPayload>
 /**
  * Model DriverDocument
- * 
+ * Stores identity and driving license documents for a driver.
+ * Upload attempts are capped at MAX_UPLOAD_ATTEMPTS (default 3) per document type.
  */
 export type DriverDocument = $Result.DefaultSelection<Prisma.$DriverDocumentPayload>
 /**
  * Model Vehicle
- * 
+ * Vehicle registered by a driver during onboarding.
+ * Images are stored as MinIO object keys; presigned URLs are generated on read.
  */
 export type Vehicle = $Result.DefaultSelection<Prisma.$VehiclePayload>
 /**
  * Model Rider
- * 
+ * Rider profile linked to a User. Created on registration when role=RIDER.
  */
 export type Rider = $Result.DefaultSelection<Prisma.$RiderPayload>
 
@@ -66,6 +71,27 @@ export const DocumentStatus: {
 
 export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus]
 
+
+export const UserRole: {
+  RIDER: 'RIDER',
+  DRIVER: 'DRIVER',
+  ADMIN: 'ADMIN',
+  SUPPORT: 'SUPPORT'
+};
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const UserStatus: {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  PENDING_DOCUMENTS: 'PENDING_DOCUMENTS',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  REJECTED: 'REJECTED'
+};
+
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
+
 }
 
 export type OnboardingStatus = $Enums.OnboardingStatus
@@ -75,6 +101,14 @@ export const OnboardingStatus: typeof $Enums.OnboardingStatus
 export type DocumentStatus = $Enums.DocumentStatus
 
 export const DocumentStatus: typeof $Enums.DocumentStatus
+
+export type UserRole = $Enums.UserRole
+
+export const UserRole: typeof $Enums.UserRole
+
+export type UserStatus = $Enums.UserStatus
+
+export const UserStatus: typeof $Enums.UserStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1431,8 +1465,8 @@ export namespace Prisma {
     passwordHash: string | null
     firstName: string | null
     lastName: string | null
-    role: string | null
-    status: string | null
+    role: $Enums.UserRole | null
+    status: $Enums.UserStatus | null
     profileImage: string | null
     address: string | null
     city: string | null
@@ -1443,6 +1477,8 @@ export namespace Prisma {
     emergencyContactPhone: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    deletedAt: Date | null
+    deletedBy: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1452,8 +1488,8 @@ export namespace Prisma {
     passwordHash: string | null
     firstName: string | null
     lastName: string | null
-    role: string | null
-    status: string | null
+    role: $Enums.UserRole | null
+    status: $Enums.UserStatus | null
     profileImage: string | null
     address: string | null
     city: string | null
@@ -1464,6 +1500,8 @@ export namespace Prisma {
     emergencyContactPhone: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    deletedAt: Date | null
+    deletedBy: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1485,6 +1523,8 @@ export namespace Prisma {
     emergencyContactPhone: number
     createdAt: number
     updatedAt: number
+    deletedAt: number
+    deletedBy: number
     _all: number
   }
 
@@ -1508,6 +1548,8 @@ export namespace Prisma {
     emergencyContactPhone?: true
     createdAt?: true
     updatedAt?: true
+    deletedAt?: true
+    deletedBy?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1529,6 +1571,8 @@ export namespace Prisma {
     emergencyContactPhone?: true
     createdAt?: true
     updatedAt?: true
+    deletedAt?: true
+    deletedBy?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1550,6 +1594,8 @@ export namespace Prisma {
     emergencyContactPhone?: true
     createdAt?: true
     updatedAt?: true
+    deletedAt?: true
+    deletedBy?: true
     _all?: true
   }
 
@@ -1632,8 +1678,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status: string
+    role: $Enums.UserRole
+    status: $Enums.UserStatus
     profileImage: string | null
     address: string | null
     city: string | null
@@ -1644,6 +1690,8 @@ export namespace Prisma {
     emergencyContactPhone: string | null
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
+    deletedBy: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -1682,6 +1730,8 @@ export namespace Prisma {
     emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
+    deletedBy?: boolean
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
     driver?: boolean | User$driverArgs<ExtArgs>
     rider?: boolean | User$riderArgs<ExtArgs>
@@ -1707,6 +1757,8 @@ export namespace Prisma {
     emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
+    deletedBy?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1728,6 +1780,8 @@ export namespace Prisma {
     emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
+    deletedBy?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -1749,9 +1803,11 @@ export namespace Prisma {
     emergencyContactPhone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    deletedAt?: boolean
+    deletedBy?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "phoneNumber" | "passwordHash" | "firstName" | "lastName" | "role" | "status" | "profileImage" | "address" | "city" | "state" | "country" | "dateOfBirth" | "emergencyContactName" | "emergencyContactPhone" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "phoneNumber" | "passwordHash" | "firstName" | "lastName" | "role" | "status" | "profileImage" | "address" | "city" | "state" | "country" | "dateOfBirth" | "emergencyContactName" | "emergencyContactPhone" | "createdAt" | "updatedAt" | "deletedAt" | "deletedBy", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
     driver?: boolean | User$driverArgs<ExtArgs>
@@ -1775,8 +1831,8 @@ export namespace Prisma {
       passwordHash: string
       firstName: string
       lastName: string
-      role: string
-      status: string
+      role: $Enums.UserRole
+      status: $Enums.UserStatus
       profileImage: string | null
       address: string | null
       city: string | null
@@ -1787,6 +1843,14 @@ export namespace Prisma {
       emergencyContactPhone: string | null
       createdAt: Date
       updatedAt: Date
+      /**
+       * Timestamp when the user was soft-deleted. Null means active.
+       */
+      deletedAt: Date | null
+      /**
+       * ID of the admin or system user who performed the soft-delete.
+       */
+      deletedBy: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2219,8 +2283,8 @@ export namespace Prisma {
     readonly passwordHash: FieldRef<"User", 'String'>
     readonly firstName: FieldRef<"User", 'String'>
     readonly lastName: FieldRef<"User", 'String'>
-    readonly role: FieldRef<"User", 'String'>
-    readonly status: FieldRef<"User", 'String'>
+    readonly role: FieldRef<"User", 'UserRole'>
+    readonly status: FieldRef<"User", 'UserStatus'>
     readonly profileImage: FieldRef<"User", 'String'>
     readonly address: FieldRef<"User", 'String'>
     readonly city: FieldRef<"User", 'String'>
@@ -2231,6 +2295,8 @@ export namespace Prisma {
     readonly emergencyContactPhone: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly deletedAt: FieldRef<"User", 'DateTime'>
+    readonly deletedBy: FieldRef<"User", 'String'>
   }
     
 
@@ -2939,6 +3005,9 @@ export namespace Prisma {
       id: string
       userId: string
       tokenHash: string
+      /**
+       * Token family — all tokens in a family are revoked on reuse detection.
+       */
       family: string
       expiresAt: Date
       revoked: boolean
@@ -5328,10 +5397,16 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       driverId: string
+      /**
+       * MinIO object keys for front/back identity card images.
+       */
       identityImages: string[]
       identityStatus: $Enums.DocumentStatus
       identityRejectionReason: string | null
       identityUploadAttempts: number
+      /**
+       * MinIO object keys for driving license images.
+       */
       drivingLicenseImages: string[]
       drivingLicenseStatus: $Enums.DocumentStatus
       drivingLicenseRejectionReason: string | null
@@ -6542,7 +6617,13 @@ export namespace Prisma {
       year: number
       color: string
       plateNumber: string
+      /**
+       * MinIO object key for the vehicle exterior photo.
+       */
       carImage: string
+      /**
+       * MinIO object key for the vehicle license/registration photo.
+       */
       carLicenseImage: string
       carLicenseText: string | null
       status: $Enums.DocumentStatus
@@ -8595,7 +8676,9 @@ export namespace Prisma {
     emergencyContactName: 'emergencyContactName',
     emergencyContactPhone: 'emergencyContactPhone',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt',
+    deletedBy: 'deletedBy'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -8726,6 +8809,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'UserRole'
+   */
+  export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserRole[]'
+   */
+  export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserStatus'
+   */
+  export type EnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserStatus[]'
+   */
+  export type ListEnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -8815,8 +8926,8 @@ export namespace Prisma {
     passwordHash?: StringFilter<"User"> | string
     firstName?: StringFilter<"User"> | string
     lastName?: StringFilter<"User"> | string
-    role?: StringFilter<"User"> | string
-    status?: StringFilter<"User"> | string
+    role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
+    status?: EnumUserStatusFilter<"User"> | $Enums.UserStatus
     profileImage?: StringNullableFilter<"User"> | string | null
     address?: StringNullableFilter<"User"> | string | null
     city?: StringNullableFilter<"User"> | string | null
@@ -8827,6 +8938,8 @@ export namespace Prisma {
     emergencyContactPhone?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    deletedBy?: StringNullableFilter<"User"> | string | null
     refreshTokens?: RefreshTokenListRelationFilter
     driver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
     rider?: XOR<RiderNullableScalarRelationFilter, RiderWhereInput> | null
@@ -8851,6 +8964,8 @@ export namespace Prisma {
     emergencyContactPhone?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    deletedBy?: SortOrderInput | SortOrder
     refreshTokens?: RefreshTokenOrderByRelationAggregateInput
     driver?: DriverOrderByWithRelationInput
     rider?: RiderOrderByWithRelationInput
@@ -8866,8 +8981,8 @@ export namespace Prisma {
     passwordHash?: StringFilter<"User"> | string
     firstName?: StringFilter<"User"> | string
     lastName?: StringFilter<"User"> | string
-    role?: StringFilter<"User"> | string
-    status?: StringFilter<"User"> | string
+    role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
+    status?: EnumUserStatusFilter<"User"> | $Enums.UserStatus
     profileImage?: StringNullableFilter<"User"> | string | null
     address?: StringNullableFilter<"User"> | string | null
     city?: StringNullableFilter<"User"> | string | null
@@ -8878,6 +8993,8 @@ export namespace Prisma {
     emergencyContactPhone?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    deletedBy?: StringNullableFilter<"User"> | string | null
     refreshTokens?: RefreshTokenListRelationFilter
     driver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
     rider?: XOR<RiderNullableScalarRelationFilter, RiderWhereInput> | null
@@ -8902,6 +9019,8 @@ export namespace Prisma {
     emergencyContactPhone?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    deletedBy?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -8917,8 +9036,8 @@ export namespace Prisma {
     passwordHash?: StringWithAggregatesFilter<"User"> | string
     firstName?: StringWithAggregatesFilter<"User"> | string
     lastName?: StringWithAggregatesFilter<"User"> | string
-    role?: StringWithAggregatesFilter<"User"> | string
-    status?: StringWithAggregatesFilter<"User"> | string
+    role?: EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
+    status?: EnumUserStatusWithAggregatesFilter<"User"> | $Enums.UserStatus
     profileImage?: StringNullableWithAggregatesFilter<"User"> | string | null
     address?: StringNullableWithAggregatesFilter<"User"> | string | null
     city?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -8929,6 +9048,8 @@ export namespace Prisma {
     emergencyContactPhone?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    deletedBy?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type RefreshTokenWhereInput = {
@@ -9357,8 +9478,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -9369,6 +9490,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     driver?: DriverCreateNestedOneWithoutUserInput
     rider?: RiderCreateNestedOneWithoutUserInput
@@ -9381,8 +9504,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -9393,6 +9516,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     driver?: DriverUncheckedCreateNestedOneWithoutUserInput
     rider?: RiderUncheckedCreateNestedOneWithoutUserInput
@@ -9405,8 +9530,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9417,6 +9542,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     driver?: DriverUpdateOneWithoutUserNestedInput
     rider?: RiderUpdateOneWithoutUserNestedInput
@@ -9429,8 +9556,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9441,6 +9568,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     driver?: DriverUncheckedUpdateOneWithoutUserNestedInput
     rider?: RiderUncheckedUpdateOneWithoutUserNestedInput
@@ -9453,8 +9582,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -9465,6 +9594,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -9474,8 +9605,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9486,6 +9617,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -9495,8 +9628,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9507,6 +9640,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RefreshTokenCreateInput = {
@@ -9989,6 +10124,20 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type EnumUserRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleFilter<$PrismaModel> | $Enums.UserRole
+  }
+
+  export type EnumUserStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusFilter<$PrismaModel> | $Enums.UserStatus
+  }
+
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -10070,6 +10219,8 @@ export namespace Prisma {
     emergencyContactPhone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrder
+    deletedBy?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -10091,6 +10242,8 @@ export namespace Prisma {
     emergencyContactPhone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrder
+    deletedBy?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -10112,6 +10265,8 @@ export namespace Prisma {
     emergencyContactPhone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    deletedAt?: SortOrder
+    deletedBy?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -10130,6 +10285,26 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type EnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleWithAggregatesFilter<$PrismaModel> | $Enums.UserRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserRoleFilter<$PrismaModel>
+    _max?: NestedEnumUserRoleFilter<$PrismaModel>
+  }
+
+  export type EnumUserStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusWithAggregatesFilter<$PrismaModel> | $Enums.UserStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserStatusFilter<$PrismaModel>
+    _max?: NestedEnumUserStatusFilter<$PrismaModel>
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -10593,6 +10768,14 @@ export namespace Prisma {
     set?: string
   }
 
+  export type EnumUserRoleFieldUpdateOperationsInput = {
+    set?: $Enums.UserRole
+  }
+
+  export type EnumUserStatusFieldUpdateOperationsInput = {
+    set?: $Enums.UserStatus
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
@@ -10879,6 +11062,20 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type NestedEnumUserRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleFilter<$PrismaModel> | $Enums.UserRole
+  }
+
+  export type NestedEnumUserStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusFilter<$PrismaModel> | $Enums.UserStatus
+  }
+
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -10941,6 +11138,26 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type NestedEnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserRoleWithAggregatesFilter<$PrismaModel> | $Enums.UserRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserRoleFilter<$PrismaModel>
+    _max?: NestedEnumUserRoleFilter<$PrismaModel>
+  }
+
+  export type NestedEnumUserStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusWithAggregatesFilter<$PrismaModel> | $Enums.UserStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserStatusFilter<$PrismaModel>
+    _max?: NestedEnumUserStatusFilter<$PrismaModel>
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11277,8 +11494,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -11289,6 +11506,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     driver?: DriverCreateNestedOneWithoutUserInput
     rider?: RiderCreateNestedOneWithoutUserInput
   }
@@ -11300,8 +11519,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -11312,6 +11531,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     driver?: DriverUncheckedCreateNestedOneWithoutUserInput
     rider?: RiderUncheckedCreateNestedOneWithoutUserInput
   }
@@ -11339,8 +11560,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11351,6 +11572,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     driver?: DriverUpdateOneWithoutUserNestedInput
     rider?: RiderUpdateOneWithoutUserNestedInput
   }
@@ -11362,8 +11585,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11374,6 +11597,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     driver?: DriverUncheckedUpdateOneWithoutUserNestedInput
     rider?: RiderUncheckedUpdateOneWithoutUserNestedInput
   }
@@ -11385,8 +11610,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -11397,6 +11622,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     rider?: RiderCreateNestedOneWithoutUserInput
   }
@@ -11408,8 +11635,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -11420,6 +11647,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     rider?: RiderUncheckedCreateNestedOneWithoutUserInput
   }
@@ -11519,8 +11748,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11531,6 +11760,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     rider?: RiderUpdateOneWithoutUserNestedInput
   }
@@ -11542,8 +11773,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11554,6 +11785,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     rider?: RiderUncheckedUpdateOneWithoutUserNestedInput
   }
@@ -11785,8 +12018,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -11797,6 +12030,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     driver?: DriverCreateNestedOneWithoutUserInput
   }
@@ -11808,8 +12043,8 @@ export namespace Prisma {
     passwordHash: string
     firstName: string
     lastName: string
-    role: string
-    status?: string
+    role: $Enums.UserRole
+    status?: $Enums.UserStatus
     profileImage?: string | null
     address?: string | null
     city?: string | null
@@ -11820,6 +12055,8 @@ export namespace Prisma {
     emergencyContactPhone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    deletedBy?: string | null
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     driver?: DriverUncheckedCreateNestedOneWithoutUserInput
   }
@@ -11847,8 +12084,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11859,6 +12096,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     driver?: DriverUpdateOneWithoutUserNestedInput
   }
@@ -11870,8 +12109,8 @@ export namespace Prisma {
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11882,6 +12121,8 @@ export namespace Prisma {
     emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedBy?: NullableStringFieldUpdateOperationsInput | string | null
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     driver?: DriverUncheckedUpdateOneWithoutUserNestedInput
   }

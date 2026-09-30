@@ -47,6 +47,9 @@ export class UserSuspendResponder implements OnModuleInit, OnModuleDestroy {
     await this.responder.respond<SuspendUserRequest, SuspendUserResponse>(
       'user.suspend.request',
       async (request) => {
+        if (!request?.userId || !request?.suspendedBy) {
+          throw new Error('[UserSuspendResponder] Missing required fields: userId, suspendedBy');
+        }
         const { userId, suspendedBy } = request;
 
         console.log(

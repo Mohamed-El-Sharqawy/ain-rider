@@ -1,3 +1,8 @@
+/// Migration strategy:
+/// - All schema changes must be backward-compatible (additive columns, nullable fields).
+/// - Renames require a two-step migration: add new column → backfill → drop old column.
+/// - Deprecated fields should be marked with a /// DEPRECATED comment and removed after a full release cycle.
+/// - Coordinate multi-service schema changes via NATS event versioning (new fields = new event version).
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -7,38 +12,67 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Payment lifecycle status.
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+/// Refund request lifecycle status.
+enum RefundStatus {
+  PENDING
+  APPROVED
+  PROCESSED
+  REJECTED
+}
+
+/// Payment record linked to a trip. Cash payments are confirmed manually by drivers/admins.
+/// The `gatewayResponse` field stores typed JSON (CashGatewayResponse, CashFailureResponse, etc.).
 model Payment {
-  id              String    @id @default(uuid())
-  tripId          String    @unique
+  id              String        @id @default(uuid())
+  tripId          String        @unique
   riderId         String
   driverId        String
   amount          Float
-  currency        String    @default("IQD")
-  status          String    @default("PENDING")
+  currency        String        @default("IQD")
+  status          PaymentStatus @default(PENDING)
   paymentMethod   String
   transactionId   String?
+  /// Typed JSON response from the payment gateway. For cash, see CashGatewayResponse interface.
   gatewayResponse Json?
-  createdAt       DateTime  @default(now())
+  createdAt       DateTime      @default(now())
   completedAt     DateTime?
-  updatedAt       DateTime  @updatedAt
+  updatedAt       DateTime      @updatedAt
+
+  refunds Refund[]
 
   @@index([tripId])
   @@index([riderId])
   @@index([driverId])
   @@index([status])
+  @@index([createdAt])
+  @@index([status, createdAt])
   @@map("payments")
 }
 
+/// Refund request against a payment. Total refunds cannot exceed the original payment amount.
 model Refund {
-  id          String    @id @default(uuid())
+  id          String       @id @default(uuid())
   paymentId   String
   amount      Float
   reason      String
-  status      String    @default("PENDING")
+  status      RefundStatus @default(PENDING)
   processedBy String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime     @default(now())
   completedAt DateTime?
 
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
   @@index([paymentId])
+  @@index([status])
+  @@index([createdAt])
   @@map("refunds")
 }

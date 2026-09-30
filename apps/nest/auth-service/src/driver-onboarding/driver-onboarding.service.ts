@@ -14,6 +14,7 @@ import { UpdateDriverProfileDto } from "./dto/update-driver-profile.dto";
 import { OnboardingStatus, DocumentStatus } from "../generated/prisma";
 import type { PresignedUrlResult } from "../shared/storage/storage.service";
 import type { UploadedFile } from "../shared/types";
+import type { Prisma } from "../generated/prisma/client";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -64,7 +65,7 @@ export class DriverOnboardingService {
       throw new NotFoundException("Driver not found");
     }
 
-    const updateData: Record<string, unknown> = {};
+    const updateData: Prisma.UserUpdateInput = {};
     if (dto.address !== undefined) updateData.address = dto.address;
     if (dto.city !== undefined) updateData.city = dto.city;
     if (dto.state !== undefined) updateData.state = dto.state;

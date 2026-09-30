@@ -138,7 +138,9 @@ exports.Prisma.UserScalarFieldEnum = {
   emergencyContactName: 'emergencyContactName',
   emergencyContactPhone: 'emergencyContactPhone',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  deletedBy: 'deletedBy'
 };
 
 exports.Prisma.RefreshTokenScalarFieldEnum = {
@@ -221,6 +223,21 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.UserRole = exports.$Enums.UserRole = {
+  RIDER: 'RIDER',
+  DRIVER: 'DRIVER',
+  ADMIN: 'ADMIN',
+  SUPPORT: 'SUPPORT'
+};
+
+exports.UserStatus = exports.$Enums.UserStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  PENDING_DOCUMENTS: 'PENDING_DOCUMENTS',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  REJECTED: 'REJECTED'
+};
+
 exports.OnboardingStatus = exports.$Enums.OnboardingStatus = {
   PENDING_DOCUMENTS: 'PENDING_DOCUMENTS',
   UNDER_REVIEW: 'UNDER_REVIEW',

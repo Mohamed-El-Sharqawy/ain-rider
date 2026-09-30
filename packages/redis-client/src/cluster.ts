@@ -1,11 +1,42 @@
 import Redis, { Cluster, ClusterOptions } from "ioredis";
 
+export interface RedisClientLike {
+  exists(key: string): Promise<number | boolean>;
+  exists(keys: string[]): Promise<number | boolean>;
+  setEx?(key: string, ttl: number, value: string): Promise<unknown>;
+  setex?(key: string, ttl: number, value: string): Promise<unknown>;
+  set(key: string, value: string): Promise<unknown>;
+  set(key: string, value: string, flag: string, duration: number): Promise<unknown>;
+  get(key: string): Promise<string | null>;
+  del(key: string): Promise<number>;
+  del(keys: string[]): Promise<number>;
+  connect?(): unknown;
+  disconnect?(): unknown;
+  quit?(): unknown;
+  readonly status?: string;
+  readonly isOpen?: boolean;
+}
+
 export interface RedisClusterConfig {
-  nodes: string[]; // ["host:port", "host:port", ...]
+  nodes: string[];
   password?: string;
   keyPrefix?: string;
   enableReadyCheck?: boolean;
   maxRetriesPerRequest?: number;
+  natMap?: Record<string, { host: string; port: number }>;
+}
+
+function parseNatMap(raw?: string): Record<string, { host: string; port: number }> | undefined {
+  if (!raw) return undefined;
+  const map: Record<string, { host: string; port: number }> = {};
+  for (const entry of raw.split(',')) {
+    const [from, to] = entry.split('>');
+    if (!from || !to) continue;
+    const [fromHost, fromPort] = from.split(':');
+    const [toHost, toPort] = to.split(':');
+    map[`${fromHost}:${fromPort}`] = { host: toHost, port: parseInt(toPort, 10) };
+  }
+  return Object.keys(map).length > 0 ? map : undefined;
 }
 
 export function createRedisCluster(config: RedisClusterConfig): Cluster {
@@ -14,23 +45,11 @@ export function createRedisCluster(config: RedisClusterConfig): Cluster {
     return { host, port: parseInt(port, 10) };
   });
 
+  const envNatMap = parseNatMap(process.env.REDIS_NAT_MAP);
+  const natMap = config.natMap ?? envNatMap;
+
   const options: ClusterOptions = {
-    natMap: {
-      // 3 masters - local development
-      "ain-rider-redis-1:6379": { host: "127.0.0.1", port: 6379 },
-      "ain-rider-redis-1:0":    { host: "127.0.0.1", port: 6379 },
-      "ain-rider-redis-2:6379": { host: "127.0.0.1", port: 6380 },
-      "ain-rider-redis-2:0":    { host: "127.0.0.1", port: 6380 },
-      "ain-rider-redis-3:6379": { host: "127.0.0.1", port: 6381 },
-      "ain-rider-redis-3:0":    { host: "127.0.0.1", port: 6381 },
-      // 3 replicas - local development
-      "ain-rider-redis-4:6379": { host: "127.0.0.1", port: 6382 },
-      "ain-rider-redis-4:0":    { host: "127.0.0.1", port: 6382 },
-      "ain-rider-redis-5:6379": { host: "127.0.0.1", port: 6383 },
-      "ain-rider-redis-5:0":    { host: "127.0.0.1", port: 6383 },
-      "ain-rider-redis-6:6379": { host: "127.0.0.1", port: 6384 },
-      "ain-rider-redis-6:0":    { host: "127.0.0.1", port: 6384 },
-    },
+    natMap,
     redisOptions: {
       password: config.password,
       keyPrefix: config.keyPrefix,

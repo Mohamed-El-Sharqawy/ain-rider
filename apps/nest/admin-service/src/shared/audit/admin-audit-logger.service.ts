@@ -9,8 +9,8 @@ export interface AuditLogData {
   action: string;
   targetType: string;
   targetId: string;
-  previousState?: any;
-  newState?: any;
+  previousState?: Record<string, unknown>;
+  newState?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
   reason?: string;
@@ -36,8 +36,8 @@ export class AdminAuditLogger {
           action: data.action,
           targetType: data.targetType,
           targetId: data.targetId,
-          previousState: data.previousState ?? undefined,
-          newState: data.newState ?? undefined,
+          previousState: (data.previousState ?? undefined) as any,
+          newState: (data.newState ?? undefined) as any,
           ipAddress: data.ipAddress,
           userAgent: data.userAgent,
           reason: data.reason,

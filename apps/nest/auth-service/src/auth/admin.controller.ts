@@ -2,6 +2,7 @@ import { Controller, Get, Query, Param, UseGuards, NotFoundException, Patch, Bod
 import { AuthService } from './auth.service';
 import { InternalAuthGuard } from './guards/internal-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 
 @ApiTags('admin')
 @Controller('auth/admin')
@@ -46,7 +47,7 @@ export class AdminController {
 
   @Patch('users/:id')
   @ApiOperation({ summary: 'Update user profile (Admin only)' })
-  async updateUser(@Param('id') id: string, @Body() data: any) {
+  async updateUser(@Param('id') id: string, @Body() data: AdminUpdateUserDto) {
     return this.authService.updateUser(id, data);
   }
 }

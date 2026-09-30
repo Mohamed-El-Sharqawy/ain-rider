@@ -4,6 +4,7 @@ import { health } from './modules/health';
 import { metricsPlugin } from '@ain-rider/metrics';
 import { realtime } from './modules/realtime';
 import { RealtimeService } from './modules/realtime/service';
+import { ConnectionStore } from './shared/connections';
 import { log } from './shared/logger';
 import { traceMiddleware } from './shared/trace';
 import { errorHandler } from './shared/error-handler';
@@ -16,7 +17,11 @@ RealtimeService.initNatsSubscriptions().catch((err) => {
   process.exit(1);
 });
 
-new Elysia()
+ConnectionStore.init().catch((err) => {
+  log('error', 'Failed to initialize ConnectionStore Redis subscriber', { error: String(err) });
+});
+
+const app = new Elysia()
   .use(traceMiddleware)
   .use(errorHandler)
   .use(
@@ -37,3 +42,25 @@ new Elysia()
   .listen(PORT);
 
 log('info', 'WebSocket Server running', { port: PORT, wsEndpoint: `ws://localhost:${PORT}/ws` });
+
+let isShuttingDown = false;
+
+async function gracefulShutdown(signal: string) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  log('info', `Received ${signal} — starting graceful shutdown`);
+
+  try {
+    await RealtimeService.stopNatsSubscriptions();
+  } catch (err) {
+    log('error', 'Error stopping NATS consumers during shutdown', { error: String(err) });
+  }
+
+  app.stop();
+  log('info', 'WebSocket Server shut down complete');
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

@@ -1,12 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NatsService } from '../shared/nats/nats.service';
 import { TripEventPublisher } from '../events/trip-event.publisher';
-import { TripStatus } from '@ain-rider/shared-types';
+import { TripStatus, haversineDistance } from '@ain-rider/shared-types';
 import { fetchInternal } from '@ain-rider/internal-api';
 import type { CreateTripDto } from './dto/create-trip.dto';
 import type { Prisma } from '../generated/prisma/client';
 import type { SOS } from '../generated/prisma/client';
+
+type TripStatusType = typeof TripStatus[keyof typeof TripStatus];
+
+const VALID_TRANSITIONS: Record<string, Set<string>> = {
+  [TripStatus.REQUESTED]: new Set([TripStatus.MATCHED, TripStatus.ASSIGNED, TripStatus.IN_PROGRESS, TripStatus.CANCELLED]),
+  [TripStatus.ASSIGNED]: new Set([TripStatus.ASSIGNED, TripStatus.MATCHED, TripStatus.IN_PROGRESS, TripStatus.CANCELLED]),
+  [TripStatus.MATCHED]: new Set([TripStatus.DRIVER_ARRIVING, TripStatus.IN_PROGRESS, TripStatus.CANCELLED]),
+  [TripStatus.DRIVER_ARRIVING]: new Set([TripStatus.IN_PROGRESS, TripStatus.CANCELLED]),
+  [TripStatus.IN_PROGRESS]: new Set([TripStatus.COMPLETED, TripStatus.CANCELLED]),
+  [TripStatus.COMPLETED]: new Set(),
+  [TripStatus.CANCELLED]: new Set(),
+};
 
 @Injectable()
 export class TripsService {
@@ -40,7 +52,7 @@ export class TripsService {
 
   async updateStatus(
     tripId: string, 
-    status: TripStatus, 
+    status: TripStatusType, 
     driverId?: string, 
     traceId?: string,
     metadata?: {
@@ -52,7 +64,22 @@ export class TripsService {
       vehiclePlate?: string;
     }
   ) {
-    const data: Prisma.TripUpdateInput = { status };
+    const existing = await this.prisma.trip.findUnique({ where: { id: tripId } });
+    if (!existing) {
+      throw new BadRequestException(`Trip ${tripId} not found`);
+    }
+
+    // Idempotency check: if already in the target status, just return the trip
+    if (existing.status === (status as any)) {
+      return existing;
+    }
+
+    const allowed = VALID_TRANSITIONS[existing.status];
+    if (!allowed || !allowed.has(status)) {
+      throw new BadRequestException(`Invalid transition: ${existing.status} → ${status}`);
+    }
+
+    const data: Prisma.TripUpdateInput = { status: status as any };
     if (status === 'ASSIGNED' as any && driverId) {
       data.driverId = driverId;
       if (metadata) {
@@ -181,39 +208,36 @@ export class TripsService {
   }
 
   async acceptTrip(tripId: string, driverId: string, traceId?: string) {
-    const trip = await this.prisma.trip.findUnique({ where: { id: tripId } });
-
-    if (!trip) {
-      throw new Error(`Trip ${tripId} not found`);
-    }
-
-    if (trip.status !== 'ASSIGNED' && trip.status !== TripStatus.REQUESTED) {
-      // Allow REQUESTED as fallback if assignment status didn't propagate
-      // throw new Error(`Cannot accept trip in status ${trip.status}`);
-    }
-
-    const updated = await this.prisma.trip.update({
-      where: { id: tripId },
+    const result = await this.prisma.trip.updateMany({
+      where: {
+        id: tripId,
+        status: { in: [TripStatus.REQUESTED, 'ASSIGNED'] as any },
+      },
       data: {
-        status: TripStatus.MATCHED,
+        status: TripStatus.MATCHED as any,
         matchedAt: new Date(),
         driverId,
       },
     });
 
-    // Publish matched event so rider can see driver info
+    if (result.count === 0) {
+      throw new BadRequestException(`Trip ${tripId} not available for acceptance (already matched/cancelled)`);
+    }
+
+    const updated = await this.prisma.trip.findUnique({ where: { id: tripId } });
+
     await this.eventPublisher.publishTripMatched(
       {
-        tripId: updated.id,
-        driverId: updated.driverId!,
-        driverName: updated.driverName || 'Driver',
-        driverPhone: updated.driverPhone || '',
-        driverRating: updated.driverRating || 5,
-        vehicleMake: updated.vehicleMake || '',
-        vehicleModel: updated.vehicleModel || '',
-        vehiclePlate: updated.vehiclePlate || '',
+        tripId: updated!.id,
+        driverId: updated!.driverId!,
+        driverName: updated!.driverName || 'Driver',
+        driverPhone: updated!.driverPhone || '',
+        driverRating: updated!.driverRating || 5,
+        vehicleMake: updated!.vehicleMake || '',
+        vehicleModel: updated!.vehicleModel || '',
+        vehiclePlate: updated!.vehiclePlate || '',
         estimatedArrival: 5,
-        distance: updated.distance || 0,
+        distance: updated!.distance || 0,
       },
       traceId,
     );
@@ -221,7 +245,7 @@ export class TripsService {
     return updated;
   }
 
-  async assignDriver(tripId: string, driverId: string, assignedBy: string, _traceId?: string) {
+  async assignDriver(tripId: string, driverId: string, _assignedBy: string, _traceId?: string) {
     const trip = await this.prisma.trip.update({
       where: { id: tripId },
       data: {
@@ -230,10 +254,6 @@ export class TripsService {
         matchedAt: new Date(),
       },
     });
-
-    console.log(
-      `[TripsService] Driver assigned | tripId=${tripId} | driverId=${driverId} | assignedBy=${assignedBy}`,
-    );
 
     return trip;
   }
@@ -254,8 +274,8 @@ export class TripsService {
         tripId: data.tripId,
         userId: data.userId,
         userType: data.userType,
-        lat: data.lat,
-        lng: data.lng,
+        latitude: data.lat,
+        longitude: data.lng,
         reason: data.reason,
         status: 'ACTIVE',
       },
@@ -267,14 +287,10 @@ export class TripsService {
         tripId: sos.tripId,
         userId: sos.userId,
         userType: sos.userType as 'RIDER' | 'DRIVER',
-        location: { lat: sos.lat, lng: sos.lng },
+        location: { lat: sos.latitude, lng: sos.longitude },
         reason: sos.reason,
       },
       traceId,
-    );
-
-    console.log(
-      `[TripsService] SOS triggered | sosId=${sos.id} | userId=${data.userId} | traceId=${traceId}`,
     );
 
     return sos;
@@ -307,14 +323,10 @@ export class TripsService {
       traceId,
     );
 
-    console.log(
-      `[TripsService] SOS resolved | sosId=${sosId} | resolvedBy=${resolvedBy} | traceId=${traceId}`,
-    );
-
     return sos;
   }
 
-  async findAllTrips(params: { skip?: number; take?: number; status?: TripStatus; search?: string }) {
+  async findAllTrips(params: { skip?: number; take?: number; status?: TripStatusType; search?: string }) {
     const where: any = {};
     if (params.status) where.status = params.status;
     if (params.search) {
@@ -362,7 +374,10 @@ export class TripsService {
     let routeSource: 'osrm' | 'haversine' = 'osrm';
 
     try {
-      const OSRM_URL = process.env.OSRM_URL || 'http://localhost:5000';
+      const OSRM_URL = process.env.OSRM_URL;
+      if (!OSRM_URL) {
+        throw new Error('[TripsService] FATAL: OSRM_URL environment variable is required for fare estimation');
+      }
       const res = await fetchInternal(
         `${OSRM_URL}/route/v1/driving/${pickupLng},${pickupLat};${dropoffLng},${dropoffLat}?overview=false`,
         'GET',
@@ -384,24 +399,36 @@ export class TripsService {
       }
     } catch {
       routeSource = 'haversine';
-      const R = 6371e3;
-      const toRad = (d: number) => (d * Math.PI) / 180;
-      const dLat = toRad(dropoffLat - pickupLat);
-      const dLon = toRad(dropoffLng - pickupLng);
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(toRad(pickupLat)) * Math.cos(toRad(dropoffLat)) * Math.sin(dLon / 2) ** 2;
-      distanceMeters = 2 * R * Math.asin(Math.sqrt(a)) * 1.3;
+      distanceMeters = haversineDistance(
+        { latitude: pickupLat, longitude: pickupLng },
+        { latitude: dropoffLat, longitude: dropoffLng },
+      ) * 1.3;
       durationSeconds = (distanceMeters / 1000 / 30) * 3600;
     }
 
     const distanceKm = distanceMeters / 1000;
     const durationMin = durationSeconds / 60;
 
-    const baseFare = 2500;
-    const perKmRate = 1000;
-    const perMinRate = 200;
-    const minimumFare = 5000;
+    let baseFare = 2500;
+    let perKmRate = 1000;
+    let perMinRate = 200;
+    let minimumFare = 5000;
+
+    try {
+      const ADMIN_URL = process.env.ADMIN_SERVICE_URL || 'http://localhost:4004';
+      const settingsRes = await fetchInternal(`${ADMIN_URL}/settings/public/fare_config`, 'GET');
+      if (settingsRes.ok) {
+        const settingsData = await settingsRes.json() as any;
+        const raw = settingsData?.data?.value || settingsData?.value;
+        if (raw) {
+          const config = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          if (config.baseFare) baseFare = Number(config.baseFare);
+          if (config.perKmRate) perKmRate = Number(config.perKmRate);
+          if (config.perMinRate) perMinRate = Number(config.perMinRate);
+          if (config.minimumFare) minimumFare = Number(config.minimumFare);
+        }
+      }
+    } catch {}
 
     const distanceFare = distanceKm * perKmRate;
     const timeFare = durationMin * perMinRate;

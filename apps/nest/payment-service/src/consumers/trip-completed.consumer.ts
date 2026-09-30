@@ -53,6 +53,13 @@ export class TripCompletedConsumer implements OnModuleInit, OnModuleDestroy {
         traceId: string
       ): Promise<void> {
         const payload = envelope.data as TripCompletedPayload;
+
+        if (!payload?.tripId || !payload?.riderId || !payload?.driverId || payload?.actualFare === undefined) {
+          console.error(
+            `[TripCompletedConsumer] Invalid payload: missing required fields | traceId=${traceId}`
+          );
+          throw new Error('Missing required fields: tripId, riderId, driverId, actualFare');
+        }
         
         console.log(
           `[TripCompletedConsumer] Processing trip_completed | tripId=${payload.tripId} | fare=${payload.actualFare} | traceId=${traceId}`

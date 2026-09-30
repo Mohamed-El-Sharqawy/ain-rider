@@ -49,7 +49,11 @@ export interface TripMatchedPayload {
   pickupAddress?: string;
   dropoffAddress?: string;
   estimatedFare?: number;
+  estimatedDuration?: number; // seconds
   riderId?: string;
+  riderName?: string;
+  riderPhone?: string;
+  riderRating?: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

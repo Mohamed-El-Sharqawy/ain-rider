@@ -53,10 +53,10 @@ export class TripsController {
   @Patch(':id/accept')
   @ApiOperation({ summary: 'Accept trip (Driver only)' })
   @ApiParam({ name: 'id', type: String })
-  @ApiHeader({ name: 'x-driver-id', description: 'ID of the driver accepting the trip' })
+  @ApiHeader({ name: 'x-user-id', description: 'ID of the driver accepting the trip (injected by gateway)' })
   accept(
     @Param('id') id: string,
-    @Headers('x-driver-id') driverId: string,
+    @Headers('x-user-id') driverId: string,
   ) {
     return this.tripsService.acceptTrip(id, driverId);
   }
@@ -64,11 +64,11 @@ export class TripsController {
   @Patch(':id/reject')
   @ApiOperation({ summary: 'Reject trip (Driver only)' })
   @ApiParam({ name: 'id', type: String })
-  @ApiHeader({ name: 'x-driver-id', description: 'ID of the driver rejecting the trip' })
+  @ApiHeader({ name: 'x-user-id', description: 'ID of the driver rejecting the trip (injected by gateway)' })
   reject(
     @Param('id') id: string,
     @Body() body: RejectTripDto,
-    @Headers('x-driver-id') driverId: string,
+    @Headers('x-user-id') driverId: string,
   ) {
     return this.tripsService.rejectTrip(id, driverId, body.reason, body.traceId);
   }

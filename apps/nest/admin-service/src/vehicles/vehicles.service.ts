@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateVehicleTypeDto } from './dto/create-vehicle-type.dto';
+import { UpdateVehicleTypeDto } from './dto/update-vehicle-type.dto';
+import { CreateVehicleMakeDto, UpdateVehicleMakeDto } from './dto/vehicle-make.dto';
+import { CreateVehicleModelDto, UpdateVehicleModelDto } from './dto/vehicle-model.dto';
+import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 @Injectable()
 export class VehiclesService {
@@ -12,15 +18,14 @@ export class VehiclesService {
     });
   }
 
-  createType(data: any) {
+  createType(data: CreateVehicleTypeDto) {
     return this.prisma.vehicleType.create({ data });
   }
 
-  updateType(id: string, data: any) {
+  updateType(id: string, data: UpdateVehicleTypeDto) {
     return this.prisma.vehicleType.update({ where: { id }, data });
   }
 
-  // --- Makes ---
   findAllMakes(activeOnly = false) {
     return this.prisma.vehicleMake.findMany({
       where: activeOnly ? { isActive: true } : undefined,
@@ -29,15 +34,14 @@ export class VehiclesService {
     });
   }
 
-  createMake(data: any) {
+  createMake(data: CreateVehicleMakeDto) {
     return this.prisma.vehicleMake.create({ data });
   }
 
-  updateMake(id: string, data: any) {
+  updateMake(id: string, data: UpdateVehicleMakeDto) {
     return this.prisma.vehicleMake.update({ where: { id }, data });
   }
 
-  // --- Models ---
   findAllModels(makeId?: string) {
     return this.prisma.vehicleModel.findMany({
       where: makeId ? { makeId } : undefined,
@@ -46,11 +50,11 @@ export class VehiclesService {
     });
   }
 
-  createModel(data: any) {
+  createModel(data: CreateVehicleModelDto) {
     return this.prisma.vehicleModel.create({ data });
   }
 
-  updateModel(id: string, data: any) {
+  updateModel(id: string, data: UpdateVehicleModelDto) {
     return this.prisma.vehicleModel.update({ where: { id }, data });
   }
 
@@ -61,11 +65,11 @@ export class VehiclesService {
     });
   }
 
-  createVehicle(data: any) {
-    return this.prisma.vehicle.create({ data, include: { vehicleType: true } });
+  createVehicle(data: CreateVehicleDto) {
+    return this.prisma.vehicle.create({ data: data as any, include: { vehicleType: true } });
   }
 
-  updateVehicle(id: string, data: any) {
-    return this.prisma.vehicle.update({ where: { id }, data });
+  updateVehicle(id: string, data: UpdateVehicleDto) {
+    return this.prisma.vehicle.update({ where: { id }, data: data as any });
   }
 }

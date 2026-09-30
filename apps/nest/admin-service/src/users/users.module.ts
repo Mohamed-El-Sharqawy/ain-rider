@@ -4,9 +4,10 @@ import { UsersService } from './users.service';
 import { AuthModule } from '../auth/auth.module';
 import { NatsModule } from '../shared/nats/nats.module';
 import { AdminNatsClient } from '../nats/admin-nats.client';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [AuthModule, NatsModule],
+  imports: [AuthModule, NatsModule, PrismaModule],
   controllers: [UsersController],
   providers: [UsersService, AdminNatsClient],
   exports: [UsersService],

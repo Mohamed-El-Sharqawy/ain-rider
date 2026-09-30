@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import type { SettingType } from '../generated/prisma/client';
 
 @Injectable()
 export class SettingsService {
@@ -32,14 +33,14 @@ export class SettingsService {
     return null;
   }
 
-  upsert(key: string, value: unknown, type?: string, category?: string, description?: string, updatedBy?: string, isPublic?: boolean) {
+  upsert(key: string, value: unknown, type?: SettingType | string, category?: string, description?: string, updatedBy?: string, isPublic?: boolean) {
     const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
     
     return this.prisma.setting.upsert({
       where: { key },
       update: { 
         value: valueStr, 
-        type: type || undefined,
+        type: (type || undefined) as any,
         category: category || undefined,
         description: description || undefined,
         isPublic: isPublic ?? undefined,
@@ -48,7 +49,7 @@ export class SettingsService {
       create: { 
         key, 
         value: valueStr, 
-        type: type || 'STRING', 
+        type: (type || 'STRING') as any, 
         category: category || 'GENERAL', 
         description: description || '', 
         updatedBy: updatedBy || 'system', 
@@ -57,7 +58,7 @@ export class SettingsService {
     });
   }
 
-  async batchUpsert(settings: Array<{ key: string; value: unknown; type?: string; category?: string; description?: string; isPublic?: boolean }>, updatedBy: string) {
+  async batchUpsert(settings: Array<{ key: string; value: unknown; type?: SettingType | string; category?: string; description?: string; isPublic?: boolean }>, updatedBy: string) {
     const results = await Promise.all(
       settings.map((setting) =>
         this.upsert(

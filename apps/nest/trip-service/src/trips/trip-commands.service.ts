@@ -52,7 +52,6 @@ export class TripCommandsService implements OnModuleInit {
     await this.nats.responder.respond<CancelTripRequest, any>(
       NATS_REQUESTS.TRIP_CANCEL,
       async (req) => {
-        console.log(`[TripCommands] Cancel request for trip ${req.tripId}`);
         return this.tripsService.cancelTrip(req.tripId, req.reason, req.cancelledBy);
       },
     );
@@ -61,7 +60,6 @@ export class TripCommandsService implements OnModuleInit {
     await this.nats.responder.respond<UpdateStatusRequest, any>(
       NATS_REQUESTS.TRIP_UPDATE_STATUS,
       async (req) => {
-        console.log(`[TripCommands] Status update for trip ${req.tripId} -> ${req.status}`);
         return this.tripsService.updateStatus(req.tripId, req.status, req.driverId);
       },
     );
@@ -70,11 +68,8 @@ export class TripCommandsService implements OnModuleInit {
     await this.nats.responder.respond<AssignDriverRequest, any>(
       NATS_REQUESTS.TRIP_ASSIGN_DRIVER,
       async (req) => {
-        console.log(`[TripCommands] Assign driver ${req.driverId} to trip ${req.tripId}`);
         return this.tripsService.updateStatus(req.tripId, TripStatus.MATCHED, req.driverId);
       },
     );
-
-    console.log('[TripCommands] All command handlers registered');
   }
 }

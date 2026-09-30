@@ -1,3 +1,8 @@
+/// Migration strategy:
+/// - All schema changes must be backward-compatible (additive columns, nullable fields).
+/// - Renames require a two-step migration: add new column → backfill → drop old column.
+/// - Deprecated fields should be marked with a /// DEPRECATED comment and removed after a full release cycle.
+/// - Coordinate multi-service schema changes via NATS event versioning (new fields = new event version).
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -7,11 +12,43 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Lifecycle status of a trip from request to completion or cancellation.
+enum TripStatus {
+  REQUESTED
+  ASSIGNED
+  MATCHED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+/// Cash collection status tracked independently of trip status.
+enum TripPaymentStatus {
+  PENDING
+  COLLECTED
+  FAILED
+}
+
+/// SOS alert resolution state.
+enum SOSStatus {
+  ACTIVE
+  RESOLVED
+}
+
+/// Whether the SOS was triggered by a rider or driver.
+enum SOSUserType {
+  RIDER
+  DRIVER
+}
+
+/// Core trip record. Driver/vehicle info is intentionally duplicated at assignment time
+/// for historical accuracy — even if the driver later updates their profile, past trips
+/// retain the name/phone/vehicle at the time of the trip.
 model Trip {
-  id                 String    @id @default(uuid())
+  id                 String            @id @default(uuid())
   riderId            String
   driverId           String?
-  status             String    @default("REQUESTED")
+  status             TripStatus        @default(REQUESTED)
   pickupLat          Float
   pickupLng          Float
   pickupAddress      String
@@ -20,13 +57,13 @@ model Trip {
   dropoffAddress     String
   estimatedFare      Float
   actualFare         Float?
-  paymentMethod      String    @default("CASH")
-  paymentStatus      String    @default("PENDING") // PENDING, COLLECTED, FAILED
+  paymentMethod      String            @default("CASH")
+  paymentStatus      TripPaymentStatus @default(PENDING)
   promoCode          String?
-  promoDiscount      Float     @default(0)
+  promoDiscount      Float             @default(0)
   distance           Float?
   duration           Int?
-  requestedAt        DateTime  @default(now())
+  requestedAt        DateTime          @default(now())
   matchedAt          DateTime?
   startedAt          DateTime?
   completedAt        DateTime?
@@ -34,40 +71,50 @@ model Trip {
   cancellationReason String?
   cancelledBy        String?
   driverRating       Float?
+  /// Driver name at the time of assignment (snapshot, not a live FK).
   driverName         String?
+  /// Driver phone at the time of assignment (snapshot, not a live FK).
   driverPhone        String?
+  /// Vehicle make at the time of assignment (snapshot, not a live FK).
   vehicleMake        String?
+  /// Vehicle model at the time of assignment (snapshot, not a live FK).
   vehicleModel       String?
+  /// Vehicle plate at the time of assignment (snapshot, not a live FK).
   vehiclePlate       String?
   riderRating        Float?
-  updatedAt          DateTime  @updatedAt
+  updatedAt          DateTime          @updatedAt
 
   @@index([riderId])
   @@index([driverId])
   @@index([status])
   @@index([paymentStatus])
   @@index([requestedAt])
+  @@index([riderId, status])
+  @@index([driverId, status])
+  @@index([status, requestedAt])
   @@map("trips")
 }
 
+/// Emergency SOS alert triggered by riders or drivers during a trip or standalone.
 model SOS {
-  id         String    @id @default(uuid())
+  id         String      @id @default(uuid())
   tripId     String?
   userId     String
-  userType   String // RIDER, DRIVER
-  lat        Float
-  lng        Float
+  userType   SOSUserType
+  latitude   Float
+  longitude  Float
   reason     String?
-  status     String    @default("ACTIVE") // ACTIVE, RESOLVED
+  status     SOSStatus   @default(ACTIVE)
   resolution String?
   resolvedBy String?
   resolvedAt DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@index([tripId])
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([status, createdAt])
   @@map("sos")
 }

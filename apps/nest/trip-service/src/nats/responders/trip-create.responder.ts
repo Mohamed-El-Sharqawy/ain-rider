@@ -56,6 +56,9 @@ export class TripCreateResponder implements OnModuleInit, OnModuleDestroy {
     await this.responder.respond<CreateTripRequest, CreateTripResponse>(
       'trip.create.request',
       async (request) => {
+        if (!request?.riderId || !request?.pickupLat || !request?.pickupLng || !request?.dropoffLat || !request?.dropoffLng) {
+          throw new Error('[TripCreateResponder] Missing required fields: riderId, pickupLat, pickupLng, dropoffLat, dropoffLng');
+        }
         const { riderId, pickupLat, pickupLng, pickupAddress, dropoffLat, dropoffLng, dropoffAddress, estimatedFare, paymentMethod, promoCode, traceId } = request;
 
         console.log(

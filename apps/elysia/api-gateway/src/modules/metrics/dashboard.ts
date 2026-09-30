@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { authGuard } from '../auth/guard';
 
 export function generateDashboardHtml(services: string[], title: string = "Ain Rider | Metrics Dashboard") {
     return `<!DOCTYPE html>
@@ -209,7 +210,12 @@ export function generateDashboardHtml(services: string[], title: string = "Ain R
 }
 
 export const metricsDashboard = new Elysia()
-    .get('/dashboard/metrics', () => {
+    .use(authGuard)
+    .get('/dashboard/metrics', ({ user, set }) => {
+        if (user?.role !== 'ADMIN' && user?.role !== 'SUPPORT') {
+            set.status = 403;
+            return 'Forbidden';
+        }
         return new Response(
             generateDashboardHtml(['auth', 'trips', 'location', 'match', 'admin', 'websocket', 'payments']),
             { headers: { 'Content-Type': 'text/html' } }

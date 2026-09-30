@@ -10,17 +10,25 @@ export const matchProxy = new Elysia({ prefix: '/match' })
       return { error: 'Forbidden' };
     }
     const res = await MatchProxyService.registerAvailable(user.id, body);
+    
+    const resText = await res.text();
     if (!res.ok) {
+      set.status = res.status;
       try {
-        const errorBody = await res.json();
-        set.status = res.status;
-        return errorBody;
+        return JSON.parse(resText);
       } catch {
-        set.status = res.status;
+        console.error(`[MatchProxy] Non-JSON error from ${res.url} (${res.status}): ${resText.slice(0, 500)}`);
         return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
       }
     }
-    return res.json();
+
+    try {
+      return JSON.parse(resText);
+    } catch (e) {
+      console.error(`[MatchProxy] Malformed JSON from ${res.url}: ${resText.slice(0, 500)}`);
+      set.status = 500;
+      return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Malformed response from match service' } };
+    }
   }, {
     body: t.Object({
       latitude: t.Number(),
@@ -40,17 +48,25 @@ export const matchProxy = new Elysia({ prefix: '/match' })
       return { error: 'Forbidden' };
     }
     const res = await MatchProxyService.respondToTrip(body.tripId, user.id, body.action);
+    
+    const resText = await res.text();
     if (!res.ok) {
+      set.status = res.status;
       try {
-        const errorBody = await res.json();
-        set.status = res.status;
-        return errorBody;
+        return JSON.parse(resText);
       } catch {
-        set.status = res.status;
+        console.error(`[MatchProxy] Non-JSON error from ${res.url} (${res.status}): ${resText.slice(0, 500)}`);
         return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
       }
     }
-    return res.json();
+
+    try {
+      return JSON.parse(resText);
+    } catch (e) {
+      console.error(`[MatchProxy] Malformed JSON from ${res.url}: ${resText.slice(0, 500)}`);
+      set.status = 500;
+      return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Malformed response from match service' } };
+    }
   }, {
     body: t.Object({ tripId: t.String(), action: t.String() }),
   })
@@ -60,33 +76,49 @@ export const matchProxy = new Elysia({ prefix: '/match' })
       return { error: 'Forbidden' };
     }
     const res = await MatchProxyService.unregisterAvailable(user.id);
+    
+    const resText = await res.text();
     if (!res.ok) {
+      set.status = res.status;
       try {
-        const errorBody = await res.json();
-        set.status = res.status;
-        return errorBody;
+        return JSON.parse(resText);
       } catch {
-        set.status = res.status;
+        console.error(`[MatchProxy] Non-JSON error from ${res.url} (${res.status}): ${resText.slice(0, 500)}`);
         return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
       }
     }
-    return res.json();
+
+    try {
+      return JSON.parse(resText);
+    } catch (e) {
+      console.error(`[MatchProxy] Malformed JSON from ${res.url}: ${resText.slice(0, 500)}`);
+      set.status = 500;
+      return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Malformed response from match service' } };
+    }
   })
   .get('/nearby', async ({ query, user, set }) => {
     const lat = parseFloat(query.latitude as string);
     const lng = parseFloat(query.longitude as string);
     const res = await MatchProxyService.getNearbyDrivers(user.id, lat, lng);
+    
+    const resText = await res.text();
     if (!res.ok) {
+      set.status = res.status;
       try {
-        const errorBody = await res.json();
-        set.status = res.status;
-        return errorBody;
+        return JSON.parse(resText);
       } catch {
-        set.status = res.status;
+        console.error(`[MatchProxy] Non-JSON error from ${res.url} (${res.status}): ${resText.slice(0, 500)}`);
         return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to parse error response' } };
       }
     }
-    return res.json();
+
+    try {
+      return JSON.parse(resText);
+    } catch (e) {
+      console.error(`[MatchProxy] Malformed JSON from ${res.url}: ${resText.slice(0, 500)}`);
+      set.status = 500;
+      return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Malformed response from match service' } };
+    }
   }, {
     query: t.Object({
       latitude: t.String(),

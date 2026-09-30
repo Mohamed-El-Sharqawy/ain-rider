@@ -18,8 +18,18 @@ export class ComplaintsController {
   @Get()
   @ApiOperation({ summary: 'Get all complaints' })
   @ApiQuery({ name: 'status', required: false, type: String })
-  findAll(@Query('status') status?: string) {
-    return this.complaintsService.findAll(status);
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  findAll(
+    @Query('status') status?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.complaintsService.findAll(
+      status,
+      page ? parseInt(page, 10) : undefined,
+      limit ? parseInt(limit, 10) : undefined,
+    );
   }
 
   @Get(':id')

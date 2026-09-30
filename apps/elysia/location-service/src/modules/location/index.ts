@@ -1,8 +1,10 @@
 import { Elysia, status } from 'elysia';
 import { LocationService } from './service';
 import { LocationModel } from './model';
+import { internalAuth } from '../../shared/internal-auth';
 
 export const location = new Elysia({ prefix: '/location' })
+  .use(internalAuth)
   .post(
     '/update',
     async ({ body }) => {
