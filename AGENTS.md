@@ -33,6 +33,24 @@ Run from the repository root:
 
 TypeScript strict in all workspaces. Follow standard conventions.
 
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical defaults are used as-is: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context: root `CONTEXT-MAP.md` pointing at per-app `CONTEXT.md` files. See `docs/agents/domain.md`.
+
+### Implementation workflow
+
+Every `ready-for-agent` ticket gets its own branch and lands as a PR. The human reviews and merges; agents never push to `main` and never merge PRs unless told to. Multiple tickets run in parallel when they have no blocking edge: shared-tree subagents if file sets are disjoint, git worktrees if they overlap. See `docs/agents/implementation.md`.
+
 <!-- BEGIN:turborepo-agent-rules -->
 
 # This is NOT the Turborepo you know
