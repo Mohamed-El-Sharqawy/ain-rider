@@ -35,3 +35,5 @@ Thumbs.db
 
 # osrm map data (large, generated - fetch with apps/backend/scripts/setup-osrm)
 data/osrm/
+
+coverage/

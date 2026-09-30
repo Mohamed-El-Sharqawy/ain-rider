@@ -7,10 +7,11 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.32.0",
+    "@sinclair/typebox": "^0.34.0",
     "pino": "^8.19.0"
   },
   "peerDependencies": {
@@ -19,6 +20,7 @@
   "devDependencies": {
     "typescript": "^5.7.3",
     "rimraf": "^6.0.1",
-    "@types/node": "^22.10.5"
+    "@types/node": "^22.10.5",
+    "vitest": "^3.2.0"
   }
 }
