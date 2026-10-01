@@ -5,22 +5,22 @@
  * (pnpm docker:infra:up): postgres on 5433, redis cluster on 6379-6384,
  * nats on 4222-4224. @ain-rider/test-utils wires the env defaults.
  */
-import { Test } from '@nestjs/testing';
-import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { FastifyAdapter } from '@nestjs/platform-fastify';
-import { ValidationPipe } from '@nestjs/common';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import type { NatsConnection } from 'nats';
-import { AppModule } from '../src/app.module';
-import { GlobalExceptionFilter } from '../src/shared/filters/global-exception.filter';
-import { TraceInterceptor } from '../src/shared/interceptors/trace.interceptor';
+import { Test } from "@nestjs/testing";
+import type { NestFastifyApplication } from "@nestjs/platform-fastify";
+import { FastifyAdapter } from "@nestjs/platform-fastify";
+import { ValidationPipe } from "@nestjs/common";
+import { JwtModule, JwtService } from "@nestjs/jwt";
+import type { NatsConnection } from "nats";
+import { AppModule } from "../src/app.module";
+import { GlobalExceptionFilter } from "../src/shared/filters/global-exception.filter";
+import { TraceInterceptor } from "../src/shared/interceptors/trace.interceptor";
 import {
   ensureTestDatabase,
   loadTestEnv,
   resetTestDatabase,
-} from '@ain-rider/test-utils';
+} from "@ain-rider/test-utils";
 
-export const INTERNAL_SECRET = 'test-internal-secret';
+export const INTERNAL_SECRET = "test-internal-secret";
 
 /**
  * Point DATABASE_URL at the dedicated ainrider_trip_test database and apply
@@ -29,12 +29,15 @@ export const INTERNAL_SECRET = 'test-internal-secret';
  */
 export async function setupTripTestEnv(): Promise<void> {
   loadTestEnv();
-  process.env.DATABASE_URL = await ensureTestDatabase('trip');
+  // CI runners have slower disks; the default 5s JetStream ack wait can
+  // time out on file-storage streams there.
+  process.env.NATS_JS_TIMEOUT_MS ||= "30000";
+  process.env.DATABASE_URL = await ensureTestDatabase("trip");
   process.env.INTERNAL_SERVICE_SECRET = INTERNAL_SECRET;
 }
 
 export async function resetTrips(): Promise<void> {
-  await resetTestDatabase('trip');
+  await resetTestDatabase("trip");
 }
 
 /** Boot the full AppModule (real DB, NATS, redis) with main.ts's globals. */
@@ -47,7 +50,11 @@ export async function bootstrapTestApp(): Promise<NestFastifyApplication> {
     new FastifyAdapter(),
   );
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
   );
   app.useGlobalInterceptors(new TraceInterceptor());
   app.useGlobalFilters(new GlobalExceptionFilter());
@@ -64,19 +71,19 @@ export async function makeInternalToken(
   }).compile();
   await moduleRef.init();
   const jwt = moduleRef.get(JwtService);
-  return jwt.signAsync({ internal: true, service: 'admin-service', ...claims });
+  return jwt.signAsync({ internal: true, service: "admin-service", ...claims });
 }
 
 /** Purge JetStream state so a fresh app boot sees an empty consumer cursor. */
 export async function purgeTripStream(nc: NatsConnection): Promise<void> {
   const jsm = await nc.jetstreamManager();
   try {
-    await jsm.consumers.delete('AIN_RIDER_OPS', 'trip-lifecycle-consumer');
+    await jsm.consumers.delete("AIN_RIDER_OPS", "trip-lifecycle-consumer");
   } catch {
     // consumer does not exist yet — fine
   }
   try {
-    await jsm.streams.purge('AIN_RIDER_OPS');
+    await jsm.streams.purge("AIN_RIDER_OPS");
   } catch {
     // stream does not exist yet — fine
   }
@@ -138,13 +145,13 @@ export const CAIRO_DROPOFF = { lat: 30.0131, lng: 31.2089 };
 
 export function createTripPayload(overrides: Record<string, unknown> = {}) {
   return {
-    riderId: '11111111-1111-4111-8111-111111111111',
+    riderId: "11111111-1111-4111-8111-111111111111",
     pickupLat: CAIRO_PICKUP.lat,
     pickupLng: CAIRO_PICKUP.lng,
-    pickupAddress: 'Tahrir Square, Cairo',
+    pickupAddress: "Tahrir Square, Cairo",
     dropoffLat: CAIRO_DROPOFF.lat,
     dropoffLng: CAIRO_DROPOFF.lng,
-    dropoffAddress: 'Giza Pyramids Road',
+    dropoffAddress: "Giza Pyramids Road",
     estimatedFare: 10_385,
     ...overrides,
   };
