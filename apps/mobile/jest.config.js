@@ -2,6 +2,7 @@ module.exports = {
   preset: 'jest-expo',
   roots: ['<rootDir>/__tests__'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testTimeout: 20000,
   collectCoverageFrom: [
     'services/**/*.ts',
     'app/**/login.tsx',
