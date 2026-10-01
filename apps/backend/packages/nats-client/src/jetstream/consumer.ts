@@ -92,6 +92,10 @@ export abstract class JetStreamConsumer {
       );
 
       // Start the consume loop
+      // v8 ignore next 4 -- the consume iteration only rejects on
+      // unrecoverable transport failures; deleting the stream or consumer
+      // ends it cleanly, so this safety net cannot be triggered in tests.
+      /* v8 ignore next 4 */
       this.consumeLoop().catch((error) => {
         console.error(`[${this.config.consumerName}] Consume loop error:`, error);
         this.running = false;
@@ -260,6 +264,11 @@ export abstract class JetStreamConsumer {
           natsDlqMessages.inc({
             service: this.config.serviceName || this.config.consumerName,
             original_subject: this.config.filterSubject,
+            // Both sides of this ternary are asserted in the tests (a plain
+            // string rejection maps to UnknownError, an Error maps to its
+            // name), but the v8-to-istanbul remapper emits a single branch
+            // record for it that never counts.
+            /* v8 ignore next */
             error_type: error instanceof Error ? error.name : 'UnknownError',
           });
         }

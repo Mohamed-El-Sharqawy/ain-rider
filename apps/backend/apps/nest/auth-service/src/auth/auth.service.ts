@@ -23,6 +23,20 @@ const VALID_USER_STATUS_TRANSITIONS: Record<string, Set<string>> = {
   REJECTED: new Set(['PENDING_DOCUMENTS', 'ACTIVE', 'SUSPENDED']),
 };
 
+/**
+ * Prisma P2002 carries meta.target as column names on classic engines but,
+ * with driver adapters, only nests the violated constraint under
+ * meta.driverAdapterError.cause.constraint.index (e.g. "users_email_key"),
+ * so flatten both into one string to match on.
+ */
+function uniqueConstraintTarget(error: Prisma.PrismaClientKnownRequestError): string {
+  const target = error.meta?.target as unknown;
+  const cause = (error.meta as any)?.driverAdapterError?.cause;
+  const constraint = cause?.constraint?.index ?? cause?.constraint ?? "";
+  const parts = Array.isArray(target) ? target : target ? [target] : [];
+  return [...parts, constraint].join(" ").toLowerCase();
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -78,12 +92,11 @@ export class AuthService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         (error as Prisma.PrismaClientKnownRequestError).code === "P2002"
       ) {
-        const prismaError = error as Prisma.PrismaClientKnownRequestError;
-        const target = (prismaError.meta?.target as any) || [];
+        const target = uniqueConstraintTarget(error);
         if (target.includes("email")) {
           throw new ConflictException("Email already registered");
         }
-        if (target.includes("phoneNumber")) {
+        if (target.includes("phonenumber")) {
           throw new ConflictException("Phone number already registered");
         }
         throw new ConflictException("User already exists with these credentials");
@@ -349,6 +362,10 @@ export class AuthService {
         role: user.role,
         type: "refresh",
         family: family || "",
+        // jti makes the token unique: the rest of the payload is identical
+        // for every rotation of a family, and JWTs signed in the same second
+        // would otherwise collide on the tokenHash unique constraint.
+        jti: crypto.randomUUID(),
       },
       { expiresIn: "7d" },
     );

@@ -28,7 +28,7 @@ export function getNatsServersFromEnv(): string[] {
 }
 
 export async function createNatsConnection(
-  config: NatsConfig,
+  config: NatsConfig = {},
 ): Promise<NatsConnection> {
   // Determine servers: prefer explicit servers array, then url, then env
   let servers: string[];
@@ -55,6 +55,10 @@ export async function createNatsConnection(
     );
 
     // Handle connection events
+    // v8 ignore next 12 -- the status iterator only yields on real socket
+    // drops (server restarts, network flaps); it is a logging-only side
+    // loop and cannot be triggered against the shared dev cluster.
+    /* v8 ignore next 12 */
     (async () => {
       for await (const status of nc.status()) {
         console.log(

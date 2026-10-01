@@ -2,7 +2,7 @@
  * Error normalization and HTTP exception mapping utilities.
  */
 
-import { AppError, InternalError, ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, BusinessRuleError } from '../errors/index.js';
+import { AppError, InternalError, ValidationError, UnauthorizedError, ForbiddenError, NotFoundError, ConflictError, BusinessRuleError, UnsupportedMediaTypeError, TooManyRequestsError, ServiceUnavailableError } from '../errors/index.js';
 
 /**
  * Normalizes any error to an AppError instance.
@@ -39,8 +39,14 @@ export function mapHttpExceptionToAppError(exception: { getStatus: () => number;
       return new NotFoundError(message);
     case 409:
       return new ConflictError(message, response);
+    case 415:
+      return new UnsupportedMediaTypeError(message, response);
     case 422:
       return new BusinessRuleError(message, response);
+    case 429:
+      return new TooManyRequestsError(message, response);
+    case 503:
+      return new ServiceUnavailableError(message);
     default:
       return new InternalError(message, response);
   }

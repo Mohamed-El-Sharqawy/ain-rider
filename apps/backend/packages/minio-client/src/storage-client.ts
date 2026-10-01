@@ -92,11 +92,15 @@ export class StorageClient {
   ): Promise<UploadResult[]> {
     const results: UploadResult[] = [];
     for (const file of files) {
+      const fileOptions =
+        file.contentType !== undefined
+          ? { ...options, contentType: file.contentType }
+          : options;
       const result = await this.upload(
         file.objectName,
         file.data,
         file.data.length,
-        { ...options, contentType: file.contentType },
+        fileOptions,
       );
       results.push(result);
     }
