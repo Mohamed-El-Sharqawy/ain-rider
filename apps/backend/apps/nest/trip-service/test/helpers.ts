@@ -31,6 +31,17 @@ export async function setupTripTestEnv(): Promise<void> {
   loadTestEnv();
   process.env.DATABASE_URL = await ensureTestDatabase("trip");
   process.env.INTERNAL_SERVICE_SECRET = INTERNAL_SECRET;
+  // Parallel suites share one NATS cluster: extend the shared streams to
+  // the full subject union before anything publishes (uncovered subjects
+  // never receive a JetStream ack).
+  const { createTestNatsConnection, provisionSharedStreams } =
+    await import("@ain-rider/test-utils");
+  const nc = await createTestNatsConnection("trip-provision");
+  try {
+    await provisionSharedStreams(nc);
+  } finally {
+    await nc.close();
+  }
 }
 
 export async function resetTrips(): Promise<void> {

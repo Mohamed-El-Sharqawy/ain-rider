@@ -1,9 +1,9 @@
-import './env';
+import "./env";
 import {
   createNatsConnection,
   type NatsConnection,
-} from '@ain-rider/nats-client';
-import { getConnection, initNats } from '../../src/shared/nats';
+} from "@ain-rider/nats-client";
+import { getConnection, initNats } from "../../src/shared/nats";
 
 /**
  * Initialize the service's own NATS singleton (nats.ts) exactly once.
@@ -19,38 +19,12 @@ export async function ensureServiceNats(): Promise<void> {
 
 /** Idempotently make sure the JetStream streams used by matching exist. */
 export async function ensureStreams(): Promise<void> {
-  const nc = await createNatsConnection({ name: 'match-service-test-streams' });
+  const nc = await createNatsConnection({ name: "match-service-test-streams" });
   try {
-    const jsm = await nc.jetstreamManager();
-    const wanted: Array<[string, string[]]> = [
-      [
-        'AIN_RIDER_OPS',
-        [
-          'ain_rider.trip_requested',
-          'ain_rider.trip_assigned',
-          'ain_rider.trip_matched',
-          'ain_rider.trip_no_match',
-        ],
-      ],
-      ['AIN_RIDER_LOCATION', ['ain_rider.location_update']],
-    ];
-    for (const [name, subjects] of wanted) {
-      try {
-        await jsm.streams.info(name);
-      } catch {
-        try {
-          await jsm.streams.add({
-            name,
-            subjects,
-            storage: 1, // file
-            num_replicas: 1,
-          });
-        } catch {
-          // subjects overlap with an existing stream that already covers them;
-          // publishes work regardless.
-        }
-      }
-    }
+    // Full subject union: parallel suites share one NATS cluster and an
+    // uncovered subject never receives a JetStream ack.
+    const { provisionSharedStreams } = await import("@ain-rider/test-utils");
+    await provisionSharedStreams(nc);
   } finally {
     await nc.close();
   }
@@ -71,7 +45,9 @@ export class EventCollector {
   }
 
   static async start(subjects: string[]): Promise<EventCollector> {
-    const nc = await createNatsConnection({ name: 'match-service-test-collector' });
+    const nc = await createNatsConnection({
+      name: "match-service-test-collector",
+    });
     const collector = new EventCollector(nc);
     const decoder = new TextDecoder();
     for (const subject of subjects) {
@@ -101,7 +77,8 @@ export class EventCollector {
     const deadline = Date.now() + timeoutMs;
     for (;;) {
       const hit = this.received.find(
-        (r) => r.subject === subject && (!predicate || predicate(r.envelope?.data)),
+        (r) =>
+          r.subject === subject && (!predicate || predicate(r.envelope?.data)),
       );
       if (hit) return hit.envelope;
       if (Date.now() > deadline) {
@@ -122,7 +99,8 @@ export class EventCollector {
     const deadline = Date.now() + ms;
     for (;;) {
       const hit = this.received.find(
-        (r) => r.subject === subject && (!predicate || predicate(r.envelope?.data)),
+        (r) =>
+          r.subject === subject && (!predicate || predicate(r.envelope?.data)),
       );
       if (hit) throw new Error(`unexpected ${subject} event received`);
       if (Date.now() > deadline) return;
@@ -132,7 +110,8 @@ export class EventCollector {
 
   countFor(subject: string, predicate?: (data: any) => boolean): number {
     return this.received.filter(
-      (r) => r.subject === subject && (!predicate || predicate(r.envelope?.data)),
+      (r) =>
+        r.subject === subject && (!predicate || predicate(r.envelope?.data)),
     ).length;
   }
 
