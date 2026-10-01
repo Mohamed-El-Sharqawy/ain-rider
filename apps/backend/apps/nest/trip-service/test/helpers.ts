@@ -29,9 +29,6 @@ export const INTERNAL_SECRET = "test-internal-secret";
  */
 export async function setupTripTestEnv(): Promise<void> {
   loadTestEnv();
-  // CI runners have slower disks; the default 5s JetStream ack wait can
-  // time out on file-storage streams there.
-  process.env.NATS_JS_TIMEOUT_MS ||= "30000";
   process.env.DATABASE_URL = await ensureTestDatabase("trip");
   process.env.INTERNAL_SERVICE_SECRET = INTERNAL_SECRET;
 }
