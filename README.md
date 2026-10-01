@@ -54,29 +54,29 @@ graph TB
 
 ### Services
 
-| Service | Runtime | Responsibility |
-| --- | --- | --- |
-| `api-gateway` | Elysia (Bun) | Public BFF. JWT verification, rate limiting, Swagger, proxies to internal services |
-| `auth-service` | NestJS | Users, roles, OTP login (provider-agnostic), JWT access/refresh tokens |
-| `trip-service` | NestJS | Trip lifecycle, fare estimation, OSRM routing |
-| `match-service` | Elysia | Driver–rider matching |
-| `location-service` | Elysia | Live driver locations, TimescaleDB hypertable |
-| `websocket-server` | Elysia (Bun) | Real-time trip and driver updates |
-| `payment-service` | NestJS | Payments, refunds, driver wallets (cash-first) |
-| `admin-service` | NestJS | Shadow users, document verification, complaints, promos, fleet, notifications |
+| Service            | Runtime      | Responsibility                                                                     |
+| ------------------ | ------------ | ---------------------------------------------------------------------------------- |
+| `api-gateway`      | Elysia (Bun) | Public BFF. JWT verification, rate limiting, Swagger, proxies to internal services |
+| `auth-service`     | NestJS       | Users, roles, OTP login (provider-agnostic), JWT access/refresh tokens             |
+| `trip-service`     | NestJS       | Trip lifecycle, fare estimation, OSRM routing                                      |
+| `match-service`    | Elysia       | Driver–rider matching                                                              |
+| `location-service` | Elysia       | Live driver locations, TimescaleDB hypertable                                      |
+| `websocket-server` | Elysia (Bun) | Real-time trip and driver updates                                                  |
+| `payment-service`  | NestJS       | Payments, refunds, driver wallets (cash-first)                                     |
+| `admin-service`    | NestJS       | Shadow users, document verification, complaints, promos, fleet, notifications      |
 
 The backend keeps its own internal monorepo layout under [`apps/backend`](apps/backend) with 8 more shared packages:
 
-| Package | Responsibility |
-| --- | --- |
-| `@ain-rider/shared-types` | Shared TypeScript types across services and apps |
-| `@ain-rider/nats-client` | JetStream wrapper: streams, consumers, DLQ, idempotency, tracing |
-| `@ain-rider/redis-client` | Redis Cluster client, caching helpers |
-| `@ain-rider/internal-api` | Authenticated service-to-service HTTP calls |
-| `@ain-rider/error-handling` | Typed error hierarchy, mappers, Elysia + Nest adapters |
-| `@ain-rider/metrics` | Metrics controllers/interceptors for Nest and Elysia |
-| `@ain-rider/minio-client` | S3-compatible document storage (bucket: `ain-rider`) |
-| `@ain-rider/config` | Shared configuration loading |
+| Package                     | Responsibility                                                   |
+| --------------------------- | ---------------------------------------------------------------- |
+| `@ain-rider/shared-types`   | Shared TypeScript types across services and apps                 |
+| `@ain-rider/nats-client`    | JetStream wrapper: streams, consumers, DLQ, idempotency, tracing |
+| `@ain-rider/redis-client`   | Redis Cluster client, caching helpers                            |
+| `@ain-rider/internal-api`   | Authenticated service-to-service HTTP calls                      |
+| `@ain-rider/error-handling` | Typed error hierarchy, mappers, Elysia + Nest adapters           |
+| `@ain-rider/metrics`        | Metrics controllers/interceptors for Nest and Elysia             |
+| `@ain-rider/minio-client`   | S3-compatible document storage (bucket: `ain-rider`)             |
+| `@ain-rider/config`         | Shared configuration loading                                     |
 
 ### Key design decisions
 
@@ -90,15 +90,15 @@ The backend keeps its own internal monorepo layout under [`apps/backend`](apps/b
 
 `pnpm docker:infra:up` starts the full platform:
 
-| Component | Image | Ports | Notes |
-| --- | --- | --- | --- |
-| PostgreSQL | `timescale/timescaledb-ha:pg17` | 5433 | 5 databases, init script creates them |
-| PgBouncer x5 | `edoburu/pgbouncer` | 5434–5438 | One pool per database |
-| Redis Cluster | `redis:7.4-alpine` x6 | 6379–6384 | 3 masters + 3 replicas, AOF |
-| RedisInsight | `redis/redisinsight` | 5540 | Cluster UI |
-| NATS JetStream | `nats:2.10-alpine` x3 | 4222–4224, 8222–8224 | Cluster + monitoring |
-| MinIO | `minio/minio` | 9000, 9001 | Bucket `ain-rider` auto-created |
-| OSRM | `osrm-backend v6` | 5000 | Egypt map, MLD algorithm |
+| Component      | Image                           | Ports                | Notes                                 |
+| -------------- | ------------------------------- | -------------------- | ------------------------------------- |
+| PostgreSQL     | `timescale/timescaledb-ha:pg17` | 5433                 | 5 databases, init script creates them |
+| PgBouncer x5   | `edoburu/pgbouncer`             | 5434–5438            | One pool per database                 |
+| Redis Cluster  | `redis:7.4-alpine` x6           | 6379–6384            | 3 masters + 3 replicas, AOF           |
+| RedisInsight   | `redis/redisinsight`            | 5540                 | Cluster UI                            |
+| NATS JetStream | `nats:2.10-alpine` x3           | 4222–4224, 8222–8224 | Cluster + monitoring                  |
+| MinIO          | `minio/minio`                   | 9000, 9001           | Bucket `ain-rider` auto-created       |
+| OSRM           | `osrm-backend v6`               | 5000                 | Egypt map, MLD algorithm              |
 
 The dev compose intentionally runs clustered replicas (Redis Cluster, NATS cluster, PgBouncer pools) so clustering behavior is tested locally, not only in production.
 
@@ -113,19 +113,19 @@ The Compose stack is the development and integration environment. Production tar
 
 ## Tech stack
 
-| Layer | Technology |
-| --- | --- |
-| Monorepo | Turborepo + pnpm workspaces |
-| Backend (4 services) | NestJS 11, Prisma 7, class-validator |
-| Backend (4 services) | Elysia, Bun runtime |
-| Mobile | Expo 54, React Native 0.81, expo-router, Zustand, NativeWind |
-| Dashboard | React 19, Vite, TanStack Query, Tailwind CSS 4, shadcn-style UI |
-| Data | PostgreSQL 17 (TimescaleDB), Prisma, PgBouncer |
-| Messaging | NATS JetStream |
-| Cache / realtime state | Redis Cluster |
-| Storage | MinIO (S3) |
-| Routing | OSRM (self-hosted Egypt map) |
-| Auth | Phone OTP + JWT (access/refresh), Firebase Admin optional |
+| Layer                  | Technology                                                      |
+| ---------------------- | --------------------------------------------------------------- |
+| Monorepo               | Turborepo + pnpm workspaces                                     |
+| Backend (4 services)   | NestJS 11, Prisma 7, class-validator                            |
+| Backend (4 services)   | Elysia, Bun runtime                                             |
+| Mobile                 | Expo 54, React Native 0.81, expo-router, Zustand, NativeWind    |
+| Dashboard              | React 19, Vite, TanStack Query, Tailwind CSS 4, shadcn-style UI |
+| Data                   | PostgreSQL 17 (TimescaleDB), Prisma, PgBouncer                  |
+| Messaging              | NATS JetStream                                                  |
+| Cache / realtime state | Redis Cluster                                                   |
+| Storage                | MinIO (S3)                                                      |
+| Routing                | OSRM (self-hosted Egypt map)                                    |
+| Auth                   | Phone OTP + JWT (access/refresh), Firebase Admin optional       |
 
 ## Getting started
 
