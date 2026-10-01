@@ -11,3 +11,5 @@ export * from './service-unavailable-error';
 export * from './internal-error';
 export * from './business-rule-error';
 export * from './conflict-error';
+export * from './unsupported-media-type-error';
+export * from './too-many-requests-error';
