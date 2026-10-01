@@ -56,6 +56,18 @@ const LCOV_EXCLUDES = [
   "*/src/index.ts",
   "*.config.*",
   "*/shared-types/*",
+  // test files and in-src helpers (dashboard keeps __tests__ under src/)
+  "*/__tests__/*",
+  "*.test.ts",
+  "*.test.tsx",
+  "*.spec.ts",
+  "*.spec.tsx",
+  "*/src/test/*",
+  // configs and type-only modules carry no runtime statements to cover
+  "*/src/config/*",
+  "*/src/types/*",
+  // shadcn registry-generated ui primitives (vendor code, not hand-written)
+  "*/src/components/ui/*",
 ];
 
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx"]);
@@ -175,13 +187,17 @@ for (const file of allLcov) {
    * relative to the workspace cwd, jest emits absolute paths, and a
    * normalized file restored from the turbo cache already carries
    * repo-relative paths (normalization must be idempotent), so prefer a
-   * candidate that actually exists on disk.
+   * candidate that actually exists on disk. Separators are unified first:
+   * some vitest configs emit repo-relative paths built with the HOST
+   * separator (backslashes), which never match a posix completeness walk.
    */
   const resolveSf = (value) => {
+    const unify = (p) => p.split(/[\\/]/).join("/");
     if (path.isAbsolute(value)) return toRepoRelative(value);
-    if (existsSync(path.join(repoRoot, value)))
-      return value.split(path.sep).join("/");
-    return toRepoRelative(path.resolve(workspaceDir, value));
+    const fromRepoRoot = unify(value);
+    if (existsSync(path.join(repoRoot, ...fromRepoRoot.split("/"))))
+      return fromRepoRoot;
+    return unify(toRepoRelative(path.resolve(workspaceDir, value)));
   };
 
   const normalized = raw
@@ -228,6 +244,11 @@ const merge = spawnSync(
     // reports "No branches found".
     "--rc",
     "branch_coverage=1",
+    // v8-coverage remappers can drop DA line records inside `v8 ignore`
+    // regions while their BRDA branch records survive; lcov 2.x flags the
+    // mismatch as corrupt/inconsistent even though the data is fine.
+    "--ignore-errors",
+    "inconsistent,corrupt",
   ],
   { cwd: repoRoot, stdio: "inherit", shell: process.platform === "win32" },
 );
@@ -247,8 +268,9 @@ const remove = spawnSync(
     "branch_coverage=1",
     // lcov 2.x errors on exclude patterns that match nothing; which patterns
     // match depends on which workspaces report coverage, so tolerate them.
+    // `inconsistent,corrupt`: see the merge step (v8 ignore regions).
     "--ignore-errors",
-    "unused",
+    "unused,inconsistent,corrupt",
   ],
   { cwd: repoRoot, stdio: "inherit", shell: process.platform === "win32" },
 );
@@ -267,6 +289,9 @@ const summary = spawnSync(
     "100",
     "--fail-under-branches",
     "100",
+    // `inconsistent,corrupt`: see the merge step (v8 ignore regions).
+    "--ignore-errors",
+    "inconsistent,corrupt",
   ],
   { cwd: repoRoot, stdio: "inherit", shell: process.platform === "win32" },
 );
