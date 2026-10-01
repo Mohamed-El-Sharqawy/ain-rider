@@ -90,14 +90,18 @@ export class TripsService {
         data.vehicleModel = metadata.vehicleModel;
         data.vehiclePlate = metadata.vehiclePlate;
       }
-    } else if (status === TripStatus.MATCHED && driverId) {
-      data.driverId = driverId;
+    } else if (status === TripStatus.MATCHED) {
+      // A trip is "matched" the moment it is claimed, driver or not — stamp
+      // matchedAt on every MATCHED transition.
       data.matchedAt = new Date();
-      // Ensure metadata is saved if provided during final confirmation
-      if (metadata) {
-        data.driverName = metadata.driverName;
-        data.driverPhone = metadata.driverPhone;
-        // ... other fields if needed, but usually redundant
+      if (driverId) {
+        data.driverId = driverId;
+        // Ensure metadata is saved if provided during final confirmation
+        if (metadata) {
+          data.driverName = metadata.driverName;
+          data.driverPhone = metadata.driverPhone;
+          // ... other fields if needed, but usually redundant
+        }
       }
     } else if (status === TripStatus.IN_PROGRESS) {
       data.startedAt = new Date();
@@ -422,10 +426,12 @@ export class TripsService {
         const raw = settingsData?.data?.value || settingsData?.value;
         if (raw) {
           const config = typeof raw === 'string' ? JSON.parse(raw) : raw;
-          if (config.baseFare) baseFare = Number(config.baseFare);
-          if (config.perKmRate) perKmRate = Number(config.perKmRate);
-          if (config.perMinRate) perMinRate = Number(config.perMinRate);
-          if (config.minimumFare) minimumFare = Number(config.minimumFare);
+          // Explicit zeros are valid config (e.g. promo rates) — only skip
+          // fields that are absent.
+          if (config.baseFare != null) baseFare = Number(config.baseFare);
+          if (config.perKmRate != null) perKmRate = Number(config.perKmRate);
+          if (config.perMinRate != null) perMinRate = Number(config.perMinRate);
+          if (config.minimumFare != null) minimumFare = Number(config.minimumFare);
         }
       }
     } catch {}

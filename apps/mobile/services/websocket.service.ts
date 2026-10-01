@@ -2,6 +2,7 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import { AppState, type AppStateStatus } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { SecureStorage } from '../lib/storage/secure';
+import { isTokenExpired } from '../lib/utils/jwt';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -36,7 +37,6 @@ class WebSocketService {
 
     // Get auth token
     const token = await SecureStorage.getAccessToken();
-    const { isTokenExpired } = await import('../lib/utils/jwt');
 
     // Append token to URL as query param only if it's NOT expired.
     // If it is expired, we connect without it and let the onopen fresh fetch handle it.
@@ -152,6 +152,11 @@ class WebSocketService {
     this.removeAppStateListener();
 
     if (this.ws) {
+      // Detach the dying socket's listeners so late close/message frames
+      // cannot fire auth errors or handlers after the session is gone.
+      this.ws.onopen = null;
+      this.ws.onmessage = null;
+      this.ws.onclose = null;
       this.ws.close();
       this.ws = null;
     }
@@ -161,6 +166,7 @@ class WebSocketService {
     this.activeSubscriptions.clear();
     this.openResolvers = [];
     this.currentUrl = null;
+    this.lastNotificationTime = 0;
   }
 
   subscribe(channel: string, id: string): void {
@@ -205,13 +211,15 @@ class WebSocketService {
     return this.isAuthenticated;
   }
 
-  private async presentLocalNotification(title: string, body: string, data?: Record<string, any>): Promise<void> {
-    const notificationData: Record<string, unknown> | null = data ?? null;
-
+  private async presentLocalNotification(
+    title: string,
+    body: string,
+    data: Record<string, any>,
+  ): Promise<void> {
     const makeContent = (sound: string | boolean | undefined): Notifications.NotificationContentInput => ({
       title,
       body,
-      data: notificationData ?? undefined,
+      data,
       sound,
       priority: Notifications.AndroidNotificationPriority.HIGH,
       vibrate: [0, 250, 250, 250],
@@ -249,10 +257,8 @@ class WebSocketService {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
     while (this.messageQueue.length > 0) {
-      const msg = this.messageQueue.shift();
-      if (msg) {
-        this.ws.send(JSON.stringify(msg));
-      }
+      const msg = this.messageQueue.shift()!;
+      this.ws.send(JSON.stringify(msg));
     }
   }
 
@@ -285,11 +291,14 @@ class WebSocketService {
       (nextState: AppStateStatus) => {
         if (nextState === 'background') {
           this.stopHeartbeat();
-        } else if (nextState === 'active') {
-          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          return;
+        }
+        if (nextState === 'active') {
+          // The listener is removed on disconnect, so a socket exists here.
+          if (this.ws!.readyState === WebSocket.OPEN) {
             this.startHeartbeat();
-          } else if (this.ws) {
-            this.ws.reconnect();
+          } else {
+            this.ws!.reconnect();
           }
         }
       },
