@@ -1,0 +1,51 @@
+# FULL flow (needs the dev backend): brand-new rider signs up - OTP verification
+# routes new users to basic info, registration completes and the rider lands on
+# home.
+#
+# Prerequisites: dev backend running; OTP console provider (default 123456).
+# A UNIQUE phone number and email are generated per run, so this flow can be
+# repeated back-to-back without hitting duplicate-account or OTP rate limits.
+#
+# Divergence note: basic-info pushes to the documents screen after registering,
+# but the root layout force-redirects authenticated riders to (rider)/home
+# (app/_layout.tsx routing effect), so the observable behavior is
+# registration -> home. The documents screen is unreachable for riders.
+appId: com.anonymous.ainrider
+name: Auth - Rider signup happy path (new user)
+tags:
+  - full
+  - auth
+env:
+  OTP: ${OTP || "123456"}
+---
+- evalScript: ${output.phone = "100" + Math.floor(1000000 + Math.random() * 8999999)}
+- evalScript: ${output.email = "rider" + Math.floor(100000 + Math.random() * 899999) + "@ain-test.dev"}
+- runFlow: subflows/launch-to-phone.yaml
+- tapOn: "10 1234 5678"
+- inputText: ${output.phone}
+- tapOn:
+    text: "Next"
+    enabled: true
+- assertVisible: "Enter the code"
+- tapOn: "------"
+- inputText: ${OTP}
+- tapOn:
+    text: "Verify & Continue"
+    enabled: true
+# New user -> basic info screen
+- assertVisible: "About you"
+- tapOn: "Ali"
+- inputText: "Test"
+- tapOn: "Hassan"
+- inputText: "Rider"
+- tapOn: "ali@example.com"
+- inputText: ${output.email}
+- tapOn: "Minimum 6 characters"
+- inputText: "test1234"
+- tapOn:
+    text: "Complete Registration"
+    enabled: true
+# Registration sets auth state -> root layout routes the rider straight home
+- extendedWaitUntil:
+    visible: "Where are you going?"
+    timeout: 30000

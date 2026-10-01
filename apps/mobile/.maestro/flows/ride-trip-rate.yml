@@ -1,0 +1,43 @@
+# FULL flow (needs the dev backend + an online driver): the complete rider
+# journey - login, request a ride, wait for match, trip in progress, trip
+# completed, rate the driver 5 stars, back on home.
+#
+# Prerequisites: same as ride-request.yml, PLUS a driver (app or simulator)
+# that, after being matched: starts the trip (trip_started -> "Heading to
+# destination") and completes it (trip_completed -> "Trip Completed"). The
+# driver-side actions drive the websocket events this flow waits for.
+#
+# The 5-minute waits below are upper bounds for a driver that arrives and
+# completes slowly; with a scripted driver each phase resolves in seconds.
+appId: com.anonymous.ainrider
+name: Ride - Trip progression and driver rating
+tags:
+  - full
+  - ride
+---
+- runFlow: subflows/launch-to-phone.yaml
+- runFlow: subflows/login-rider.yaml
+- extendedWaitUntil:
+    visible: "Where are you going?"
+    timeout: 30000
+- runFlow: subflows/request-ride.yaml
+- extendedWaitUntil:
+    visible: "Driver Found"
+    timeout: 120000
+- assertVisible: "Your ride is on the way"
+- extendedWaitUntil:
+    visible: "Heading to destination"
+    timeout: 300000
+- extendedWaitUntil:
+    visible: "Trip Completed"
+    timeout: 300000
+- tapOn: "Rate Your Driver"
+- assertVisible: "Rate your driver"
+- tapOn:
+    id: "rate-star-5"
+- tapOn:
+    text: "Submit"
+    enabled: true
+- extendedWaitUntil:
+    visible: "Where are you going?"
+    timeout: 30000

@@ -1,0 +1,26 @@
+# Completes phone + OTP login from the phone entry screen.
+# For a REGISTERED rider the app lands on the rider home screen afterwards.
+#
+# Defaults live HERE only (see "Priority" in the Maestro parameterizing docs:
+# a subflow's own env overrides same-named parent values, so parent flows must
+# not redefine PHONE/OTP - override via `maestro test -e PHONE=... -e OTP=...`).
+#
+# PHONE default is the seeded dev rider (see .maestro/README.md).
+# OTP default is the auth-service console provider's TEST_OTP_CODE default.
+appId: com.anonymous.ainrider
+name: Rider OTP login
+env:
+  PHONE: ${PHONE || "1001234567"}
+  OTP: ${OTP || "123456"}
+---
+- tapOn: "10 1234 5678"
+- inputText: ${PHONE}
+- tapOn:
+    text: "Next"
+    enabled: true
+- assertVisible: "Enter the code"
+- tapOn: "------"
+- inputText: ${OTP}
+- tapOn:
+    text: "Verify & Continue"
+    enabled: true
