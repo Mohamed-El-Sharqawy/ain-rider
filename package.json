@@ -5,7 +5,10 @@
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
-    "lint": "turbo run lint",
+    "lint": "node scripts/lint.mjs",
+    "lint:turbo": "turbo run lint",
+    "typecheck": "node scripts/typecheck.mjs",
+    "format:check": "prettier --check --ignore-unknown",
     "dev": "turbo run dev",
     "clean": "turbo run clean",
     "prisma:generate": "pnpm -C apps/backend prisma:generate",
@@ -13,7 +16,10 @@
     "docker:infra:down": "pnpm -C apps/backend docker:infra:down"
   },
   "devDependencies": {
-    "turbo": "^2.5.8"
+    "turbo": "^2.5.8",
+    "react": "19.1.0",
+    "react-test-renderer": "19.1.0",
+    "zustand": "5.0.15"
   },
   "engines": {
     "node": ">=22.0.0",
