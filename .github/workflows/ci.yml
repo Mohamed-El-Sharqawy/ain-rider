@@ -1,0 +1,179 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  format:
+    name: Format (prettier, changed files)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Collect changed formattable files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif [ -n "${{ github.event.before }}" ] && [ ! "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            BASE="${{ github.event.before }}"
+          else
+            BASE="HEAD~1"
+          fi
+          FILES="$(git diff --name-only "$BASE"...HEAD \
+            -- . ':(exclude)pnpm-lock.yaml' ':(exclude)**/node_modules/**' \
+            ':(exclude)**/generated/**' ':(exclude)**/dist/**' ':(exclude)**/coverage/**' \
+            | grep -E '\.(ts|tsx|js|mjs|cjs|jsx|json|md|yaml|yml|css|scss|html)$' || true)"
+          {
+            echo "files<<EOF"
+            echo "$FILES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Prettier check (changed files only)
+        if: steps.changed.outputs.files != ''
+        env:
+          FILES: ${{ steps.changed.outputs.files }}
+        run: pnpm format:check $FILES
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+  test:
+    name: Test (unit + integration) and coverage gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Integration tests were written against the host-compose layout
+      # (apps/backend/docker-compose.yml): postgres on 5433, redis cluster on
+      # 6379-6384 with hostname announcements + NAT map, nats on 4222-4224,
+      # minio on 9000. The compose subset reproduces that exactly; the
+      # pgbouncer/redisinsight/osrm services are not used by tests.
+      - name: Start integration infra (compose subset)
+        run: docker compose -f apps/backend/docker-compose.yml up -d postgres redis-1 redis-2 redis-3 redis-4 redis-5 redis-6 redis-cluster-init nats-1 nats-2 nats-3 minio minio-init
+
+      - name: Wait for infra readiness
+        run: |
+          ok=0
+          for i in $(seq 1 60); do
+            ok=1
+            docker compose -f apps/backend/docker-compose.yml exec -T postgres pg_isready -U ainrider -d ainrider_auth > /dev/null 2>&1 || ok=0
+            docker compose -f apps/backend/docker-compose.yml exec -T redis-1 redis-cli cluster info 2> /dev/null | grep -q 'cluster_state:ok' || ok=0
+            curl -sf http://localhost:8222/healthz > /dev/null 2>&1 || ok=0
+            curl -sf http://localhost:9000/minio/health/live > /dev/null 2>&1 || ok=0
+            [ "$ok" = "1" ] && break
+            sleep 3
+          done
+          if [ "$ok" != "1" ]; then
+            docker compose -f apps/backend/docker-compose.yml ps
+            docker compose -f apps/backend/docker-compose.yml logs --tail 50
+            exit 1
+          fi
+          echo "infra ready"
+
+      - name: Test all suites (turbo run test)
+        run: pnpm test
+
+      - name: Install lcov
+        run: lcov --version > /dev/null 2>&1 || sudo apt-get install -y lcov
+
+      - name: Coverage gate (merged lcov, 100% lines + branches)
+        run: node scripts/coverage-gate.mjs
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            apps/**/coverage/lcov.info
+            coverage-*.info
+          if-no-files-found: ignore

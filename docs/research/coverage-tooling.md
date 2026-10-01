@@ -122,14 +122,14 @@ in the jest repo config: <https://github.com/jestjs/jest/tree/main/packages/jest
 
 ## Merging options compared
 
-| Tool | Input format | Works for bun? | Works for vitest/jest? | Gate support | Verdict |
-| --- | --- | --- | --- | --- | --- |
-| nyc / istanbul-lib (`nyc merge`, `nyc report`, `nyc check-coverage --per-file`) | istanbul JSON only | **no** (bun cannot emit istanbul JSON) | yes | yes (`check-coverage --lines 100 --branches 100`) | rejected as the global pipeline; viable for a vitest+jest-only subset |
-| c8 | V8 coverage JSON | no (bun is JavaScriptCore) | node-run vitest only | partial | rejected |
-| vitest `coverage.mergeReports` | vitest's own reports | no | vitest projects within one run only | via thresholds | rejected (cannot ingest bun/jest output) |
-| lcov CLI (`--add-tracefile`, `--remove`, `--extract`, `--fail-under-lines`, `--fail-under-branches`) | lcov tracefiles | yes | yes | yes (fail-under-lines/branches) | **chosen**: one off-the-shelf tool for merge + exclude-filter + 100% gate |
-| lcov-result-merger (npm) | lcov | yes | yes | no gate | redundant if lcov CLI is available |
-| Codecov (service) | any (server-side merge) | yes | yes | status checks with `target: 100%`, flags per workspace | optional reporting layer, not the enforcement gate (vendor dependency) |
+| Tool                                                                                                 | Input format            | Works for bun?                         | Works for vitest/jest?              | Gate support                                           | Verdict                                                                   |
+| ---------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------- | ----------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------- |
+| nyc / istanbul-lib (`nyc merge`, `nyc report`, `nyc check-coverage --per-file`)                      | istanbul JSON only      | **no** (bun cannot emit istanbul JSON) | yes                                 | yes (`check-coverage --lines 100 --branches 100`)      | rejected as the global pipeline; viable for a vitest+jest-only subset     |
+| c8                                                                                                   | V8 coverage JSON        | no (bun is JavaScriptCore)             | node-run vitest only                | partial                                                | rejected                                                                  |
+| vitest `coverage.mergeReports`                                                                       | vitest's own reports    | no                                     | vitest projects within one run only | via thresholds                                         | rejected (cannot ingest bun/jest output)                                  |
+| lcov CLI (`--add-tracefile`, `--remove`, `--extract`, `--fail-under-lines`, `--fail-under-branches`) | lcov tracefiles         | yes                                    | yes                                 | yes (fail-under-lines/branches)                        | **chosen**: one off-the-shelf tool for merge + exclude-filter + 100% gate |
+| lcov-result-merger (npm)                                                                             | lcov                    | yes                                    | yes                                 | no gate                                                | redundant if lcov CLI is available                                        |
+| Codecov (service)                                                                                    | any (server-side merge) | yes                                    | yes                                 | status checks with `target: 100%`, flags per workspace | optional reporting layer, not the enforcement gate (vendor dependency)    |
 
 lcov facts used above: `--add-tracefile` aggregates tracefiles by summing hit
 counts; `--remove`/`--extract` filter records by glob patterns;
@@ -180,20 +180,20 @@ workspace:
 
 ```ts
 // vitest.base.config.ts
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from "vitest/config";
 
 export const baseCoverage = {
-  provider: 'v8',                          // default; istanbul-identical since vitest 3.2
-  include: ['src/**/*.{ts,tsx}'],          // all-files mode: uncovered files must appear
+  provider: "v8", // default; istanbul-identical since vitest 3.2
+  include: ["src/**/*.{ts,tsx}"], // all-files mode: uncovered files must appear
   exclude: [
-    'src/generated/**',
-    'src/**/*.d.ts',
-    'src/main.ts',                         // bootstrap (nest entrypoint / dashboard main.tsx)
-    'src/index.ts',                        // package barrels that only re-export
+    "src/generated/**",
+    "src/**/*.d.ts",
+    "src/main.ts", // bootstrap (nest entrypoint / dashboard main.tsx)
+    "src/index.ts", // package barrels that only re-export
   ],
-  reporter: ['text-summary', 'lcovonly'],
+  reporter: ["text-summary", "lcovonly"],
   thresholds: { lines: 100, branches: 100, functions: 100, statements: 100 },
-}
+};
 ```
 
 Each workspace's `test` script: `vitest run --coverage`. Local thresholds fail
@@ -222,9 +222,9 @@ from the root merge glob until the team decides otherwise.
   "tasks": {
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
-    }
-  }
+      "outputs": ["coverage/**"],
+    },
+  },
 }
 ```
 
@@ -295,8 +295,8 @@ test-coverage:
       with: { node-version: 22, cache: pnpm }
     - uses: oven-sh/setup-bun@v2
     - run: pnpm install --frozen-lockfile
-    - run: pnpm build          # turbo; generates prisma clients etc.
-    - run: pnpm test           # turbo run test; coverage/** restored from cache on hits
+    - run: pnpm build # turbo; generates prisma clients etc.
+    - run: pnpm test # turbo run test; coverage/** restored from cache on hits
     - run: node scripts/coverage-normalize.mjs
     - run: sudo apt-get install -y lcov && bash scripts/coverage-gate.sh
     - uses: actions/upload-artifact@v4

@@ -45,6 +45,11 @@ export function sanitize(obj: unknown): unknown {
     return obj.map(item => sanitize(item));
   }
 
+  // Dates have no enumerable own properties; keep them intact
+  if (obj instanceof Date) {
+    return obj;
+  }
+
   const sanitized: Record<string, unknown> = {};
   
   for (const [key, value] of Object.entries(obj)) {
@@ -75,7 +80,8 @@ export function sanitizeString(str: string): string {
     /secret[=:]\s*\S+/gi,
     /api[_-]?key[=:]\s*\S+/gi,
     /bearer\s+\S+/gi,
-    /authorization[=:]\s*\S+/gi,
+    // Consume an optional auth scheme + credential pair (e.g. "Basic dXNlcjpwYXNz")
+    /authorization[=:]\s*\S+(\s+\S+)?/gi,
   ];
 
   for (const pattern of patterns) {
