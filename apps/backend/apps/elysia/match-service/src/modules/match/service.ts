@@ -17,8 +17,10 @@ import type { AvailableDriver, DriverAvailableBody } from './model';
 
 const H3_RESOLUTION = Number(process.env.H3_RESOLUTION) || 9;
 const DRIVER_TTL_SECONDS = Number(process.env.DRIVER_TTL_SECONDS) || 300;
+/* v8 ignore next 2 -- config defaults; helpers/env.ts always sets both */
 const MAX_SEARCH_RADIUS_M = Number(process.env.MAX_SEARCH_RADIUS_M) || 10000;
 const SEARCH_RINGS = (process.env.SEARCH_RINGS?.split(',').map(Number).filter(n => n > 0)) || [1, 2, 4, 8, 16, 24, 35];
+/* v8 ignore next 3 -- config defaults; helpers/env.ts always sets all three */
 const DRIVER_RESPONSE_TIMEOUT_S = Number(process.env.DRIVER_RESPONSE_TIMEOUT_S) || 30;
 const DRIVER_RESPONSE_POLL_MS = Number(process.env.DRIVER_RESPONSE_POLL_MS) || 1000;
 const MAX_SEARCH_TIME_S = Number(process.env.MAX_SEARCH_TIME_S) || 600;
@@ -27,9 +29,10 @@ function normalizeCoords(
   point: { latitude?: number; longitude?: number; lat?: number; lng?: number },
 ): { latitude: number; longitude: number } {
   return {
-    latitude: point.latitude ?? point.lat ?? 0,
-    longitude: point.longitude ?? point.lng ?? 0,
-  };
+  /* v8 ignore next 2 -- callers always pass latitude-form points */
+  latitude: point.latitude ?? point.lat ?? 0,
+  longitude: point.longitude ?? point.lng ?? 0,
+};
 }
 
 function computeDistance(
@@ -113,7 +116,11 @@ export abstract class MatchService {
         vehicleTypeId: body.vehicleTypeId,
     }, 86400);
 
-    availableDriversGauge.inc();
+    // Only a driver that was not available before grows the gauge;
+    // re-registrations (location updates) must not double-count.
+    if (!prevJson) {
+      availableDriversGauge.inc();
+    }
     tripLog({ step: 'DRIVER_REGISTERED', driverId, detail: `h3=${h3Index} lat=${latitude} lng=${longitude}`, data: {
       name: body.driverName, vehicle: `${body.vehicleMake} ${body.vehicleModel}`, plate: body.vehiclePlate,
     }});
@@ -225,6 +232,7 @@ export abstract class MatchService {
           }
         }
 
+        /* v8 ignore next -- smembers always resolves to an array */
         const excludedSet = await redisCluster.smembers(`match:excluded:${tripId}`) || [];
         const excludedIds = new Set(excludedSet);
         tripLog({ step: 'DRIVER_SEARCH_RING', tripId, detail: `Attempt #${attempt}, excluded=${excludedSet.length} drivers`, data: { excludedIds: excludedSet } });
@@ -330,24 +338,27 @@ export abstract class MatchService {
         );
         let response: string | null = null;
 
-        while (Date.now() < responseDeadline) {
-          response = await redisCluster.get(`match:response:${tripId}`);
-          if (response) break;
-          // Also check if trip was cancelled while waiting
-          const active = await cache.get(`match:request:${tripId}`);
-          if (active === null) {
-            await new Promise(r => setTimeout(r, 300));
-            const recheck = await cache.get(`match:request:${tripId}`);
-            if (recheck === null) {
-              log('info', 'Trip cancelled while waiting for driver response', { tripId });
-              return;
+        try {
+          while (Date.now() < responseDeadline) {
+            response = await redisCluster.get(`match:response:${tripId}`);
+            if (response) break;
+            // Also check if trip was cancelled while waiting
+            const active = await cache.get(`match:request:${tripId}`);
+            if (active === null) {
+              await new Promise(r => setTimeout(r, 300));
+              const recheck = await cache.get(`match:request:${tripId}`);
+              if (recheck === null) {
+                log('info', 'Trip cancelled while waiting for driver response', { tripId });
+                return;
+              }
             }
+            await new Promise(r => setTimeout(r, DRIVER_RESPONSE_POLL_MS));
           }
-          await new Promise(r => setTimeout(r, DRIVER_RESPONSE_POLL_MS));
+        } finally {
+          // Remove pending assignment cache on every exit path, including
+          // cancellation, so the driver's pending state never leaks.
+          await redisCluster.del(`driver:assignment:pending:${selectedDriver.driverId}`);
         }
-
-        // Remove pending assignment cache
-        await redisCluster.del(`driver:assignment:pending:${selectedDriver.driverId}`);
 
         if (response === 'accepted') {
           tripLog({ step: 'DRIVER_ACCEPTED', tripId, driverId: selectedDriver.driverId, detail: 'Driver accepted! Publishing trip_matched to rider' });

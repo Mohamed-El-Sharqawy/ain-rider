@@ -8,10 +8,10 @@
  */
 
 import { appendFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
-// Use import.meta.dir (Bun-native) for reliable path resolution
-const THIS_DIR = typeof import.meta.dir === 'string' ? import.meta.dir : process.cwd();
+const THIS_DIR = dirname(fileURLToPath(import.meta.url));
 const LOG_DIR = join(THIS_DIR, '..', '..', 'logs');
 const LOG_FILE = join(LOG_DIR, 'trip-flow.log');
 

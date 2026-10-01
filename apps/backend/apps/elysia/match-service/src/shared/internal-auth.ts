@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia';
+import { AppError, ErrorCodes } from '@ain-rider/error-handling';
 import { log } from './logger';
 
 const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET;
@@ -53,19 +54,19 @@ export const internalAuth = new Elysia({ name: 'InternalAuth' }).derive(
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       set.status = 401;
-      throw new Error('Internal service auth header missing');
+      throw new AppError(ErrorCodes.UNAUTHORIZED, 'Internal service auth header missing');
     }
 
     const token = authHeader.slice(7);
     const payload = await verifyInternalToken(token);
 
     if (!payload) {
-      log('warn', 'Internal auth failed', { 
+      log('warn', 'Internal auth failed', {
         ip: request.headers.get('x-forwarded-for'),
-        hasSecretHeader: !!secretHeader 
+        hasSecretHeader: !!secretHeader
       });
       set.status = 401;
-      throw new Error('Invalid internal service token');
+      throw new AppError(ErrorCodes.UNAUTHORIZED, 'Invalid internal service token');
     }
 
     return { serviceCaller: payload };

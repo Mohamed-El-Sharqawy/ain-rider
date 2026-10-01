@@ -8,8 +8,8 @@ import type { NatsConnection } from '@ain-rider/nats-client';
 import { redisCluster } from './redis';
 
 const NATS_SERVERS = process.env.NATS_SERVERS?.split(',') || ['nats://localhost:4222'];
-const MAX_RETRIES = 10;
-const RETRY_DELAY_MS = 1000;
+const MAX_RETRIES = Number(process.env.NATS_MAX_RETRIES) || 10;
+const RETRY_DELAY_MS = Number(process.env.NATS_RETRY_DELAY_MS) || 1000;
 
 let _nc: NatsConnection | null = null;
 let _publisher: JetStreamPublisher | null = null;
