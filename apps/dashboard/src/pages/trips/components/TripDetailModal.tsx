@@ -48,12 +48,13 @@ export function TripDetailModal({ trip, open, onClose }: TripDetailModalProps) {
   if (!trip) return null
 
   const handleCancel = () => {
-    if (!cancelReason.trim() || !user) return
+    // confirm is disabled until a reason is typed
     cancelTrip(
       {
         id: trip.id,
         reason: cancelReason.trim(),
-        cancelledBy: user.id,
+        // the modal only renders inside the protected layout, so a session exists
+        cancelledBy: user!.id,
       },
       {
         onSuccess: () => {

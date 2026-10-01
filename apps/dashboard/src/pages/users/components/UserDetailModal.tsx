@@ -30,7 +30,7 @@ export function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
 
   const { mutate: updateStatus, isPending } = useUpdateUserStatus();
   const { data: onboarding } = useGetOnboardingStatus(
-    user?.role === 'DRIVER' ? (user?.id ?? '') : ''
+    user?.role === 'DRIVER' && user ? user.id : ''
   );
   const { mutate: approveDriver, isPending: isApproving } = useApproveDriver();
   const { mutate: rejectDocument, isPending: isRejecting } = useRejectDocument();
@@ -40,7 +40,7 @@ export function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
   if (!user) return null;
 
   const handleUpdateStatus = () => {
-    if (!newStatus) return;
+    // save is disabled until a status is picked
     updateStatus(
       {
         id: user.id,
@@ -64,9 +64,10 @@ export function UserDetailModal({ user, open, onClose }: UserDetailModalProps) {
   };
 
   const handleRejectDocument = () => {
-    if (!rejectStage || !reason) return;
+    // confirm is disabled until a reason is typed, and the reject UI only
+    // exists behind a picked stage
     rejectDocument(
-      { id: user.id, stage: rejectStage, reason },
+      { id: user.id, stage: rejectStage!, reason },
       {
         onSuccess: () => {
           setRejectStage(null);

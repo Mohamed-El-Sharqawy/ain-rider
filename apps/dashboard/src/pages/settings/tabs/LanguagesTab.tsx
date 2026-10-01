@@ -110,7 +110,9 @@ export function LanguagesTab() {
     upsertSetting({
       key: 'languages.list',
       data: {
-        value: JSON.stringify(updatedLanguages),
+        // store the array itself, like add/edit/delete do; the backend
+        // stringifies non-string values, so all writers round-trip the same way
+        value: updatedLanguages,
         type: 'JSON',
         category: 'languages',
       },

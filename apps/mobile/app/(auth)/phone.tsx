@@ -16,8 +16,6 @@ export default function PhoneScreen() {
   const { setPhone } = useOnboardingStore();
 
   const handleNext = async () => {
-    if (phoneNumber.length < 8) return;
-
     const formattedPhone = phoneNumber.startsWith('+')
       ? phoneNumber
       : `+20${phoneNumber.replace(/^0+/, '')}`;
