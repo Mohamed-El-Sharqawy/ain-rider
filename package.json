@@ -5,7 +5,10 @@
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
-    "lint": "turbo run lint",
+    "lint": "node scripts/lint.mjs",
+    "lint:turbo": "turbo run lint",
+    "typecheck": "node scripts/typecheck.mjs",
+    "format:check": "prettier --check --ignore-unknown",
     "dev": "turbo run dev",
     "clean": "turbo run clean",
     "prisma:generate": "pnpm -C apps/backend prisma:generate",

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Param, Body, Query, Headers } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Param, Body, Query, Headers, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiHeader } from '@nestjs/swagger';
 import { TripsService } from './trips.service';
 import { CreateTripDto } from './dto/create-trip.dto';
@@ -14,6 +14,7 @@ export class TripsController {
   constructor(private tripsService: TripsService) {}
 
   @Post('estimate')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Estimate fare for a trip' })
   estimateFare(@Body() body: EstimateFareDto) {
     return this.tripsService.estimateFare(
