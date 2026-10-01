@@ -12,8 +12,11 @@
  * this list, so the gate never regresses and tightens as errors are paid
  * down. Known PENDING failures as of the ticket that introduced this script
  * (issue #17):
- * - apps/mobile: unused imports (TS6133) + GoogleMapProvider.getRoute type
- *   mismatch vs MapProvider (TS2416).
+ * - apps/mobile was ratcheted up to ENFORCED after @types segregation
+ *   (backend tsconfig.base pins "types": ["node"] so hoisted @types/*
+ *   cannot leak in; mobile tsconfig adds "jest" to types). Its remaining
+ *   errors were fixed: unused imports and GoogleMapProvider stub
+ *   signatures that did not match MapProvider.
  * - apps/backend/apps/elysia/api-gateway: unused `set` (TS6133) +
  *   proxy-error `unknown` assignment (TS2322).
  * - apps/backend/packages/metrics (src/elysia/plugin.ts unused `_request`,
@@ -37,6 +40,7 @@ const tscBin = require.resolve("typescript/bin/tsc");
 
 const ENFORCED = [
   "apps/dashboard",
+  "apps/mobile",
   "apps/backend/packages/config",
   "apps/backend/packages/error-handling",
   "apps/backend/packages/internal-api",
@@ -47,7 +51,6 @@ const ENFORCED = [
 ];
 
 const PENDING = [
-  "apps/mobile",
   "apps/backend/apps/elysia/api-gateway",
   "apps/backend/apps/elysia/location-service",
   "apps/backend/apps/elysia/match-service",

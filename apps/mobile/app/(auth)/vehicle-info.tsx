@@ -1,25 +1,35 @@
-import { View, Text, TextInput, TouchableOpacity, Platform, Modal, FlatList, ActivityIndicator, ScrollView } from 'react-native';
-import { useState, useEffect, useMemo } from 'react';
-import { router } from 'expo-router';
-import { useOnboardingStore } from '../../stores/onboarding.store';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Ionicons } from '@expo/vector-icons';
-import { DriverApi } from '../../lib/api/driver';
-import { VehicleMake, VehicleModel } from '../../lib/api/types';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
+import { useState, useEffect } from "react";
+import { router } from "expo-router";
+import { useOnboardingStore } from "../../stores/onboarding.store";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Ionicons } from "@expo/vector-icons";
+import { DriverApi } from "../../lib/api/driver";
+import { VehicleMake, VehicleModel } from "../../lib/api/types";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Constants
 const COLORS = [
-  { name: 'White', hex: '#FFFFFF', icon: 'square' },
-  { name: 'Black', hex: '#18181b', icon: 'square' },
-  { name: 'Silver', hex: '#d4d4d8', icon: 'square' },
-  { name: 'Grey', hex: '#71717a', icon: 'square' },
-  { name: 'Blue', hex: '#3b82f6', icon: 'square' },
-  { name: 'Red', hex: '#ef4444', icon: 'square' },
+  { name: "White", hex: "#FFFFFF", icon: "square" },
+  { name: "Black", hex: "#18181b", icon: "square" },
+  { name: "Silver", hex: "#d4d4d8", icon: "square" },
+  { name: "Grey", hex: "#71717a", icon: "square" },
+  { name: "Blue", hex: "#3b82f6", icon: "square" },
+  { name: "Red", hex: "#ef4444", icon: "square" },
 ];
 
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 25 }, (_, i) => (CURRENT_YEAR + 1 - i).toString());
+const YEARS = Array.from({ length: 25 }, (_, i) =>
+  (CURRENT_YEAR + 1 - i).toString(),
+);
 
 export default function VehicleInfoScreen() {
   const [makes, setMakes] = useState<VehicleMake[]>([]);
@@ -28,15 +38,17 @@ export default function VehicleInfoScreen() {
   const [selectedMake, setSelectedMake] = useState<VehicleMake | null>(null);
   const [selectedModel, setSelectedModel] = useState<VehicleModel | null>(null);
   const [year, setYear] = useState(CURRENT_YEAR.toString());
-  const [plate, setPlate] = useState('');
-  const [color, setColor] = useState('White');
+  const [plate, setPlate] = useState("");
+  const [color, setColor] = useState("White");
 
   const [isLoading, setIsLoading] = useState(true);
   const [isModelsLoading, setIsModelsLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState<'make' | 'model' | 'year' | 'color' | null>(null);
+  const [modalVisible, setModalVisible] = useState<
+    "make" | "model" | "year" | "color" | null
+  >(null);
 
   const { setVehicle, vehicle: storeVehicle } = useOnboardingStore();
-  
+
   // Load data from store on mount
   useEffect(() => {
     if (storeVehicle) {
@@ -53,7 +65,7 @@ export default function VehicleInfoScreen() {
   // Update selection if they were previously saved
   useEffect(() => {
     if (storeVehicle && makes.length > 0 && !selectedMake) {
-      const foundMake = makes.find(m => m.name === storeVehicle.make);
+      const foundMake = makes.find((m) => m.name === storeVehicle.make);
       if (foundMake) {
         setSelectedMake(foundMake);
         fetchModels(foundMake.id);
@@ -63,7 +75,7 @@ export default function VehicleInfoScreen() {
 
   useEffect(() => {
     if (storeVehicle && models.length > 0 && !selectedModel) {
-      const foundModel = models.find(m => m.name === storeVehicle.model);
+      const foundModel = models.find((m) => m.name === storeVehicle.model);
       if (foundModel) setSelectedModel(foundModel);
     }
   }, [models, storeVehicle]);
@@ -74,7 +86,7 @@ export default function VehicleInfoScreen() {
       const data = await DriverApi.getMakes();
       setMakes(data);
     } catch (error) {
-      console.error('Failed to fetch makes:', error);
+      console.error("Failed to fetch makes:", error);
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +98,7 @@ export default function VehicleInfoScreen() {
       const data = await DriverApi.getModels(makeId);
       setModels(data);
     } catch (error) {
-      console.error('Failed to fetch models:', error);
+      console.error("Failed to fetch models:", error);
     } finally {
       setIsModelsLoading(false);
     }
@@ -97,7 +109,7 @@ export default function VehicleInfoScreen() {
     setSelectedModel(null);
     setModels([]);
     fetchModels(make.id);
-    setModalVisible('model'); // Auto-transition to model selection
+    setModalVisible("model"); // Auto-transition to model selection
   };
 
   const handleModelSelect = (model: VehicleModel) => {
@@ -105,7 +117,8 @@ export default function VehicleInfoScreen() {
     setModalVisible(null);
   };
 
-  const isFormValid = selectedMake && selectedModel && year && plate && plate.length >= 4;
+  const isFormValid =
+    selectedMake && selectedModel && year && plate && plate.length >= 4;
 
   const handleNext = () => {
     if (isFormValid) {
@@ -116,44 +129,64 @@ export default function VehicleInfoScreen() {
         color: color,
         plateNumber: plate,
       });
-      router.push('/(auth)/driver-documents');
+      router.push("/(auth)/driver-documents");
     }
   };
 
   const renderSelectionItem = ({ item, type }: { item: any; type: string }) => {
-    let label = '';
+    let label = "";
     let isSelected = false;
 
-    if (type === 'make') {
+    if (type === "make") {
       label = item.name;
       isSelected = selectedMake?.id === item.id;
-    } else if (type === 'model') {
+    } else if (type === "model") {
       label = item.name;
       isSelected = selectedModel?.id === item.id;
-    } else if (type === 'year') {
+    } else if (type === "year") {
       label = item;
       isSelected = year === item;
-    } else if (type === 'color') {
+    } else if (type === "color") {
       label = item.name;
       isSelected = color === item.name;
     }
 
     return (
       <TouchableOpacity
-        className={`py-4 px-6 mb-2 rounded-2xl flex-row items-center justify-between ${isSelected ? 'bg-emerald-600/20 border-emerald-600' : 'bg-zinc-900 border-zinc-800'}`}
+        className={`py-4 px-6 mb-2 rounded-2xl flex-row items-center justify-between ${isSelected ? "bg-emerald-600/20 border-emerald-600" : "bg-zinc-900 border-zinc-800"}`}
         style={{ borderWidth: 1 }}
         onPress={() => {
-          if (type === 'make') handleMakeSelect(item);
-          else if (type === 'model') handleModelSelect(item);
-          else if (type === 'year') { setYear(item); setModalVisible(null); }
-          else if (type === 'color') { setColor(item.name); setModalVisible(null); }
+          if (type === "make") handleMakeSelect(item);
+          else if (type === "model") handleModelSelect(item);
+          else if (type === "year") {
+            setYear(item);
+            setModalVisible(null);
+          } else if (type === "color") {
+            setColor(item.name);
+            setModalVisible(null);
+          }
         }}
       >
         <View className="flex-row items-center">
-          {type === 'color' && <View className="w-4 h-4 rounded-full me-3" style={{ backgroundColor: item.hex, borderWidth: item.name === 'White' ? 1 : 0, borderColor: '#3f3f46' }} />}
-          <Text className={`text-lg font-medium ${isSelected ? 'text-emerald-400' : 'text-zinc-300'}`}>{label}</Text>
+          {type === "color" && (
+            <View
+              className="w-4 h-4 rounded-full me-3"
+              style={{
+                backgroundColor: item.hex,
+                borderWidth: item.name === "White" ? 1 : 0,
+                borderColor: "#3f3f46",
+              }}
+            />
+          )}
+          <Text
+            className={`text-lg font-medium ${isSelected ? "text-emerald-400" : "text-zinc-300"}`}
+          >
+            {label}
+          </Text>
         </View>
-        {isSelected && <Ionicons name="checkmark-circle" size={24} color="#10b981" />}
+        {isSelected && (
+          <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+        )}
       </TouchableOpacity>
     );
   };
@@ -161,73 +194,122 @@ export default function VehicleInfoScreen() {
   return (
     <SafeAreaView className="flex-1 bg-zinc-950">
       <KeyboardAwareScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 60, paddingBottom: 60 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 24,
+          paddingTop: 60,
+          paddingBottom: 60,
+        }}
         enableOnAndroid={true}
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity onPress={() => router.back()} className="mb-8 w-10 h-10 rounded-full bg-zinc-900 items-center justify-center">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mb-8 w-10 h-10 rounded-full bg-zinc-900 items-center justify-center"
+        >
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
 
-        <Text className="text-4xl font-extrabold text-white mb-2 tracking-tighter">Identity your vehicle</Text>
-        <Text className="text-xl text-zinc-500 mb-10 font-medium">Please provide accurate vehicle details for approval</Text>
+        <Text className="text-4xl font-extrabold text-white mb-2 tracking-tighter">
+          Identity your vehicle
+        </Text>
+        <Text className="text-xl text-zinc-500 mb-10 font-medium">
+          Please provide accurate vehicle details for approval
+        </Text>
 
         {/* Brand/Make */}
-        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Car Brand</Text>
+        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">
+          Car Brand
+        </Text>
         <TouchableOpacity
           className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-6 border border-zinc-800/50"
-          onPress={() => setModalVisible('make')}
+          onPress={() => setModalVisible("make")}
           disabled={isLoading}
         >
           <Ionicons name="business-outline" size={20} color="#71717a" />
-          <Text className={`flex-1 text-lg font-medium ms-3 ${selectedMake ? 'text-white' : 'text-zinc-600'}`}>
-            {isLoading ? 'Loading brands...' : selectedMake ? selectedMake.name : 'Select car brand'}
+          <Text
+            className={`flex-1 text-lg font-medium ms-3 ${selectedMake ? "text-white" : "text-zinc-600"}`}
+          >
+            {isLoading
+              ? "Loading brands..."
+              : selectedMake
+                ? selectedMake.name
+                : "Select car brand"}
           </Text>
           <Ionicons name="chevron-down" size={20} color="#3f3f46" />
         </TouchableOpacity>
 
         {/* Model */}
-        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Car Model</Text>
+        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">
+          Car Model
+        </Text>
         <TouchableOpacity
           className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-6 border border-zinc-800/50"
-          onPress={() => selectedMake && setModalVisible('model')}
+          onPress={() => selectedMake && setModalVisible("model")}
           disabled={!selectedMake || isModelsLoading}
         >
           <Ionicons name="car-outline" size={20} color="#71717a" />
-          <Text className={`flex-1 text-lg font-medium ms-3 ${selectedModel ? 'text-white' : 'text-zinc-600'}`}>
-            {isModelsLoading ? 'Loading models...' : selectedModel ? selectedModel.name : selectedMake ? 'Select model' : 'Pick a brand first'}
+          <Text
+            className={`flex-1 text-lg font-medium ms-3 ${selectedModel ? "text-white" : "text-zinc-600"}`}
+          >
+            {isModelsLoading
+              ? "Loading models..."
+              : selectedModel
+                ? selectedModel.name
+                : selectedMake
+                  ? "Select model"
+                  : "Pick a brand first"}
           </Text>
-          {isModelsLoading ? <ActivityIndicator size="small" color="#10b981" /> : <Ionicons name="chevron-down" size={20} color="#3f3f46" />}
+          {isModelsLoading ? (
+            <ActivityIndicator size="small" color="#10b981" />
+          ) : (
+            <Ionicons name="chevron-down" size={20} color="#3f3f46" />
+          )}
         </TouchableOpacity>
 
         <View className="flex-row gap-4 mb-6">
           {/* Year */}
           <View className="flex-1">
-            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Year</Text>
+            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">
+              Year
+            </Text>
             <TouchableOpacity
               className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 border border-zinc-800/50"
-              onPress={() => setModalVisible('year')}
+              onPress={() => setModalVisible("year")}
             >
-              <Text className="flex-1 text-lg font-medium text-white text-center">{year}</Text>
+              <Text className="flex-1 text-lg font-medium text-white text-center">
+                {year}
+              </Text>
               <Ionicons name="calendar-outline" size={16} color="#3f3f46" />
             </TouchableOpacity>
           </View>
 
           {/* Color */}
           <View className="flex-1">
-            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">Car Color</Text>
+            <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">
+              Car Color
+            </Text>
             <TouchableOpacity
               className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 border border-zinc-800/50"
-              onPress={() => setModalVisible('color')}
+              onPress={() => setModalVisible("color")}
             >
-              <View className="w-3 h-3 rounded-full me-2" style={{ backgroundColor: COLORS.find(c => c.name === color)?.hex }} />
-              <Text className="flex-1 text-lg font-medium text-white capitalize">{color}</Text>
+              <View
+                className="w-3 h-3 rounded-full me-2"
+                style={{
+                  backgroundColor: COLORS.find((c) => c.name === color)?.hex,
+                }}
+              />
+              <Text className="flex-1 text-lg font-medium text-white capitalize">
+                {color}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* License Plate */}
-        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">License Plate</Text>
+        <Text className="text-zinc-500 text-xs font-bold uppercase tracking-[2px] mb-3 ms-1">
+          License Plate
+        </Text>
         <View className="bg-zinc-900 h-16 rounded-2xl flex-row items-center px-5 mb-12 border border-zinc-800/50">
           <Ionicons name="card-outline" size={20} color="#71717a" />
           <TextInput
@@ -242,44 +324,68 @@ export default function VehicleInfoScreen() {
         </View>
 
         <TouchableOpacity
-          className={`h-16 rounded-2xl items-center justify-center shadow-lg ${isFormValid ? 'bg-emerald-600' : 'bg-zinc-900 border border-zinc-800'}`}
+          className={`h-16 rounded-2xl items-center justify-center shadow-lg ${isFormValid ? "bg-emerald-600" : "bg-zinc-900 border border-zinc-800"}`}
           onPress={handleNext}
           disabled={!isFormValid}
         >
-          <Text className={`text-xl font-bold ${isFormValid ? 'text-white' : 'text-zinc-600'}`}>Next: Upload Documents</Text>
+          <Text
+            className={`text-xl font-bold ${isFormValid ? "text-white" : "text-zinc-600"}`}
+          >
+            Next: Upload Documents
+          </Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
 
       {/* Selection Modals */}
       <Modal visible={!!modalVisible} transparent animationType="slide">
         <View className="flex-1 bg-black/60 justify-end">
-          <View className="bg-zinc-950 rounded-t-[40px] px-6 pt-8 pb-10" style={{ maxHeight: '80%' }}>
+          <View
+            className="bg-zinc-950 rounded-t-[40px] px-6 pt-8 pb-10"
+            style={{ maxHeight: "80%" }}
+          >
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-2xl font-bold text-white capitalize">Select {modalVisible}</Text>
+              <Text className="text-2xl font-bold text-white capitalize">
+                Select {modalVisible}
+              </Text>
               <TouchableOpacity onPress={() => setModalVisible(null)}>
                 <Ionicons name="close-circle" size={32} color="#3f3f46" />
               </TouchableOpacity>
             </View>
 
-            {modalVisible === 'model' && isModelsLoading ? (
+            {modalVisible === "model" && isModelsLoading ? (
               <View className="flex-1 items-center justify-center py-20">
                 <ActivityIndicator size="large" color="#10b981" />
-                <Text className="text-zinc-500 mt-4 font-medium">Loading models...</Text>
+                <Text className="text-zinc-500 mt-4 font-medium">
+                  Loading models...
+                </Text>
               </View>
             ) : (
               <FlatList
-                data={(
-                  modalVisible === 'make' ? makes :
-                    modalVisible === 'model' ? models :
-                      modalVisible === 'year' ? YEARS :
-                        modalVisible === 'color' ? COLORS : []
-                ) as any[]}
-                keyExtractor={(item, index) => (typeof item === 'string' ? item : (item as any).id || index.toString())}
-                renderItem={(info) => renderSelectionItem({ ...info, type: modalVisible! })}
+                data={
+                  (modalVisible === "make"
+                    ? makes
+                    : modalVisible === "model"
+                      ? models
+                      : modalVisible === "year"
+                        ? YEARS
+                        : modalVisible === "color"
+                          ? COLORS
+                          : []) as any[]
+                }
+                keyExtractor={(item, index) =>
+                  typeof item === "string"
+                    ? item
+                    : (item as any).id || index.toString()
+                }
+                renderItem={(info) =>
+                  renderSelectionItem({ ...info, type: modalVisible! })
+                }
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                   <View className="items-center justify-center py-10">
-                    <Text className="text-zinc-500 font-medium">No results found</Text>
+                    <Text className="text-zinc-500 font-medium">
+                      No results found
+                    </Text>
                   </View>
                 }
               />
