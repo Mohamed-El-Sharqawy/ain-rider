@@ -8,7 +8,7 @@
     "start": "bun src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun --external @nestjs/common --external @nestjs/core --external fastify",
     "clean": "rimraf dist",
-    "test": "bun test"
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "@ain-rider/error-handling": "workspace:*",
@@ -24,7 +24,10 @@
     "redis": "^4.6.0"
   },
   "devDependencies": {
+    "@ain-rider/test-utils": "workspace:*",
     "@types/bun": "latest",
-    "rimraf": "^6.0.1"
+    "@vitest/coverage-v8": "^3.2.0",
+    "rimraf": "^6.0.1",
+    "vitest": "^3.2.0"
   }
 }

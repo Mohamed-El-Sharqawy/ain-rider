@@ -12,7 +12,9 @@ import { generateTraceId, extractTraceId } from '@ain-rider/error-handling';
  */
 export const traceMiddleware = new Elysia({ name: 'trace-middleware' })
   .state('traceId', '')
-  .derive(({ request, store }) => {
+  // as: 'scoped' is required: without it the derive only applies to routes
+  // registered on this plugin instance (there are none), so it never runs
+  .derive({ as: 'scoped' }, ({ request, store }) => {
     const traceId = extractTraceId(request.headers) || generateTraceId();
     store.traceId = traceId;
     return { traceId };

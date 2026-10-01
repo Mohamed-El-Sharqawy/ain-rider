@@ -1,10 +1,14 @@
 import { createRedisCluster, createCache } from '@ain-rider/redis-client';
 
+/** Prefix applied to every key this service writes. */
+export const KEY_PREFIX = 'match:';
+
+/* v8 ignore next  -- helpers/env.ts always sets REDIS_NODES */
 const REDIS_NODES = (process.env.REDIS_NODES || 'localhost:6379').split(',');
 
 export const redisCluster = createRedisCluster({
   nodes: REDIS_NODES,
-  keyPrefix: 'match:',
+  keyPrefix: KEY_PREFIX,
 });
 
 export const cache = createCache(redisCluster);
