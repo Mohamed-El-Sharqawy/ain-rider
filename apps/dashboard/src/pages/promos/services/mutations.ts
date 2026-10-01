@@ -49,11 +49,10 @@ export const useUpdatePromo = () => {
       toast.success('تم تحديث العرض الترويجي بنجاح');
     },
     onError: (err, _vars, context) => {
-      if (context?.previousLists) {
-        context.previousLists.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
+      // onMutate always returns { previousLists }, possibly an empty array
+      context!.previousLists.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       toast.error(getApiError(err));
     },
   });

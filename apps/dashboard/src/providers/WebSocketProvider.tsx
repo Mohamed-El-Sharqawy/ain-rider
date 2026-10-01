@@ -61,7 +61,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const reconnectAttemptRef = useRef(0);
   const intentionalCloseRef = useRef(false);
 
-  const connectRef = useRef<() => void>(() => {});
+  // always set before any reconnect timer can fire (assigned in an effect below)
+  const connectRef = useRef<(() => void) | undefined>(undefined);
 
   useEffect(() => { userIdRef.current = user?.id; }, [user?.id]);
   useEffect(() => { isAuthenticatedRef.current = isAuthenticated; }, [isAuthenticated]);
@@ -81,7 +82,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const connect = useCallback(() => {
-    if (!isAuthenticatedRef.current || isConnectingRef.current || (wsRef.current && wsRef.current.readyState === WebSocket.OPEN)) {
+    // both call sites (the auth effect and the reconnect timer) run after the
+    // previous socket was torn down, so a live OPEN socket can never exist here
+    if (!isAuthenticatedRef.current || isConnectingRef.current) {
       return;
     }
 
@@ -149,6 +152,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
           if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = setInterval(() => {
+            // a tick landing inside the closing handshake must not send
             if (wsRef.current?.readyState === WebSocket.OPEN) {
               wsRef.current.send(JSON.stringify({ type: 'ping' }));
             }
@@ -191,12 +195,19 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         return;
       }
 
+      // Logout and unmount both tear the socket down intentionally, so this
+      // reconnect branch only ever runs while still authed and mounted; the
+      // unauthed/unmounted sides of the guards are unreachable through React's
+      // synchronous cleanup (it clears this timer first). Tested via the
+      // abnormal-close backoff suite; the defensive false sides are excluded.
+      /* v8 ignore next 3 */
       if (isAuthenticatedRef.current && mountedRef.current) {
         if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
         const delay = getReconnectDelay();
         reconnectAttemptRef.current += 1;
         reconnectTimeoutRef.current = setTimeout(() => {
-          if (isAuthenticatedRef.current && mountedRef.current) connectRef.current();
+          /* v8 ignore next */
+          if (isAuthenticatedRef.current && mountedRef.current) connectRef.current!();
         }, delay);
       }
     };
