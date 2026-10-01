@@ -276,29 +276,59 @@ const remove = spawnSync(
 );
 if (remove.status !== 0) fail("lcov --remove failed.");
 
-const summary = spawnSync(
+const summaryArgs = [
+  "--summary",
+  gatedFile,
+  // lcov 2.x only evaluates branch data (and --fail-under-branches) when
+  // branch coverage is enabled for the summary run.
+  "--rc",
+  "branch_coverage=1",
+  "--fail-under-lines",
+  "100",
+  // `inconsistent,corrupt`: see the merge step (v8 ignore regions).
+  "--ignore-errors",
+  "inconsistent,corrupt",
+];
+// Older lcov builds (e.g. Ubuntu apt) reject --fail-under-branches as an
+// unknown option. Probe once; when unsupported, enforce the branch bar by
+// parsing the summary text instead of relying on the exit code.
+const probe = spawnSync(
   "lcov",
-  [
-    "--summary",
-    gatedFile,
-    // lcov 2.x only evaluates branch data (and --fail-under-branches) when
-    // branch coverage is enabled for the summary run.
-    "--rc",
-    "branch_coverage=1",
-    "--fail-under-lines",
-    "100",
-    "--fail-under-branches",
-    "100",
-    // `inconsistent,corrupt`: see the merge step (v8 ignore regions).
-    "--ignore-errors",
-    "inconsistent,corrupt",
-  ],
-  { cwd: repoRoot, stdio: "inherit", shell: process.platform === "win32" },
+  ["--summary", gatedFile, "--fail-under-branches", "100"],
+  {
+    encoding: "utf8",
+    shell: process.platform === "win32",
+  },
 );
+const probeOutput = `${probe.stdout ?? ""}${probe.stderr ?? ""}`;
+const supportsFailUnderBranches =
+  probe.status === 0 && !/Unknown option/i.test(probeOutput);
+if (supportsFailUnderBranches) summaryArgs.push("--fail-under-branches", "100");
+
+const summary = spawnSync("lcov", summaryArgs, {
+  cwd: repoRoot,
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
 if (summary.status !== 0) {
   fail(
     `coverage below the 100% bar (lines + branches) across ${reports.length} tracefile(s).`,
   );
+}
+if (!supportsFailUnderBranches) {
+  const check = spawnSync("lcov", summaryArgs, {
+    cwd: repoRoot,
+    encoding: "utf8",
+    shell: process.platform === "win32",
+  });
+  const branchRate = Number(
+    /branches\S*\s*:\s*([\d.]+)%/.exec(check.stdout ?? "")?.[1] ?? "0",
+  );
+  if (!(branchRate >= 100)) {
+    fail(
+      `branch coverage ${branchRate}% is below the 100% bar across ${reports.length} tracefile(s).`,
+    );
+  }
 }
 console.log(
   `coverage-gate: 100% lines + branches across ${reports.length} tracefile(s).`,

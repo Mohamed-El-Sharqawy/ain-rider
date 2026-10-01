@@ -4,13 +4,12 @@
  * reconnect loop.
  */
 
-import {
-  createNatsConnection,
-  NatsConnection,
-} from '@ain-rider/nats-client';
-import { loadTestEnv } from './env';
+import { createNatsConnection, NatsConnection } from "@ain-rider/nats-client";
+import { loadTestEnv } from "./env";
 
-export async function createTestNatsConnection(name = 'test'): Promise<NatsConnection> {
+export async function createTestNatsConnection(
+  name = "test",
+): Promise<NatsConnection> {
   const env = loadTestEnv();
   return createNatsConnection({
     servers: env.natsServers,
@@ -29,29 +28,31 @@ export async function createTestNatsConnection(name = 'test'): Promise<NatsConne
  * whole update.
  */
 const OPS_SUBJECTS = [
-  'ain_rider.trip_requested',
-  'ain_rider.trip_assigned',
-  'ain_rider.trip_matched',
-  'ain_rider.trip_started',
-  'ain_rider.trip_completed',
-  'ain_rider.trip_cancelled',
-  'ain_rider.trip_rejected',
-  'ain_rider.trip_no_match',
-  'ain_rider.sos_created',
-  'ain_rider.sos_resolved',
+  "ain_rider.trip_requested",
+  "ain_rider.trip_assigned",
+  "ain_rider.trip_matched",
+  "ain_rider.trip_started",
+  "ain_rider.trip_completed",
+  "ain_rider.trip_cancelled",
+  "ain_rider.trip_rejected",
+  "ain_rider.trip_no_match",
+  "ain_rider.sos_created",
+  "ain_rider.sos_resolved",
 ];
 
-const LOCATION_SUBJECTS = ['ain_rider.location_update'];
+const LOCATION_SUBJECTS = ["ain_rider.location_update"];
 
 /**
  * Idempotently provision the shared test streams with the full subject
  * union. Extends an existing stream's subject list instead of replacing it.
  */
-export async function provisionSharedStreams(nc: NatsConnection): Promise<void> {
+export async function provisionSharedStreams(
+  nc: NatsConnection,
+): Promise<void> {
   const jsm = await nc.jetstreamManager();
   const wanted: Array<[string, string[]]> = [
-    ['AIN_RIDER_OPS', OPS_SUBJECTS],
-    ['AIN_RIDER_LOCATION', LOCATION_SUBJECTS],
+    ["AIN_RIDER_OPS", OPS_SUBJECTS],
+    ["AIN_RIDER_LOCATION", LOCATION_SUBJECTS],
   ];
   for (const [name, subjects] of wanted) {
     let exists = true;
@@ -72,7 +73,7 @@ export async function provisionSharedStreams(nc: NatsConnection): Promise<void> 
         await jsm.streams.add({
           name,
           subjects,
-          storage: 'file' as never,
+          storage: "file" as never,
           max_msgs: 100000,
           max_bytes: 100 * 1024 * 1024,
         });
