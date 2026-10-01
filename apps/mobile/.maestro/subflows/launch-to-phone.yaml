@@ -1,0 +1,13 @@
+# Fresh launch -> welcome -> SKIP -> rider role -> phone entry screen.
+# Called by every auth/ride flow. Never runs standalone (subflows/ is excluded
+# from top-level `maestro test` runs).
+appId: com.anonymous.ainrider
+name: Launch fresh and navigate to phone screen (rider)
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Ain Rider"
+- tapOn: "SKIP"
+- assertVisible: "I want to..."
+- tapOn: "Book Rides"
+- assertVisible: "What's your number?"

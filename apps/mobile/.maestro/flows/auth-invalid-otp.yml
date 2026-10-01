@@ -1,0 +1,33 @@
+# FULL flow (needs the dev backend): a wrong OTP code is rejected and the app
+# stays on the verify screen showing the backend error.
+#
+# Prerequisites: dev backend running; OTP console provider. The backend maps a
+# bad code to UnauthorizedException("Invalid or expired OTP code"), which the
+# verify screen renders verbatim.
+#
+# Lockout safety: UNIQUE phone per run (no OTP rate limit), fresh app state
+# (attempt counter starts at 0), and exactly ONE failed verify per run - well
+# below the 5-attempt / 60s verify lockout. Note: the auth-service OTP circuit
+# breaker counts consecutive provider failures; running only this flow
+# occasionally is fine, hammering it in a tight loop is not.
+appId: com.anonymous.ainrider
+name: Auth - Invalid OTP shows error and stays on verify screen
+tags:
+  - full
+  - auth
+---
+- evalScript: ${output.phone = "100" + Math.floor(1000000 + Math.random() * 8999999)}
+- runFlow: subflows/launch-to-phone.yaml
+- tapOn: "10 1234 5678"
+- inputText: ${output.phone}
+- tapOn:
+    text: "Next"
+    enabled: true
+- assertVisible: "Enter the code"
+- tapOn: "------"
+- inputText: "000000"
+- tapOn:
+    text: "Verify & Continue"
+    enabled: true
+- assertVisible: "Invalid or expired OTP code"
+- assertVisible: "Verify & Continue"

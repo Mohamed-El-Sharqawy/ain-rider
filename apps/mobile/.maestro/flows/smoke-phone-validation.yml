@@ -1,0 +1,23 @@
+# Backend-independent smoke: rider role selection -> phone screen -> client-side
+# E.164 validation rejects a non-Egyptian number with an alert.
+# Runs on EAS (`type: maestro` job) and locally. No backend, no seeded data needed.
+appId: com.anonymous.ainrider
+name: Smoke - Invalid phone number is rejected client-side
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Ain Rider"
+- tapOn: "SKIP"
+- assertVisible: "I want to..."
+- tapOn: "Book Rides"
+- assertVisible: "What's your number?"
+# 9 digits: passes the length > 8 guard, fails the ^\+201[0125]\d{8}$ E.164 check
+- tapOn: "10 1234 5678"
+- inputText: "190000000"
+- tapOn:
+    text: "Next"
+    enabled: true
+- assertVisible: "Invalid Phone"
+- assertVisible: "valid Egyptian phone number"

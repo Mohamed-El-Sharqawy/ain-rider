@@ -36,7 +36,12 @@ export default function RateScreen() {
 
         <View className="flex-row mb-8">
           {[1, 2, 3, 4, 5].map((star) => (
-            <TouchableOpacity key={star} onPress={() => setRating(star)} className="p-2">
+            <TouchableOpacity
+              key={star}
+              onPress={() => setRating(star)}
+              className="p-2"
+              testID={`rate-star-${star}`}
+            >
               <Ionicons
                 name={star <= rating ? 'star' : 'star-outline'}
                 size={48}
