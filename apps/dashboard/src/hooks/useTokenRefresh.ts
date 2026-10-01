@@ -19,9 +19,8 @@ export function useTokenRefresh() {
     intervalRef.current = window.setInterval(refreshToken, REFRESH_INTERVAL);
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      // the interval is always set above before the cleanup can run
+      clearInterval(intervalRef.current!);
     };
   }, []);
 }

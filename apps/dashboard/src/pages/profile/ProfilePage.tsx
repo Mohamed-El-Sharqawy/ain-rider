@@ -36,18 +36,6 @@ export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
-  const handleEdit = () => {
-    if (profile) {
-      setFormData({
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        email: profile.email,
-        phoneNumber: profile.phoneNumber,
-      })
-      setIsEditing(true)
-    }
-  }
-
   const handleSave = () => {
     const errors: Record<string, string> = {}
 
@@ -269,7 +257,21 @@ export function ProfilePage() {
                 </Button>
               </>
             ) : (
-              <Button onClick={handleEdit}>تعديل الملف الشخصي</Button>
+              <Button
+                onClick={() => {
+                  // profile is non-null here: the button only renders after the
+                  // not-found guard above
+                  setFormData({
+                    firstName: profile.firstName,
+                    lastName: profile.lastName,
+                    email: profile.email,
+                    phoneNumber: profile.phoneNumber,
+                  })
+                  setIsEditing(true)
+                }}
+              >
+                تعديل الملف الشخصي
+              </Button>
             )}
           </div>
         </CardContent>

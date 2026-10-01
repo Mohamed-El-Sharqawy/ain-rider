@@ -15,13 +15,16 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useTokenRefresh();
 
-  // Sync auth to Zustand on first successful fetch
+  // Sync auth to Zustand on first successful fetch. A me-response that is not
+  // staff must drop an authenticated session, otherwise the guards ping-pong:
+  // ProtectedRoute bounces to /login and GuestRoute bounces straight back.
   useEffect(() => {
-    if (isSuccess && data && !isAuthenticated) {
+    if (isSuccess && data) {
       if (data.role === 'ADMIN' || data.role === 'SUPPORT') {
-        setUser(data);
-      } else {
-        // Invalid role - reject access
+        if (!isAuthenticated) {
+          setUser(data);
+        }
+      } else if (isAuthenticated) {
         console.error('[ProtectedRoute] Invalid role:', data.role);
         clear();
       }

@@ -43,17 +43,23 @@ export const useUpdateComplaintStatus = () => {
         queryClient.setQueryData(complaintKeys.detail(id), optimisticallyUpdated);
       }
 
-      queryClient.setQueriesData<PaginatedComplaints>({ queryKey: complaintKeys.all }, (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          data: old.data.map((c) =>
-            c.id === id
-              ? { ...c, status: data.status, assignedTo: data.assignedTo, updatedAt: new Date().toISOString() }
-              : c
-          ),
-        };
-      });
+      // Update every cached LIST (prefix match on ['complaints', 'list']);
+      // a bare complaintKeys.all match would also hit detail queries, whose
+      // shape is a single Complaint, and crash the optimistic updater.
+      queryClient.setQueriesData<PaginatedComplaints>(
+        { queryKey: [...complaintKeys.all, 'list'] },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.map((c) =>
+              c.id === id
+                ? { ...c, status: data.status, assignedTo: data.assignedTo, updatedAt: new Date().toISOString() }
+                : c
+            ),
+          };
+        },
+      );
 
       return { previousDetail };
     },

@@ -194,6 +194,8 @@ export class DriverOnboardingController {
   }
 
   @Get(":userId/onboarding-status")
+  @UseGuards(InternalAuthGuard)
+  @ApiBearerAuth('internal-secret')
   @ApiOperation({ summary: "Get driver onboarding status by user ID (Admin only)" })
   async getOnboardingStatusById(@Param("userId") userId: string) {
     const result = await this.service.getOnboardingStatus(userId);
