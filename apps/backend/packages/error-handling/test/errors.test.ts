@@ -7,7 +7,9 @@ import {
   InternalError,
   NotFoundError,
   ServiceUnavailableError,
+  TooManyRequestsError,
   UnauthorizedError,
+  UnsupportedMediaTypeError,
   ValidationError,
 } from '../src';
 
@@ -157,5 +159,19 @@ describe('error subclasses', () => {
     expect(error.code).toBe('SERVICE_UNAVAILABLE');
     expect(error.httpStatus).toBe(503);
     expect(error.message).toBe('Service temporarily unavailable');
+  });
+
+  test('UnsupportedMediaTypeError maps to 415 with default message', () => {
+    const error = new UnsupportedMediaTypeError();
+    expect(error.code).toBe('UNSUPPORTED_MEDIA_TYPE');
+    expect(error.httpStatus).toBe(415);
+    expect(error.message).toBe('Unsupported media type');
+  });
+
+  test('TooManyRequestsError maps to 429 with default message', () => {
+    const error = new TooManyRequestsError();
+    expect(error.code).toBe('TOO_MANY_REQUESTS');
+    expect(error.httpStatus).toBe(429);
+    expect(error.message).toBe('Too many requests');
   });
 });

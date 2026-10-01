@@ -9,6 +9,9 @@ import {
   NotFoundError,
   ConflictError,
   BusinessRuleError,
+  UnsupportedMediaTypeError,
+  TooManyRequestsError,
+  ServiceUnavailableError,
   InternalError,
 } from '../src';
 
@@ -48,7 +51,10 @@ describe('mapHttpExceptionToAppError', () => {
     [404, NotFoundError, 'NOT_FOUND'],
     [409, ConflictError, 'CONFLICT'],
     [422, BusinessRuleError, 'BUSINESS_RULE_VIOLATION'],
+    [415, UnsupportedMediaTypeError, 'UNSUPPORTED_MEDIA_TYPE'],
+    [429, TooManyRequestsError, 'TOO_MANY_REQUESTS'],
     [500, InternalError, 'INTERNAL_ERROR'],
+    [503, ServiceUnavailableError, 'SERVICE_UNAVAILABLE'],
   ])('maps status %i to %s', (status, klass, code) => {
     const mapped = mapHttpExceptionToAppError({
       getStatus: () => status,
