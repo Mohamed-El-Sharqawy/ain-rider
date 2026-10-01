@@ -70,12 +70,10 @@ export default function VerifyOtpScreen() {
   }, [sessionStartTime]);
 
   const handleResend = async () => {
-    if (resendTimer > 0 || isResending) return;
-
     setIsResending(true);
     setErrorMessage(null);
     try {
-      const formattedPhone = phone?.startsWith('+') ? phone : `+20${phone.replace(/^0+/, '')}`;
+      const formattedPhone = phone.startsWith('+') ? phone : `+20${phone.replace(/^0+/, '')}`;
       await AuthApi.requestOtp(formattedPhone);
       setResendTimer(60);
     } catch (err: unknown) {
@@ -91,8 +89,6 @@ export default function VerifyOtpScreen() {
   };
 
   const handleVerify = async () => {
-    if (otp.length !== 6) return;
-
     const now = Date.now();
     if (now < verifyLockedUntil.current) {
       const remaining = Math.ceil((verifyLockedUntil.current - now) / 1000);
@@ -109,7 +105,7 @@ export default function VerifyOtpScreen() {
       }
 
       // 1. Verify token with our abstract backend 
-      const formattedPhone = phone?.startsWith('+') ? phone : `+20${phone.replace(/^0+/, '')}`;
+      const formattedPhone = phone.startsWith('+') ? phone : `+20${phone.replace(/^0+/, '')}`;
       const result = await AuthApi.verifyOtp(formattedPhone, otp);
 
       // 2. Handle based on registration status

@@ -1,0 +1,32 @@
+# From logged-in rider home: plan a trip (pickup = current location, dropoff
+# picked on the map), confirm, and submit the ride request. Ends on the trip
+# screen in the "matching" phase ("Finding Your Ride").
+#
+# Prerequisites (in addition to login): foreground location permission granted
+# when prompted (handled below), backend reachable for fare estimate, an online
+# driver near the pickup point for the matching phase (asserted by callers).
+appId: com.anonymous.ainrider
+name: Request a ride
+---
+# The foreground location dialog appears on first launch after login
+- runFlow:
+    when:
+      visible: "While using the app"
+    commands:
+      - tapOn: "While using the app"
+- tapOn: "Where are you going?"
+- assertVisible: "Plan your trip"
+# Pickup auto-fills from GPS; set the dropoff by choosing on the map
+- tapOn: "Choose on map"
+- assertVisible: "Set drop-off location"
+- tapOn:
+    text: "Confirm drop-off location"
+    enabled: true
+# Both endpoints set -> app auto-navigates to the confirm screen
+- extendedWaitUntil:
+    visible: "Request Ride"
+    timeout: 20000
+- tapOn:
+    text: "Request Ride"
+    enabled: true
+- assertVisible: "Finding Your Ride"

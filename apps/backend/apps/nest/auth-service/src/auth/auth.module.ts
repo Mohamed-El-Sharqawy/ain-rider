@@ -17,6 +17,14 @@ import { InternalUserController } from "./internal-user.controller";
 import { DriverOnboardingModule } from "../driver-onboarding/driver-onboarding.module";
 import { AdminCommandHandler } from "../nats/responders/admin-command.handler";
 
+export function jwtModuleFactory(config: ConfigService) {
+  const secret = config.get<string>("JWT_SECRET");
+  if (!secret) {
+    throw new Error("[AuthModule] FATAL: JWT_SECRET environment variable is required. Refusing to start.");
+  }
+  return { secret };
+}
+
 @Module({
   imports: [
     NatsModule,
@@ -25,13 +33,7 @@ import { AdminCommandHandler } from "../nats/responders/admin-command.handler";
     DriverOnboardingModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const secret = config.get<string>("JWT_SECRET");
-        if (!secret) {
-          throw new Error("[AuthModule] FATAL: JWT_SECRET environment variable is required. Refusing to start.");
-        }
-        return { secret };
-      },
+      useFactory: jwtModuleFactory,
     }),
   ],
   providers: [

@@ -30,13 +30,12 @@ export function ProcessWithdrawalModal({ withdrawal, open, onClose }: ProcessWit
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (approve === null) return;
-
+    // submit is disabled until a decision is picked
     processWithdrawal(
       {
         id: withdrawal.id,
         data: {
-          approve,
+          approve: approve!,
           rejectionReason: !approve && rejectionReason ? rejectionReason : undefined,
         },
       },

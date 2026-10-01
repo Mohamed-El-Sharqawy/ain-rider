@@ -1,0 +1,25 @@
+# FULL flow (needs the dev backend): registered rider logs in with phone + OTP
+# and lands on the rider home screen.
+#
+# Prerequisites:
+#   - dev backend running and reachable from the device (Android emulator:
+#     EXPO_PUBLIC_API_URL=http://10.0.2.2:3000 baked into the build)
+#   - a REGISTERED rider account for PHONE with role RIDER and no pending
+#     onboarding (default seed: local phone 1001234567, see .maestro/README.md)
+#   - auth-service OTP_PROVIDER=console (default) with TEST_OTP_CODE=123456
+#
+# Lockout safety: launch-to-phone clears app state, so verify-screen attempt
+# counters start at 0 on every run. One valid OTP per run never approaches the
+# 5-attempt / 60s lockout.
+appId: com.anonymous.ainrider
+name: Auth - Rider login happy path (phone + OTP)
+tags:
+  - full
+  - auth
+---
+- runFlow: subflows/launch-to-phone.yaml
+- runFlow: subflows/login-rider.yaml
+- extendedWaitUntil:
+    visible: "Where are you going?"
+    timeout: 30000
+- assertVisible: "Search for your destination"

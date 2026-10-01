@@ -1,0 +1,27 @@
+# FULL flow (needs the dev backend + an online driver): registered rider logs
+# in, requests a ride, and the flow waits for the matching phase to resolve
+# ("Driver Found") driven by a driver accepting the trip.
+#
+# Prerequisites (all, see .maestro/README.md):
+#   - dev backend + websocket reachable from the device
+#   - REGISTERED rider for PHONE (default seeded 1001234567), OTP console provider
+#   - emulator GPS location set near Cairo (the map + nearby-driver search
+#     center on the device location)
+#   - a driver online (driver app or driver simulator) close enough to the
+#     rider's pickup point to be matched
+appId: com.anonymous.ainrider
+name: Ride - Request ride and wait for match
+tags:
+  - full
+  - ride
+---
+- runFlow: subflows/launch-to-phone.yaml
+- runFlow: subflows/login-rider.yaml
+- extendedWaitUntil:
+    visible: "Where are you going?"
+    timeout: 30000
+- runFlow: subflows/request-ride.yaml
+- extendedWaitUntil:
+    visible: "Driver Found"
+    timeout: 120000
+- assertVisible: "Your ride is on the way"

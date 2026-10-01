@@ -1,0 +1,30 @@
+# E2E on EAS Workflows with Maestro (per docs/research/mobile-e2e-tool.md).
+# Builds an Android APK with the `e2e-test` profile, then runs the smoke flows
+# on an EAS-hosted emulator. The `full`-tagged flows need a dev backend and are
+# local-only for now (see apps/mobile/.maestro/README.md).
+#
+# Runs automatically on pull requests, or manually:
+#   cd apps/mobile && eas workflow:run .eas/workflows/e2e-test-android.yml
+name: e2e-test-android
+
+on:
+  pull_request:
+    branches: ['*']
+
+jobs:
+  build_android_for_e2e:
+    type: build
+    params:
+      platform: android
+      profile: e2e-test
+
+  maestro_test:
+    needs: [build_android_for_e2e]
+    type: maestro
+    runs_on: linux-medium-nested-virtualization
+    params:
+      build_id: ${{ needs.build_android_for_e2e.outputs.build_id }}
+      flow_path: .maestro/flows
+      include_tags: smoke
+      retries: 1
+      record_screen: true

@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import { ApiConfig } from '@/config/constants';
 
 export interface ApiErrorResponse {
@@ -59,7 +59,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // If refresh endpoint itself failed, dispatch unauthorized
+    // The refresh endpoint itself failed with 401. This is an externally
+    // initiated refresh call: internal refresh calls carry _retry and are
+    // rejected by the _retry check above, and their failure is dispatched
+    // exactly once by the catch below.
     if (originalRequest.url?.includes('/auth/refresh')) {
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
       return Promise.reject(error);
@@ -78,7 +81,9 @@ api.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      await api.post('/auth/refresh');
+      // _retry marks this as the internal refresh call so its own failure is
+      // not double-reported as auth:unauthorized (the catch block reports it).
+      await api.post('/auth/refresh', undefined, { _retry: true } as AxiosRequestConfig);
       processQueue(null);
       isRefreshing = false;
       return api(originalRequest);
@@ -109,7 +114,7 @@ export function getApiError(error: unknown): string {
       return String(message);
     }
     
-    return error.message ?? 'An unexpected error occurred';
+    return error.message;
   }
   if (error instanceof Error) {
     return error.message;
@@ -124,7 +129,7 @@ export function toApiError(error: unknown): ApiError | null {
     ? (Array.isArray(errorData.error.message) ? errorData.error.message.join(', ') : errorData.error.message)
     : errorData?.message
       ? (Array.isArray(errorData.message) ? errorData.message.join(', ') : String(errorData.message))
-      : (error.message ?? 'An unexpected error occurred');
+      : (error.message);
 
   return {
     status: error.response?.status ?? 0,

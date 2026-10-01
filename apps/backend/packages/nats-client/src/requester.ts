@@ -56,7 +56,15 @@ export class NatsRequester {
       }
 
       if (response.error) {
-        throw new Error(response.error);
+        // error may be a plain string or a structured { code, message } object
+        if (typeof response.error === 'string') {
+          throw new Error(response.error);
+        }
+        const structuredError = new Error(
+          response.error.message || 'Unknown error',
+        );
+        (structuredError as any).code = response.error.code;
+        throw structuredError;
       }
 
       return response.data as TResponse;

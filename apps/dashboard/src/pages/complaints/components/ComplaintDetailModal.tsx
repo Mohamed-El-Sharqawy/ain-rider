@@ -41,8 +41,7 @@ export function ComplaintDetailModal({ complaint, open, onClose }: ComplaintDeta
   if (!complaint) return null;
 
   const handleUpdateStatus = () => {
-    if (!newStatus) return;
-
+    // the submit button is disabled until a status is picked; no guard here
     const errors: Record<string, string> = {};
 
     const transitionError = validateStatusTransition(complaint.status, newStatus);
@@ -77,7 +76,7 @@ export function ComplaintDetailModal({ complaint, open, onClose }: ComplaintDeta
   };
 
   const handleAddComment = () => {
-    if (!comment.trim()) return;
+    // the submit button is disabled while the comment is blank
     setValidationErrors({});
     addComment(
       {

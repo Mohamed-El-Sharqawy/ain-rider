@@ -57,7 +57,9 @@ export class RedisCache {
 
   async mget<T = any>(keys: string[]): Promise<(T | null)[]> {
     try {
-      const values = await this.cluster.mget(...keys);
+      // Redis Cluster only allows multi-key commands within a single hash
+      // slot, so fan out to one GET per key instead of MGET.
+      const values = await Promise.all(keys.map((key) => this.cluster.get(key)));
       return values.map((v) => (v ? JSON.parse(v) : null));
     } catch (error) {
       throw new CacheError('Mget failed', 'mget', keys.join(','), error);
@@ -66,18 +68,16 @@ export class RedisCache {
 
   async mset(entries: Record<string, any>, ttlSeconds?: number): Promise<void> {
     try {
-      const pipeline = this.cluster.pipeline();
-
-      for (const [key, value] of Object.entries(entries)) {
-        const serialized = JSON.stringify(value);
-        if (ttlSeconds) {
-          pipeline.setex(key, ttlSeconds, serialized);
-        } else {
-          pipeline.set(key, serialized);
-        }
-      }
-
-      await pipeline.exec();
+      // Pipelines on a cluster require all keys in the same hash slot group,
+      // which arbitrary cache keys do not satisfy. Fan out per key instead.
+      await Promise.all(
+        Object.entries(entries).map(([key, value]) => {
+          const serialized = JSON.stringify(value);
+          return ttlSeconds
+            ? this.cluster.setex(key, ttlSeconds, serialized)
+            : this.cluster.set(key, serialized);
+        }),
+      );
     } catch (error) {
       throw new CacheError('Mset failed', 'mset', Object.keys(entries).join(','), error);
     }

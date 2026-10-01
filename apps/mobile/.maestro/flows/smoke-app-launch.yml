@@ -1,0 +1,12 @@
+# Backend-independent smoke: fresh app launches and the welcome screen renders.
+# Runs on EAS (`type: maestro` job) and locally. No backend, no seeded data needed.
+appId: com.anonymous.ainrider
+name: Smoke - App launch shows welcome screen
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Ain Rider"
+- assertVisible: "Get Started"
+- assertVisible: "Already have an account"
