@@ -100,6 +100,10 @@ export class JetStreamPublisher {
     // Publish options
     const publishOptions: Partial<JetStreamPublishOptions> = {
       headers: hdrs,
+      // Ack wait for the publish itself (nats.js default is 5s; JetStream
+      // client options do not propagate to publishes). Slow disks such as
+      // CI runners with file storage can exceed the default.
+      timeout: Number(process.env.NATS_JS_TIMEOUT_MS) || 5000,
     };
 
     try {

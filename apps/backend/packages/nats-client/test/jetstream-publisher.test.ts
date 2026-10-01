@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "vitest";
-import type { NatsConnection } from "nats";
+import type { JetStreamPublishOptions, NatsConnection } from "nats";
 import {
   JetStreamPublisher,
   createJetStreamPublisher,
@@ -221,27 +221,37 @@ describe("JetStreamPublisher", () => {
     ).rejects.toThrow();
   });
 
-  test("forwards a JetStream ack timeout from NATS_JS_TIMEOUT_MS", () => {
-    const recorded: unknown[] = [];
-    const stub = {
-      jetstream: (opts?: unknown) => {
-        recorded.push(opts);
-        return {} as ReturnType<NatsConnection["jetstream"]>;
+  test("honors NATS_JS_TIMEOUT_MS as the per-publish ack wait", async () => {
+    const publishCalls: Array<Partial<JetStreamPublishOptions>> = [];
+    const stubJs = {
+      publish: async (
+        _s: string,
+        _d: Uint8Array,
+        opts?: Partial<JetStreamPublishOptions>,
+      ) => {
+        publishCalls.push(opts ?? {});
+        return { stream: "x", seq: 1, duplicate: false } as never;
       },
+    };
+    const stub = {
+      jetstream: () =>
+        stubJs as unknown as ReturnType<NatsConnection["jetstream"]>,
     } as unknown as NatsConnection;
 
     const saved = process.env.NATS_JS_TIMEOUT_MS;
     try {
       process.env.NATS_JS_TIMEOUT_MS = "30000";
-      new JetStreamPublisher(stub, "timeout-service");
+      const tuned = new JetStreamPublisher(stub, "timeout-service");
+      await tuned.publish("ain_rider.tests", "test_event", { ok: true });
       delete process.env.NATS_JS_TIMEOUT_MS;
-      new JetStreamPublisher(stub, "timeout-service");
+      const defaulted = new JetStreamPublisher(stub, "timeout-service");
+      await defaulted.publish("ain_rider.tests", "test_event", { ok: true });
     } finally {
       if (saved === undefined) delete process.env.NATS_JS_TIMEOUT_MS;
       else process.env.NATS_JS_TIMEOUT_MS = saved;
     }
 
-    expect(recorded[0]).toEqual({ timeout: 30000 });
-    expect(recorded[1]).toBeUndefined();
+    expect(publishCalls[0].timeout).toBe(30000);
+    expect(publishCalls[1].timeout).toBe(5000);
   });
 });
