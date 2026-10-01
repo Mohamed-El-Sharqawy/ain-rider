@@ -180,7 +180,7 @@ docs/                      project documentation (docs/archive holds old specs)
 
 ## Roadmap
 
-- [ ] **CI pipeline** — GitHub Actions: install, build, and typecheck on every push with Turborepo caching
+- [x] **CI pipeline** — GitHub Actions: install, build, and typecheck on every push with Turborepo caching
 - [ ] **Secrets management** — move `.env` values and service keys into a proper secret flow for CI and production
 - [ ] **Observability** — distributed tracing and dashboards for the gateway and services (tooling under evaluation)
 - [ ] **Test coverage** — unit and integration tests starting with the critical paths: fare estimation, OTP flow, matching
